@@ -144,6 +144,17 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Textures\chalet.jpg" />
+    <Image Include="Textures\texture.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VulkanTest.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="Models\chalet.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

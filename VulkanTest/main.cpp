@@ -533,9 +533,9 @@ private:
 		camera.SetFOV(45.0f);
 
 		auto cameraDirectionFunc = [this](double x, double y) {
-			float pitchChange = frameTime * -y * 0.01f;
+			float pitchChange = frameTime * -y * 0.001f;
 			this->camera.ChangePitch(pitchChange);			
-			float headingChange = frameTime * -x * 0.01f;
+			float headingChange = frameTime * -x * 0.001f;
 			this->camera.ChangeHeading(headingChange);
 		};
 
@@ -545,6 +545,22 @@ private:
 
 		inputManager.AddMouseMoveHandler(cameraDirectionFunc);
 		//inputManager.AddMouseMoveHandler(pitchLogger);
+
+		
+
+		auto cameraMoveFunc = [this](int key, int sc, int action, int mods) {
+			if(action == GLFW_REPEAT || action == GLFW_PRESS) {
+				float tScale = this->camera.camera_scale;
+				this->camera.camera_scale = frameTime * 0.001f;
+				if(key == GLFW_KEY_S)
+					this->camera.camera_scale *= -1.f;
+				this->camera.Move(CameraDirection::FORWARD);
+				this->camera.camera_scale = tScale;
+			}
+		};
+
+		inputManager.AddKeyHandler(GLFW_KEY_W, cameraMoveFunc);
+		inputManager.AddKeyHandler(GLFW_KEY_S, cameraMoveFunc);
 
 	}
 
