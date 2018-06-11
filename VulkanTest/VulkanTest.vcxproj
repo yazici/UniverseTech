@@ -135,6 +135,9 @@
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="VulkanWinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -147,7 +150,11 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="Vertex.h" />
     <ClInclude Include="VulkanCommon.h" />
     <ClInclude Include="VulkanWinApp.h" />
   </ItemGroup>

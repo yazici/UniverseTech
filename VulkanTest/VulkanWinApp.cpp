@@ -322,10 +322,10 @@ void VulkanWinApp::createSwapChain() {
 	}
 
 	vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
-	engine->swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(device, swapChain, &imageCount, engine->swapChainImages.data());
+	engine->m_SwapChainImages.resize(imageCount);
+	vkGetSwapchainImagesKHR(device, swapChain, &imageCount, engine->m_SwapChainImages.data());
 
-	engine->swapChainImageFormat = surfaceFormat.format;
+	engine->m_SwapChainImageFormat = surfaceFormat.format;
 	engine->setExtent(extent);
 
 }
@@ -373,8 +373,8 @@ void VulkanWinApp::createLogicalDevice() {
 
 	engine->setDevice(device);
 
-	vkGetDeviceQueue(device, indices.graphicsFamily, 0, &engine->graphicsQueue);
-	vkGetDeviceQueue(device, indices.presentFamily, 0, &engine->presentQueue);
+	vkGetDeviceQueue(device, indices.graphicsFamily, 0, &engine->m_GraphicsQueue);
+	vkGetDeviceQueue(device, indices.presentFamily, 0, &engine->m_PresentQueue);
 }
 
 void VulkanWinApp::createSurface() {

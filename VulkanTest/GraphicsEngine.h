@@ -14,58 +14,10 @@
 
 #include "Camera.h"
 #include "InputManager.h"
+#include "Scene.h"
+#include "Vertex.h"
 
 class VulkanWinApp;
-
-struct Vertex {
-	glm::vec3 pos;
-	glm::vec3 color;
-	glm::vec2 texCoord;
-
-	static VkVertexInputBindingDescription getBindingDescription() {
-		VkVertexInputBindingDescription bindingDescription = {};
-		bindingDescription.binding = 0;
-		bindingDescription.stride = sizeof(Vertex);
-		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-		return bindingDescription;
-	}
-
-	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions = {};
-
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-		attributeDescriptions[1].binding = 0;
-		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-		attributeDescriptions[2].binding = 0;
-		attributeDescriptions[2].location = 2;
-		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-		return attributeDescriptions;
-	}
-
-	bool operator==(const Vertex& other) const {
-		return pos == other.pos && color == other.color && texCoord == other.texCoord;
-	}
-};
-
-namespace std {
-	template<> struct hash<Vertex> {
-		size_t operator()(Vertex const& vertex) const {
-			return ((hash<glm::vec3>()(vertex.pos) ^
-				(hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
-				(hash<glm::vec2>()(vertex.texCoord) << 1);
-		}
-	};
-}
 
 struct UniformBufferObject {
 	glm::mat4 model;
@@ -90,56 +42,54 @@ public:
 	void setDevice(VkDevice &d);
 	void setExtent(VkExtent2D extent);
 
-	std::vector<VkImage> swapChainImages;
-	std::vector<VkImageView> swapChainImageViews;
-	VkFormat swapChainImageFormat;
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
+	std::vector<VkImage> m_SwapChainImages;
+	std::vector<VkImageView> m_SwapChainImageViews;
+	VkFormat m_SwapChainImageFormat;
+	VkQueue m_GraphicsQueue;
+	VkQueue m_PresentQueue;
 
 private:
 	VulkanWinApp * m_App = nullptr;
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
-	VkBuffer vertexBuffer;
-	VkDeviceMemory vertexBufferMemory;
-	VkBuffer indexBuffer;
-	VkDeviceMemory indexBufferMemory;
-	VkBuffer uniformBuffer;
-	VkDeviceMemory uniformBufferMemory;
-	VkDescriptorSet descriptorSet;
-	VkRenderPass renderPass;
-	VkDescriptorSetLayout descriptorSetLayout;
-	VkPipelineLayout pipelineLayout;
-	VkPipeline graphicsPipeline;
-	std::vector<VkFramebuffer> swapChainFramebuffers;
-	VkCommandPool commandPool;
-	VkDescriptorPool descriptorPool;
-	std::vector<VkCommandBuffer> commandBuffers;
-	std::vector<VkSemaphore> imageAvailableSemaphores;
-	std::vector<VkSemaphore> renderFinishedSemaphores;
-	std::vector<VkFence> inFlightFences;
-	size_t currentFrame = 0;
-	uint32_t mipLevels;
-	VkImage textureImage;
-	VkDeviceMemory textureImageMemory;
-	VkImageView textureImageView;
-	VkSampler textureSampler;
-	VkImage depthImage;
-	VkDeviceMemory depthImageMemory;
-	VkImageView depthImageView;
-	InputManager inputManager;
-	float frameTime = 0.f;
+	VkBuffer m_VertexBuffer;
+	VkDeviceMemory m_VertexBufferMemory;
+	VkBuffer m_IndexBuffer;
+	VkDeviceMemory m_IndexBufferMemory;
+	VkBuffer m_UniformBuffer;
+	VkDeviceMemory m_UniformBufferMemory;
+	VkDescriptorSet m_DescriptorSet;
+	VkRenderPass m_RenderPass;
+	VkDescriptorSetLayout m_DescriptorSetLayout;
+	VkPipelineLayout m_PipelineLayout;
+	VkPipeline m_GraphicsPipeline;
+	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
+	VkCommandPool m_CommandPool;
+	VkDescriptorPool m_DescriptorPool;
+	std::vector<VkCommandBuffer> m_CommandBuffers;
+	std::vector<VkSemaphore> m_ImageAvailableSemaphores;
+	std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+	std::vector<VkFence> m_InFlightFences;
+	size_t m_CurrentFrame = 0;
+	std::vector<uint32_t> m_MipLevels;
+	std::vector<VkImage> m_TextureImages;
+	VkDeviceMemory m_TextureImageMemory;
+	std::vector<VkImageView> m_TextureImageViews;
+	std::vector<VkSampler> m_TextureSamplers;
+	VkImage m_DepthImage;
+	VkDeviceMemory m_DepthImageMemory;
+	VkImageView m_DepthImageView;
+	InputManager m_InputManager;
+	float m_FrameTime = 0.f;
+	Scene m_CurrentScene;
 
 	void setupInput();
 	void handleKeyboardInput(GLFWwindow* w, int key, int scancode, int action, int mods);
 	void handleMouseInput(GLFWwindow* w, double xpos, double ypos);
 	void setupCamera();
-	void createTextureImage();
+	void createTextureImages();
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 	void generateMipmaps(VkImage image, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-	void createTextureImageView();
-	void loadModel();
-	void createTextureSampler();
+	void createTextureImageViews();
+	void createTextureSamplers();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffer();
@@ -172,8 +122,8 @@ private:
 	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 
-	VkDevice device;
-	VkExtent2D swapChainExtent;
+	VkDevice m_Device;
+	VkExtent2D m_SwapChainExtent;
 };
 
 #endif // !GRAPHICSENGINE_H
