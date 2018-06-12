@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\vks">
+      <UniqueIdentifier>{bea23156-f04f-45ee-9902-b706399e4f0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vks">
+      <UniqueIdentifier>{0ee262af-a644-4ff8-bb46-c34def94fafe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{81973bbc-0cd9-469b-9436-a4bf8e6e6491}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\imgui">
+      <UniqueIdentifier>{e63737de-6d50-4153-b09b-983463239e64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imgui">
+      <UniqueIdentifier>{a94b768c-1579-4fd7-b0e2-b7126863ee5e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\vks\benchmark.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\camera.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\frustum.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\keycodes.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\threadpool.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanAndroid.h">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanBuffer.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanDebug.h">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanDevice.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\vulkanexamplebase.h">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanFrameBuffer.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanHeightmap.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanInitializers.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanModel.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanSwapChain.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanTexture.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanTools.h">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\VulkanUIOverlay.h">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui\stb_textedit.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui\stb_truetype.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui\imconfig.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui\imgui.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui\imgui_internal.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\imgui\stb_rect_pack.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\vks\VulkanAndroid.cpp">
+      <Filter>Source Files\vks</Filter>
+    </ClCompile>
+    <ClCompile Include="source\vks\VulkanDebug.cpp">
+      <Filter>Source Files\vks</Filter>
+    </ClCompile>
+    <ClCompile Include="source\vks\vulkanexamplebase.cpp">
+      <Filter>Source Files\vks</Filter>
+    </ClCompile>
+    <ClCompile Include="source\vks\VulkanTools.cpp">
+      <Filter>Source Files\vks</Filter>
+    </ClCompile>
+    <ClCompile Include="source\vks\VulkanUIOverlay.cpp">
+      <Filter>Source Files\vks</Filter>
+    </ClCompile>
+    <ClCompile Include="source\scenerendering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\imgui_draw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\imgui.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\imgui\imgui_demo.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="UniverseEngine.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
