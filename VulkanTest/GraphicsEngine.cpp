@@ -615,7 +615,6 @@ void GraphicsEngine::createDescriptorSets() {
 		ubWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 		ubWrite.descriptorCount = 1;
 		ubWrite.pBufferInfo = &bufferInfo;
-		ubWrite.pNext = nullptr;
 
 		imWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		imWrite.dstSet = descriptorSet;
@@ -624,7 +623,6 @@ void GraphicsEngine::createDescriptorSets() {
 		imWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		imWrite.descriptorCount = 1;
 		imWrite.pImageInfo = &imageInfo;
-		imWrite.pNext = nullptr;
 
 		writeSets.push_back(ubWrite);
 		writeSets.push_back(imWrite);
