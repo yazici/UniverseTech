@@ -1,4 +1,8 @@
 #pragma once
+
+#ifndef MODEL_H
+#define MODEL_H
+
 #include "SceneObject.h"
 #include "Vertex.h"
 
@@ -19,3 +23,4 @@ private:
 	std::string m_TexturePath;
 };
 
+#endif

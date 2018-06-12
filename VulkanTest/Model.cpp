@@ -4,7 +4,11 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-Model::Model() {}
+Model::Model() {
+	m_Position = glm::vec3(0, 0, 0);
+	m_Rotation = glm::vec3(0, 0, 0);
+	m_Scale = glm::vec3(1, 1, 1);
+}
 
 
 Model::~Model() {}
