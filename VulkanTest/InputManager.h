@@ -1,7 +1,9 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#ifndef INPUTMANAGER_H
+#define INPUTMANAGER_H
+
+#include "VulkanCommon.h"
 #include <map>
 #include <vector>
 #include <functional>
@@ -31,3 +33,4 @@ private:
 	double lastMouseY = 0.0;
 };
 
+#endif

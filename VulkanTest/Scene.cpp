@@ -14,10 +14,20 @@ void Scene::Init() {
 	std::shared_ptr<Model> m = std::make_shared<Model>();
 	m->SetFilePaths(MODEL_PATH, TEXTURE_PATH);
 	m->Load();
+	m->SetRotation(0, 90, 0);
 
 	m_SceneObjects.push_back(m);
 
-	std::cout << "Created scene with " << GetAllModels().size() << " models.";
+	//std::shared_ptr<Model> n = std::make_shared<Model>();
+	//n->SetFilePaths(MODEL_PATH, TEXTURE_PATH);
+	//n->Load();
+
+	//n->SetPosition(4, 0, 0);
+
+	//m_SceneObjects.push_back(n);
+
+
+	// std::cout << "Created scene with " << GetAllModels().size() << " models.";
 }
 
 void Scene::LoadModels() {

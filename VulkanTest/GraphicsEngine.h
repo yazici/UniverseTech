@@ -3,13 +3,6 @@
 #ifndef GRAPHICSENGINE_H
 #define GRAPHICSENGINE_H
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/hash.hpp>
-
 #include "VulkanCommon.h"
 
 #include "Camera.h"
@@ -56,7 +49,7 @@ private:
 	VkDeviceMemory m_IndexBufferMemory;
 	VkBuffer m_UniformBuffer;
 	VkDeviceMemory m_UniformBufferMemory;
-	VkDescriptorSet m_DescriptorSet;
+	std::vector<VkDescriptorSet> m_DescriptorSets;
 	VkRenderPass m_RenderPass;
 	VkDescriptorSetLayout m_DescriptorSetLayout;
 	VkPipelineLayout m_PipelineLayout;
@@ -92,7 +85,8 @@ private:
 	void createTextureSamplers();
 	void createVertexBuffer();
 	void createIndexBuffer();
-	void createUniformBuffer();
+	size_t getDynamicAlignment();
+	void createUniformBuffers();
 	void createRenderPass();
 	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
@@ -112,7 +106,7 @@ private:
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
 	void createDescriptorPool();
-	void createDescriptorSet();
+	void createDescriptorSets();
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	void createImageViews();
@@ -124,6 +118,7 @@ private:
 
 	VkDevice m_Device;
 	VkExtent2D m_SwapChainExtent;
+	bool m_UseCameraModelMat = false;
 };
 
 #endif // !GRAPHICSENGINE_H

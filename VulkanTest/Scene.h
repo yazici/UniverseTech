@@ -1,4 +1,8 @@
 #pragma once
+
+#ifndef SCENE_H
+#define SCENE_H
+
 #include <vector>
 #include "Vertex.h"
 
@@ -21,3 +25,4 @@ private:
 	std::vector<std::shared_ptr<SceneObject>> m_SceneObjects;
 };
 
+#endif

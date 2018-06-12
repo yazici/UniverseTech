@@ -264,6 +264,7 @@ VkExtent2D VulkanWinApp::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabi
 }
 
 void VulkanWinApp::initVulkan() {
+	std::cout << "App init..." << std::endl;
 	createInstance();
 	setupDebugCallback();
 	createSurface();
