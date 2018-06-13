@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Vulkan Example - Multi sampling with explicit resolve for deferred shading example
 *
 * Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
@@ -1126,6 +1126,7 @@ public:
 
 	void prepare() override
 	{
+
 		VulkanExampleBase::prepare();
 		loadAssets();
 		setupVertexDescriptions();
@@ -1172,5 +1173,3 @@ public:
 		}
 	}
 };
-
-VULKAN_EXAMPLE_MAIN()

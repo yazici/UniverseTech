@@ -31,6 +31,9 @@
     <Filter Include="shaders\scenerendering">
       <UniqueIdentifier>{53319fb8-6da1-44fa-95e1-9e5eb742bcdd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders\deferredmulti">
+      <UniqueIdentifier>{b05c8669-3195-4f56-b5f9-abb5a7c6427f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\vks\benchmark.hpp">
@@ -108,6 +111,9 @@
     <ClInclude Include="..\external\imgui\stb_rect_pack.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="source\UniEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -140,6 +146,12 @@
     <ClCompile Include="source\deferredmultisampling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\UniEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UniverseEngine.rc">
@@ -152,6 +164,24 @@
     </None>
     <None Include="data\shaders\scenerendering\scene.vert">
       <Filter>shaders\scenerendering</Filter>
+    </None>
+    <None Include="data\shaders\deferredmultisampling\debug.frag">
+      <Filter>shaders\deferredmulti</Filter>
+    </None>
+    <None Include="data\shaders\deferredmultisampling\debug.vert">
+      <Filter>shaders\deferredmulti</Filter>
+    </None>
+    <None Include="data\shaders\deferredmultisampling\deferred.frag">
+      <Filter>shaders\deferredmulti</Filter>
+    </None>
+    <None Include="data\shaders\deferredmultisampling\deferred.vert">
+      <Filter>shaders\deferredmulti</Filter>
+    </None>
+    <None Include="data\shaders\deferredmultisampling\mrt.frag">
+      <Filter>shaders\deferredmulti</Filter>
+    </None>
+    <None Include="data\shaders\deferredmultisampling\mrt.vert">
+      <Filter>shaders\deferredmulti</Filter>
     </None>
   </ItemGroup>
 </Project>

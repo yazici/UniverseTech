@@ -166,6 +166,7 @@
     <ClInclude Include="..\external\imgui\stb_textedit.h" />
     <ClInclude Include="..\external\imgui\stb_truetype.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="source\UniEngine.h" />
     <ClInclude Include="source\vks\benchmark.hpp" />
     <ClInclude Include="source\vks\camera.hpp" />
     <ClInclude Include="source\vks\frustum.hpp" />
@@ -189,8 +190,10 @@
     <ClCompile Include="..\external\imgui\imgui.cpp" />
     <ClCompile Include="..\external\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="source\deferredmultisampling.cpp" />
     <ClCompile Include="source\scenerendering.cpp" />
+    <ClCompile Include="source\UniEngine.cpp" />
     <ClCompile Include="source\vks\VulkanAndroid.cpp" />
     <ClCompile Include="source\vks\VulkanDebug.cpp" />
     <ClCompile Include="source\vks\vulkanexamplebase.cpp" />
@@ -201,6 +204,12 @@
     <ResourceCompile Include="UniverseEngine.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\shaders\deferredmultisampling\debug.frag" />
+    <None Include="data\shaders\deferredmultisampling\debug.vert" />
+    <None Include="data\shaders\deferredmultisampling\deferred.frag" />
+    <None Include="data\shaders\deferredmultisampling\deferred.vert" />
+    <None Include="data\shaders\deferredmultisampling\mrt.frag" />
+    <None Include="data\shaders\deferredmultisampling\mrt.vert" />
     <None Include="data\shaders\scenerendering\scene.frag" />
     <None Include="data\shaders\scenerendering\scene.vert" />
   </ItemGroup>
