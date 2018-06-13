@@ -18,6 +18,7 @@
 #include "vks/VulkanModel.hpp"
 
 #include "UniModel.h"
+#include "UniScene.h"
 
 #define VERTEX_BUFFER_BIND_ID 0
 #define ENABLE_VALIDATION false
@@ -46,10 +47,14 @@ public:
 
 	struct {
 		glm::mat4 projection;
-		glm::mat4 model;
 		glm::mat4 view;
-		glm::vec4 instancePos[3];
+		glm::mat4 model;
 	} uboVS, uboOffscreenVS;
+
+	struct UboModelMatDynamic {
+		glm::mat4 *model = nullptr;
+	} uboModelMatDynamic;
+
 
 	struct Light {
 		glm::vec4 position;
@@ -67,6 +72,7 @@ public:
 		vks::Buffer vsFullScreen;
 		vks::Buffer vsOffscreen;
 		vks::Buffer fsLights;
+		vks::Buffer modelViews;
 	} uniformBuffers;
 
 	struct {
@@ -83,7 +89,9 @@ public:
 	} pipelineLayouts;
 
 	VkDescriptorSet m_descriptorSet;
+	VkDescriptorSet m_descriptorSetDynamic;
 	VkDescriptorSetLayout m_descriptorSetLayout;
+	VkDescriptorSetLayout m_descriptorSetLayoutDynamic;
 
 	// Framebuffer for offscreen rendering
 	struct FrameBufferAttachment {
@@ -110,12 +118,14 @@ public:
 	void setupVertexDescriptions();
 	void setupDescriptorPool();
 	void setupDescriptorSetLayout();
-	void setupDescriptorSet();
+	void setupDescriptorSets();
 	void preparePipelines();
+	size_t getDynamicAlignment();
 	void prepareUniformBuffers();
 	void updateUniformBuffersScreen();
 	void updateUniformBufferDeferredMatrices();
 	void updateUniformBufferDeferredLights();
+	void updateDynamicUniformBuffers();
 	void draw();
 	void prepare() override;
 	void render() override;
@@ -134,4 +144,9 @@ public:
 
 	// Semaphore used to synchronize between offscreen and final scene rendering
 	VkSemaphore m_offscreenSemaphore = VK_NULL_HANDLE;
+
+	std::shared_ptr<UniScene> m_CurrentScene;
+
+
+	void updateModelPosition();
 };

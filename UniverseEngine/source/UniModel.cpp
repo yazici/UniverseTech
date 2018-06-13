@@ -22,6 +22,9 @@ const std::string getAssetPath() {
 
 
 UniModel::UniModel() {
+
+	UniSceneObject();
+
 	m_ModelCreateInfo.center = glm::vec3(0, 0, 0);
 	m_ModelCreateInfo.scale = glm::vec3(1.f);
 	m_ModelCreateInfo.uvscale = glm::vec2(1.f);

@@ -8,6 +8,32 @@
 
 #include "UniEngine.h"
 #include "vks/VulkanTools.h"
+#include <assert.h>
+
+#define ENABLE_VALIDATION true
+
+// Wrapper functions for aligned memory allocation
+// There is currently no standard for this in C++ that works across all platforms and vendors, so we abstract this
+void* alignedAlloc(size_t size, size_t alignment) {
+	void *data = nullptr;
+#if defined(_MSC_VER) || defined(__MINGW32__)
+	data = _aligned_malloc(size, alignment);
+#else 
+	int res = posix_memalign(&data, alignment, size);
+	if(res != 0)
+		data = nullptr;
+#endif
+	return data;
+}
+
+void alignedFree(void* data) {
+#if	defined(_MSC_VER) || defined(__MINGW32__)
+	_aligned_free(data);
+#else 
+	free(data);
+#endif
+}
+
 
 
 UniEngine::~UniEngine() {
@@ -49,9 +75,11 @@ UniEngine::~UniEngine() {
 	vkDestroyPipelineLayout(device, pipelineLayouts.offscreen, nullptr);
 
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayoutDynamic, nullptr);
 
 	// Meshes
-	for_each(m_models.begin(), m_models.end(), [](std::shared_ptr<UniModel> model){
+	auto models = m_CurrentScene->GetModels();
+	for_each(models.begin(), models.end(), [](std::shared_ptr<UniModel> model){
 		model->m_Model.destroy();
 		model->m_Texture.destroy();
 		model->m_NormalMap.destroy();
@@ -70,6 +98,9 @@ UniEngine::~UniEngine() {
 }
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
+
+	m_CurrentScene = std::make_shared<UniScene>();
+
 	title = "Multi sampled deferred shading";
 	camera.type = Camera::CameraType::firstperson;
 	camera.movementSpeed = 5.0f;
@@ -347,19 +378,19 @@ void UniEngine::buildDeferredCommandBuffer() {
 
 	// bind models
 
-	for_each(m_models.begin(), m_models.end(), [this](std::shared_ptr<UniModel> model) {
+	auto dynamicAlignment = getDynamicAlignment();
+	int index = 0;
+
+	auto models = m_CurrentScene->GetModels();
+	for_each(models.begin(), models.end(), [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
 		VkDeviceSize offsets[1] = { 0 };
-		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &model->m_DescriptorSet, 0, nullptr);
+		uint32_t dynamicOffset = index * static_cast<uint32_t>(dynamicAlignment);
+		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &model->m_DescriptorSet, 1, &dynamicOffset);
 		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &model->m_Model.vertices.buffer, offsets);
 		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, model->m_Model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(m_offScreenCmdBuffer, model->m_Model.indexCount, 1, 0, 0, 0);
+		index++;
 	});
-
-	//// Object
-	//vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &descriptorSets.model, 0, nullptr);
-	//vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &m_models.model.vertices.buffer, offsets);
-	//vkCmdBindIndexBuffer(m_offScreenCmdBuffer, m_models.model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
-	//vkCmdDrawIndexed(m_offScreenCmdBuffer, m_models.model.indexCount, 3, 0, 0, 0);
 
 	vkCmdEndRenderPass(m_offScreenCmdBuffer);
 
@@ -396,7 +427,8 @@ void UniEngine::buildCommandBuffers() {
 		VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
 		vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
 
-		vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.deferred, 0, 1, &m_descriptorSet, 0, nullptr);
+		uint32_t dummy = 0;
+		vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.deferred, 0, 1, &m_descriptorSet, 1, &dummy);
 
 		if(m_debugDisplay) {
 			vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.debug);
@@ -426,32 +458,32 @@ void UniEngine::loadAssets() {
 	std::shared_ptr<UniModel> armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_models.push_back(armor);
+	m_CurrentScene->AddSceneObject(armor);
 
 	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
 	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(1.2f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_models.push_back(armor);
+	m_CurrentScene->AddSceneObject(armor);
 
 	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
 	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.35f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_models.push_back(armor);
+	m_CurrentScene->AddSceneObject(armor);
 
 	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
 	armor->SetCreateInfo(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(.9f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_models.push_back(armor);
+	m_CurrentScene->AddSceneObject(armor);
 
 	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
 	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(.75f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_models.push_back(armor);
+	m_CurrentScene->AddSceneObject(armor);
 
 	std::shared_ptr<UniModel> floor = std::make_shared<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
 	floor->SetCreateInfo(glm::vec3(0.0f, 2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
 	floor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_models.push_back(floor);
+	m_CurrentScene->AddSceneObject(floor);
 
 }
 
@@ -510,17 +542,20 @@ void UniEngine::setupVertexDescriptions() {
 }
 
 void UniEngine::setupDescriptorPool() {
+	auto modelCount = static_cast<uint32_t>(m_CurrentScene->GetModels().size()) * 2;
+
 	std::vector<VkDescriptorPoolSize> poolSizes =
 	{
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 8),
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 9)
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 3 * modelCount),
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2 * modelCount),
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5 * modelCount)
 	};
 
 	VkDescriptorPoolCreateInfo descriptorPoolInfo =
 		vks::initializers::descriptorPoolCreateInfo(
 			static_cast<uint32_t>(poolSizes.size()),
 			poolSizes.data(),
-			static_cast<uint32_t>(m_models.size() + 1));
+			static_cast<uint32_t>(m_CurrentScene->GetModels().size() + 2));
 
 	VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 }
@@ -554,7 +589,14 @@ void UniEngine::setupDescriptorSetLayout() {
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			VK_SHADER_STAGE_FRAGMENT_BIT,
 			4),
+		// Binding 0 : Vertex shader uniform buffer dynamic
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+			VK_SHADER_STAGE_VERTEX_BIT,
+			5),
+
 	};
+
 
 	VkDescriptorSetLayoutCreateInfo descriptorLayout =
 		vks::initializers::descriptorSetLayoutCreateInfo(
@@ -563,18 +605,19 @@ void UniEngine::setupDescriptorSetLayout() {
 
 	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &m_descriptorSetLayout));
 
-	VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
+
+	VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = 
 		vks::initializers::pipelineLayoutCreateInfo(
 			&m_descriptorSetLayout,
 			1);
-
+	
 	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayouts.deferred));
 
 	// Offscreen (scene) rendering pipeline layout
 	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayouts.offscreen));
 }
 
-void UniEngine::setupDescriptorSet() {
+void UniEngine::setupDescriptorSets() {
 	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 
 	// Textured quad descriptor set
@@ -585,6 +628,7 @@ void UniEngine::setupDescriptorSet() {
 			1);
 
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSet));
+
 
 	// Image descriptors for the offscreen color attachments
 	VkDescriptorImageInfo texDescriptorPosition =
@@ -640,11 +684,23 @@ void UniEngine::setupDescriptorSet() {
 
 	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 
+
 	// Offscreen (scene)
 
-	// Models
+	// Textured quad descriptor set
+	VkDescriptorSetAllocateInfo allocInfoDynamic =
+		vks::initializers::descriptorSetAllocateInfo(
+			descriptorPool,
+			&m_descriptorSetLayoutDynamic,
+			1);
 
-	for_each(m_models.begin(), m_models.end(), [allocInfo, this](std::shared_ptr<UniModel> model) {
+	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSetDynamic));
+
+
+
+	// Models
+	auto models = m_CurrentScene->GetModels();
+	for_each(models.begin(), models.end(), [allocInfo, this](std::shared_ptr<UniModel> model) {
 
 		VkResult res = (vkAllocateDescriptorSets(device, &allocInfo, &model->m_DescriptorSet));
 		if(res != VK_SUCCESS)
@@ -672,7 +728,13 @@ void UniEngine::setupDescriptorSet() {
 				model->m_DescriptorSet,
 				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 				2,
-				&model->m_NormalMap.descriptor)
+				&model->m_NormalMap.descriptor),
+			// Binding 5 : Vertex shader uniform buffer
+			vks::initializers::writeDescriptorSet(
+				model->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+				5,
+				&uniformBuffers.modelViews.descriptor),
 		};
 		vkUpdateDescriptorSets(device, static_cast<uint32_t>(modelWriteDescriptorSets.size()), modelWriteDescriptorSets.data(), 0, nullptr);
 	});
@@ -817,6 +879,18 @@ void UniEngine::preparePipelines() {
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offscreenSampleShading));
 }
 
+size_t UniEngine::getDynamicAlignment() {
+	size_t minUboAlignment = vulkanDevice->properties.limits.minUniformBufferOffsetAlignment;
+
+	auto dynamicAlignment = sizeof(glm::mat4);
+	if(minUboAlignment > 0) {
+		dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
+	}
+
+	return dynamicAlignment;
+}
+
+
 // Prepare and initialize uniform buffer containing shader uniforms
 void UniEngine::prepareUniformBuffers() {
 	// Fullscreen vertex shader
@@ -833,6 +907,18 @@ void UniEngine::prepareUniformBuffers() {
 		&uniformBuffers.vsOffscreen,
 		sizeof(uboOffscreenVS)));
 
+	auto models = m_CurrentScene->GetModels();
+	auto dynamicAlignment = getDynamicAlignment();
+	size_t bufferSize = models.size() * dynamicAlignment;
+	uboModelMatDynamic.model = (glm::mat4 *)alignedAlloc(bufferSize, dynamicAlignment);
+	assert(uboModelMatDynamic.model);
+
+	// Deferred vertex shader dynamic
+	VK_CHECK_RESULT(vulkanDevice->createBuffer(
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 
+		&uniformBuffers.modelViews, bufferSize));
+
 	// Deferred fragment shader
 	VK_CHECK_RESULT(vulkanDevice->createBuffer(
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -843,17 +929,14 @@ void UniEngine::prepareUniformBuffers() {
 	// Map persistent
 	VK_CHECK_RESULT(uniformBuffers.vsFullScreen.map());
 	VK_CHECK_RESULT(uniformBuffers.vsOffscreen.map());
+	VK_CHECK_RESULT(uniformBuffers.modelViews.map());
 	VK_CHECK_RESULT(uniformBuffers.fsLights.map());
-
-	// Init some values
-	uboOffscreenVS.instancePos[0] = glm::vec4(0.0f);
-	uboOffscreenVS.instancePos[1] = glm::vec4(-4.0f, 0.0, -4.0f, 0.0f);
-	uboOffscreenVS.instancePos[2] = glm::vec4(4.0f, 0.0, -4.0f, 0.0f);
 
 	// Update
 	updateUniformBuffersScreen();
 	updateUniformBufferDeferredMatrices();
 	updateUniformBufferDeferredLights();
+	updateDynamicUniformBuffers();
 }
 
 void UniEngine::updateUniformBuffersScreen() {
@@ -870,7 +953,7 @@ void UniEngine::updateUniformBuffersScreen() {
 void UniEngine::updateUniformBufferDeferredMatrices() {
 	uboOffscreenVS.projection = camera.matrices.perspective;
 	uboOffscreenVS.view = camera.matrices.view;
-	uboOffscreenVS.model = glm::mat4(1.0f);
+	uboOffscreenVS.model = glm::mat4(1.f);
 	memcpy(uniformBuffers.vsOffscreen.mapped, &uboOffscreenVS, sizeof(uboOffscreenVS));
 }
 
@@ -922,6 +1005,25 @@ void UniEngine::updateUniformBufferDeferredLights() {
 	memcpy(uniformBuffers.fsLights.mapped, &uboFragmentLights, sizeof(uboFragmentLights));
 }
 
+void UniEngine::updateDynamicUniformBuffers() {
+	int index = 0;
+	auto dynamicAlignment = getDynamicAlignment();
+	auto models = m_CurrentScene->GetModels();
+	for_each(models.begin(), models.end(), [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
+		glm::mat4* modelMat = (glm::mat4*)(((uint64_t)uboModelMatDynamic.model + (index * dynamicAlignment)));
+		*modelMat = model->GetModelMat();
+		//std::cout << "Updating model matrix index: " << index << std::endl;
+		index++;
+	});
+
+	memcpy(uniformBuffers.modelViews.mapped, uboModelMatDynamic.model, uniformBuffers.modelViews.size);
+	// Flush to make changes visible to the host 
+	VkMappedMemoryRange memoryRange = vks::initializers::mappedMemoryRange();
+	memoryRange.memory = uniformBuffers.modelViews.memory;
+	memoryRange.size = uniformBuffers.modelViews.size;
+	vkFlushMappedMemoryRanges(device, 1, &memoryRange);
+}
+
 void UniEngine::draw() {
 	VulkanExampleBase::prepareFrame();
 
@@ -961,7 +1063,7 @@ void UniEngine::prepare() {
 	setupDescriptorSetLayout();
 	preparePipelines();
 	setupDescriptorPool();
-	setupDescriptorSet();
+	setupDescriptorSets();
 	buildCommandBuffers();
 	buildDeferredCommandBuffer();
 	prepared = true;
@@ -972,6 +1074,8 @@ void UniEngine::render() {
 		return;
 	draw();
 	updateUniformBufferDeferredLights();
+	updateModelPosition();
+	updateDynamicUniformBuffers();
 }
 
 void UniEngine::viewChanged() {
@@ -996,3 +1100,14 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 	}
 }
 
+
+
+void UniEngine::updateModelPosition() {
+
+	auto model = m_CurrentScene->GetModels()[0];
+	model->SetPosition(-4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f, 0.f, 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f);
+	model->SetPosition(-4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f, 0.f, 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f);
+
+	if(!paused)
+		model->SetYaw(model->m_Rotation.y + (frameTimer * 90.f));
+}

@@ -92,6 +92,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\vulkan;C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -112,6 +113,7 @@
     <Link>
       <AdditionalLibraryDirectories>C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\vulkan;C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -132,6 +134,7 @@
     <Link>
       <AdditionalLibraryDirectories>C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\vulkan;C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -156,6 +159,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\vulkan;C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -168,6 +172,8 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\UniEngine.h" />
     <ClInclude Include="source\UniModel.h" />
+    <ClInclude Include="source\UniScene.h" />
+    <ClInclude Include="source\UniSceneObject.h" />
     <ClInclude Include="source\vks\benchmark.hpp" />
     <ClInclude Include="source\vks\camera.hpp" />
     <ClInclude Include="source\vks\frustum.hpp" />
@@ -196,6 +202,8 @@
     <ClCompile Include="source\scenerendering.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
     <ClCompile Include="source\UniModel.cpp" />
+    <ClCompile Include="source\UniScene.cpp" />
+    <ClCompile Include="source\UniSceneObject.cpp" />
     <ClCompile Include="source\vks\VulkanAndroid.cpp" />
     <ClCompile Include="source\vks\VulkanDebug.cpp" />
     <ClCompile Include="source\vks\vulkanexamplebase.cpp" />

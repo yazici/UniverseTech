@@ -4,8 +4,9 @@
 #include "vks/VulkanTexture.hpp"
 #include "vulkan/vulkan_core.h"
 
+#include "UniSceneObject.h"
 
-class UniModel {
+class UniModel : public UniSceneObject{
 public:
 	UniModel();
 	~UniModel();
