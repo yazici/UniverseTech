@@ -49,7 +49,7 @@ public:
 		vks::Model model;
 		vks::Model floor;
 		//vks::Model quad;
-	} models;
+	} m_models;
 
 	struct {
 		VkPipelineVertexInputStateCreateInfo inputState;
