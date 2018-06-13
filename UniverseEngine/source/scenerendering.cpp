@@ -244,7 +244,7 @@ private:
 		VK_CHECK_RESULT(vkCreatePipelineLayout(vulkanDevice->logicalDevice, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 
 		// Material descriptor sets
-		for (size_t i = 0; i < materials.size(); i++)
+		for (auto & material : materials)
 		{
 			// Descriptor set
 			VkDescriptorSetAllocateInfo allocInfo =
@@ -253,7 +253,7 @@ private:
 					&descriptorSetLayouts.material,
 					1);
 
-			VK_CHECK_RESULT(vkAllocateDescriptorSets(vulkanDevice->logicalDevice, &allocInfo, &materials[i].descriptorSet));
+			VK_CHECK_RESULT(vkAllocateDescriptorSets(vulkanDevice->logicalDevice, &allocInfo, &material.descriptorSet));
 
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 
@@ -261,12 +261,12 @@ private:
 
 			// Binding 0: Diffuse texture
 			writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-				materials[i].descriptorSet,
+				material.descriptorSet,
 				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 				0,
-				&materials[i].diffuse.descriptor));
+				&material.diffuse.descriptor));
 
-			vkUpdateDescriptorSets(vulkanDevice->logicalDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
+			vkUpdateDescriptorSets(vulkanDevice->logicalDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 		}
 
 		// Scene descriptor set
@@ -285,7 +285,7 @@ private:
 			0,
 			&uniformBuffer.descriptor));
 
-		vkUpdateDescriptorSets(vulkanDevice->logicalDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, NULL);
+		vkUpdateDescriptorSets(vulkanDevice->logicalDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 	}
 
 	// Load all meshes from the scene and generate the buffers for rendering them
@@ -490,7 +490,7 @@ public:
 	{
 		Assimp::Importer Importer;
 
-		int flags = aiProcess_PreTransformVertices | aiProcess_Triangulate | aiProcess_GenNormals;
+		int flags = aiProcess_PreTransformVertices | aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace;
 
 #if defined(__ANDROID__)
 		AAsset* asset = AAssetManager_open(assetManager, filename.c_str(), AASSET_MODE_STREAMING);
@@ -550,7 +550,7 @@ public:
 			descriptorSets[1] = meshes[i].material->descriptorSet;
 
 			vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, wireframe ? pipelines.wireframe : *meshes[i].material->pipeline);
-			vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, NULL);
+			vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), 0, nullptr);
 
 			// Pass material properies via push constants
 			vkCmdPushConstants(
@@ -599,7 +599,7 @@ public:
 	}
 
 	// Enable physical device features required for this example				
-	virtual void getEnabledFeatures()
+	void getEnabledFeatures() override
 	{
 		// Fill mode non solid is required for wireframe display
 		if (deviceFeatures.fillModeNonSolid) {
@@ -607,7 +607,7 @@ public:
 		};
 	}
 
-	void buildCommandBuffers()
+	void buildCommandBuffers() override
 	{
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
@@ -830,14 +830,8 @@ public:
 		updateUniformBuffers();
 	}
 
-	void prepare()
+	void prepare() override
 	{
-
-		int test = (int)512 >> (int)0;
-
-		std::string filename = "data/models/sibenik/kamen_bc3_unorm.ktx";
-
-		gli::texture2d tex2D(gli::load(filename.c_str()));
 
 		VulkanExampleBase::prepare();
 		setupVertexDescriptions();
@@ -847,19 +841,19 @@ public:
 		prepared = true;
 	}
 
-	virtual void render()
+	void render() override
 	{
 		if (!prepared)
 			return;
 		draw();
 	}
 
-	virtual void viewChanged()
+	void viewChanged() override
 	{
 		updateUniformBuffers();
 	}
 
-	virtual void OnUpdateUIOverlay(vks::UIOverlay *overlay)
+	void OnUpdateUIOverlay(vks::UIOverlay *overlay) override
 	{
 		if (overlay->header("Settings")) {
 			if (deviceFeatures.fillModeNonSolid) {
@@ -884,4 +878,4 @@ public:
 	}
 };
 
-VULKAN_EXAMPLE_MAIN()
+// VULKAN_EXAMPLE_MAIN()

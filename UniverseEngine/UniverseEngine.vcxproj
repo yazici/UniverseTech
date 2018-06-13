@@ -189,6 +189,7 @@
     <ClCompile Include="..\external\imgui\imgui.cpp" />
     <ClCompile Include="..\external\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="source\deferredmultisampling.cpp" />
     <ClCompile Include="source\scenerendering.cpp" />
     <ClCompile Include="source\vks\VulkanAndroid.cpp" />
     <ClCompile Include="source\vks\VulkanDebug.cpp" />
@@ -198,6 +199,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UniverseEngine.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\shaders\scenerendering\scene.frag" />
+    <None Include="data\shaders\scenerendering\scene.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
