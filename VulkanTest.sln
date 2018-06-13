@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A88E2013-C690-40FA-93D6-C1735651089F}"
 	ProjectSection(SolutionItems) = preProject
 		.gitmodules = .gitmodules
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
