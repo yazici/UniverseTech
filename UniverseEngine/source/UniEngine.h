@@ -17,6 +17,8 @@
 #include "vks/VulkanTexture.hpp"
 #include "vks/VulkanModel.hpp"
 
+#include "UniModel.h"
+
 #define VERTEX_BUFFER_BIND_ID 0
 #define ENABLE_VALIDATION false
 // todo: check if hardware supports sample number (or select max. supported)
@@ -24,17 +26,6 @@
 
 class UniEngine : public VulkanExampleBase {
 public:
-
-	struct {
-		struct {
-			vks::Texture2D colorMap;
-			vks::Texture2D normalMap;
-		} model;
-		struct {
-			vks::Texture2D colorMap;
-			vks::Texture2D normalMap;
-		} floor;
-	} textures;
 
 	// Vertex layout for the models
 	vks::VertexLayout vertexLayout = vks::VertexLayout({
@@ -45,7 +36,7 @@ public:
 		vks::VERTEX_COMPONENT_TANGENT,
 		});
 
-	std::vector<vks::Model> m_models;
+	std::vector<std::shared_ptr<UniModel>> m_models;
 
 	struct {
 		VkPipelineVertexInputStateCreateInfo inputState;
@@ -90,11 +81,6 @@ public:
 		VkPipelineLayout deferred;
 		VkPipelineLayout offscreen;
 	} pipelineLayouts;
-
-	struct {
-		VkDescriptorSet model;
-		VkDescriptorSet floor;
-	} descriptorSets;
 
 	VkDescriptorSet m_descriptorSet;
 	VkDescriptorSetLayout m_descriptorSetLayout;

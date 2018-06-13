@@ -167,6 +167,7 @@
     <ClInclude Include="..\external\imgui\stb_truetype.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\UniEngine.h" />
+    <ClInclude Include="source\UniModel.h" />
     <ClInclude Include="source\vks\benchmark.hpp" />
     <ClInclude Include="source\vks\camera.hpp" />
     <ClInclude Include="source\vks\frustum.hpp" />
@@ -194,6 +195,7 @@
     <ClCompile Include="source\deferredmultisampling.cpp" />
     <ClCompile Include="source\scenerendering.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
+    <ClCompile Include="source\UniModel.cpp" />
     <ClCompile Include="source\vks\VulkanAndroid.cpp" />
     <ClCompile Include="source\vks\VulkanDebug.cpp" />
     <ClCompile Include="source\vks\vulkanexamplebase.cpp" />

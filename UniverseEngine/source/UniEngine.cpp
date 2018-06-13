@@ -7,6 +7,7 @@
 */
 
 #include "UniEngine.h"
+#include "vks/VulkanTools.h"
 
 
 UniEngine::~UniEngine() {
@@ -50,7 +51,11 @@ UniEngine::~UniEngine() {
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
 
 	// Meshes
-	for_each(m_models.begin(), m_models.end(), [](vks::Model model){model.destroy();});
+	for_each(m_models.begin(), m_models.end(), [](std::shared_ptr<UniModel> model){
+		model->m_Model.destroy();
+		model->m_Texture.destroy();
+		model->m_NormalMap.destroy();
+	});
 	
 	// Uniform buffers
 	uniformBuffers.vsOffscreen.destroy();
@@ -60,11 +65,6 @@ UniEngine::~UniEngine() {
 	vkFreeCommandBuffers(device, cmdPool, 1, &m_offScreenCmdBuffer);
 
 	vkDestroyRenderPass(device, offScreenFrameBuf.renderPass, nullptr);
-
-	textures.model.colorMap.destroy();
-	textures.model.normalMap.destroy();
-	textures.floor.colorMap.destroy();
-	textures.floor.normalMap.destroy();
 
 	vkDestroySemaphore(device, m_offscreenSemaphore, nullptr);
 }
@@ -347,12 +347,12 @@ void UniEngine::buildDeferredCommandBuffer() {
 
 	// bind models
 
-	for_each(m_models.begin(), m_models.end(), [this](vks::Model model) {
+	for_each(m_models.begin(), m_models.end(), [this](std::shared_ptr<UniModel> model) {
 		VkDeviceSize offsets[1] = { 0 };
-		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &descriptorSets.floor, 0, nullptr);
-		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &model.vertices.buffer, offsets);
-		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(m_offScreenCmdBuffer, model.indexCount, 1, 0, 0, 0);
+		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &model->m_DescriptorSet, 0, nullptr);
+		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &model->m_Model.vertices.buffer, offsets);
+		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, model->m_Model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(m_offScreenCmdBuffer, model->m_Model.indexCount, 1, 0, 0, 0);
 	});
 
 	//// Object
@@ -423,39 +423,36 @@ void UniEngine::buildCommandBuffers() {
 
 void UniEngine::loadAssets() {
 	
-	vks::Model armor;
-	armor.loadFromFile(getAssetPath() + "models/armor/armor.dae", vertexLayout, 1.0f, vulkanDevice, queue);
+	std::shared_ptr<UniModel> armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
+	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
+	armor->Load(vertexLayout, vulkanDevice, queue, true);
 	m_models.push_back(armor);
 
-	vks::Model floor;
-	vks::ModelCreateInfo modelCreateInfo;
-	modelCreateInfo.scale = glm::vec3(15.0f);
-	modelCreateInfo.uvscale = glm::vec2(8.0f, 8.0f);
-	modelCreateInfo.center = glm::vec3(0.0f, 2.3f, 0.0f);
-	floor.loadFromFile(getAssetPath() + "models/openbox.dae", vertexLayout, &modelCreateInfo, vulkanDevice, queue);
+	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
+	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(1.2f), glm::vec2(1.0f, 1.0f));
+	armor->Load(vertexLayout, vulkanDevice, queue, true);
+	m_models.push_back(armor);
+
+	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
+	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.35f), glm::vec2(1.0f, 1.0f));
+	armor->Load(vertexLayout, vulkanDevice, queue, true);
+	m_models.push_back(armor);
+
+	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
+	armor->SetCreateInfo(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(.9f), glm::vec2(1.0f, 1.0f));
+	armor->Load(vertexLayout, vulkanDevice, queue, true);
+	m_models.push_back(armor);
+
+	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
+	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(.75f), glm::vec2(1.0f, 1.0f));
+	armor->Load(vertexLayout, vulkanDevice, queue, true);
+	m_models.push_back(armor);
+
+	std::shared_ptr<UniModel> floor = std::make_shared<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
+	floor->SetCreateInfo(glm::vec3(0.0f, 2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
+	floor->Load(vertexLayout, vulkanDevice, queue, true);
 	m_models.push_back(floor);
 
-	// Textures
-	std::string texFormatSuffix;
-	VkFormat texFormat;
-	// Get supported compressed texture format
-	if(vulkanDevice->features.textureCompressionBC) {
-		texFormatSuffix = "_bc3_unorm";
-		texFormat = VK_FORMAT_BC3_UNORM_BLOCK;
-	} else if(vulkanDevice->features.textureCompressionASTC_LDR) {
-		texFormatSuffix = "_astc_8x8_unorm";
-		texFormat = VK_FORMAT_ASTC_8x8_UNORM_BLOCK;
-	} else if(vulkanDevice->features.textureCompressionETC2) {
-		texFormatSuffix = "_etc2_unorm";
-		texFormat = VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK;
-	} else {
-		vks::tools::exitFatal("Device does not support any compressed texture format!", VK_ERROR_FEATURE_NOT_PRESENT);
-	}
-
-	textures.model.colorMap.loadFromFile(getAssetPath() + "models/armor/color" + texFormatSuffix + ".ktx", texFormat, vulkanDevice, queue);
-	textures.model.normalMap.loadFromFile(getAssetPath() + "models/armor/normal" + texFormatSuffix + ".ktx", texFormat, vulkanDevice, queue);
-	textures.floor.colorMap.loadFromFile(getAssetPath() + "textures/stonefloor02_color" + texFormatSuffix + ".ktx", texFormat, vulkanDevice, queue);
-	textures.floor.normalMap.loadFromFile(getAssetPath() + "textures/stonefloor02_normal" + texFormatSuffix + ".ktx", texFormat, vulkanDevice, queue);
 }
 
 void UniEngine::setupVertexDescriptions() {
@@ -523,7 +520,7 @@ void UniEngine::setupDescriptorPool() {
 		vks::initializers::descriptorPoolCreateInfo(
 			static_cast<uint32_t>(poolSizes.size()),
 			poolSizes.data(),
-			3);
+			static_cast<uint32_t>(m_models.size() + 1));
 
 	VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 }
@@ -645,55 +642,40 @@ void UniEngine::setupDescriptorSet() {
 
 	// Offscreen (scene)
 
-	// Model
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.model));
-	writeDescriptorSets =
-	{
-		// Binding 0: Vertex shader uniform buffer
-		vks::initializers::writeDescriptorSet(
-			descriptorSets.model,
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			0,
-			&uniformBuffers.vsOffscreen.descriptor),
-		// Binding 1: Color map
-		vks::initializers::writeDescriptorSet(
-			descriptorSets.model,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			1,
-			&textures.model.colorMap.descriptor),
-		// Binding 2: Normal map
-		vks::initializers::writeDescriptorSet(
-			descriptorSets.model,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			2,
-			&textures.model.normalMap.descriptor)
-	};
-	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+	// Models
 
-	// Backbround
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets.floor));
-	writeDescriptorSets =
-	{
-		// Binding 0: Vertex shader uniform buffer
-		vks::initializers::writeDescriptorSet(
-			descriptorSets.floor,
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			0,
-			&uniformBuffers.vsOffscreen.descriptor),
-		// Binding 1: Color map
-		vks::initializers::writeDescriptorSet(
-			descriptorSets.floor,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			1,
-			&textures.floor.colorMap.descriptor),
-		// Binding 2: Normal map
-		vks::initializers::writeDescriptorSet(
-			descriptorSets.floor,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			2,
-			&textures.floor.normalMap.descriptor)
-	};
-	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+	for_each(m_models.begin(), m_models.end(), [allocInfo, this](std::shared_ptr<UniModel> model) {
+
+		VkResult res = (vkAllocateDescriptorSets(device, &allocInfo, &model->m_DescriptorSet));
+		if(res != VK_SUCCESS)
+		{
+			std::cout << "Fatal : VkResult is \"" << vks::tools::errorString(res) << "\" in " << __FILE__ << " at line " << __LINE__ << std::endl;
+			assert(res == VK_SUCCESS);
+		}
+
+		std::vector<VkWriteDescriptorSet> modelWriteDescriptorSets =
+		{
+			// Binding 0: Vertex shader uniform buffer
+			vks::initializers::writeDescriptorSet(
+				model->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				0,
+				&uniformBuffers.vsOffscreen.descriptor),
+			// Binding 1: Color map
+			vks::initializers::writeDescriptorSet(
+				model->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				1,
+				&model->m_Texture.descriptor),
+			// Binding 2: Normal map
+			vks::initializers::writeDescriptorSet(
+				model->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				2,
+				&model->m_NormalMap.descriptor)
+		};
+		vkUpdateDescriptorSets(device, static_cast<uint32_t>(modelWriteDescriptorSets.size()), modelWriteDescriptorSets.data(), 0, nullptr);
+	});
 }
 
 void UniEngine::preparePipelines() {
