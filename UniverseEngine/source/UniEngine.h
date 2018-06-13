@@ -45,11 +45,7 @@ public:
 		vks::VERTEX_COMPONENT_TANGENT,
 		});
 
-	struct {
-		vks::Model model;
-		vks::Model floor;
-		//vks::Model quad;
-	} m_models;
+	std::vector<vks::Model> m_models;
 
 	struct {
 		VkPipelineVertexInputStateCreateInfo inputState;

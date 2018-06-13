@@ -50,9 +50,8 @@ UniEngine::~UniEngine() {
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
 
 	// Meshes
-	m_models.model.destroy();
-	m_models.floor.destroy();
-
+	for_each(m_models.begin(), m_models.end(), [](vks::Model model){model.destroy();});
+	
 	// Uniform buffers
 	uniformBuffers.vsOffscreen.destroy();
 	uniformBuffers.vsFullScreen.destroy();
@@ -346,19 +345,21 @@ void UniEngine::buildDeferredCommandBuffer() {
 
 	vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_useSampleShading ? pipelines.offscreenSampleShading : pipelines.offscreen);
 
-	VkDeviceSize offsets[1] = { 0 };
+	// bind models
 
-	// Background
-	vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &descriptorSets.floor, 0, nullptr);
-	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &m_models.floor.vertices.buffer, offsets);
-	vkCmdBindIndexBuffer(m_offScreenCmdBuffer, m_models.floor.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
-	vkCmdDrawIndexed(m_offScreenCmdBuffer, m_models.floor.indexCount, 1, 0, 0, 0);
+	for_each(m_models.begin(), m_models.end(), [this](vks::Model model) {
+		VkDeviceSize offsets[1] = { 0 };
+		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &descriptorSets.floor, 0, nullptr);
+		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &model.vertices.buffer, offsets);
+		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(m_offScreenCmdBuffer, model.indexCount, 1, 0, 0, 0);
+	});
 
-	// Object
-	vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &descriptorSets.model, 0, nullptr);
-	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &m_models.model.vertices.buffer, offsets);
-	vkCmdBindIndexBuffer(m_offScreenCmdBuffer, m_models.model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
-	vkCmdDrawIndexed(m_offScreenCmdBuffer, m_models.model.indexCount, 3, 0, 0, 0);
+	//// Object
+	//vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &descriptorSets.model, 0, nullptr);
+	//vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &m_models.model.vertices.buffer, offsets);
+	//vkCmdBindIndexBuffer(m_offScreenCmdBuffer, m_models.model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
+	//vkCmdDrawIndexed(m_offScreenCmdBuffer, m_models.model.indexCount, 3, 0, 0, 0);
 
 	vkCmdEndRenderPass(m_offScreenCmdBuffer);
 
@@ -421,13 +422,18 @@ void UniEngine::buildCommandBuffers() {
 }
 
 void UniEngine::loadAssets() {
-	m_models.model.loadFromFile(getAssetPath() + "models/armor/armor.dae", vertexLayout, 1.0f, vulkanDevice, queue);
+	
+	vks::Model armor;
+	armor.loadFromFile(getAssetPath() + "models/armor/armor.dae", vertexLayout, 1.0f, vulkanDevice, queue);
+	m_models.push_back(armor);
 
+	vks::Model floor;
 	vks::ModelCreateInfo modelCreateInfo;
 	modelCreateInfo.scale = glm::vec3(15.0f);
 	modelCreateInfo.uvscale = glm::vec2(8.0f, 8.0f);
 	modelCreateInfo.center = glm::vec3(0.0f, 2.3f, 0.0f);
-	m_models.floor.loadFromFile(getAssetPath() + "models/openbox.dae", vertexLayout, &modelCreateInfo, vulkanDevice, queue);
+	floor.loadFromFile(getAssetPath() + "models/openbox.dae", vertexLayout, &modelCreateInfo, vulkanDevice, queue);
+	m_models.push_back(floor);
 
 	// Textures
 	std::string texFormatSuffix;
