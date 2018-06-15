@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VulkanTest", "VulkanTest\VulkanTest.vcxproj", "{83587E1A-ECA8-443B-BEEF-A4D2794229E0}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UniverseEngine", "UniverseEngine\UniverseEngine.vcxproj", "{749F7949-755A-4F56-B5C9-6E2309E34049}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A88E2013-C690-40FA-93D6-C1735651089F}"
@@ -21,14 +19,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{83587E1A-ECA8-443B-BEEF-A4D2794229E0}.Debug|x64.ActiveCfg = Debug|x64
-		{83587E1A-ECA8-443B-BEEF-A4D2794229E0}.Debug|x64.Build.0 = Debug|x64
-		{83587E1A-ECA8-443B-BEEF-A4D2794229E0}.Debug|x86.ActiveCfg = Debug|Win32
-		{83587E1A-ECA8-443B-BEEF-A4D2794229E0}.Debug|x86.Build.0 = Debug|Win32
-		{83587E1A-ECA8-443B-BEEF-A4D2794229E0}.Release|x64.ActiveCfg = Release|x64
-		{83587E1A-ECA8-443B-BEEF-A4D2794229E0}.Release|x64.Build.0 = Release|x64
-		{83587E1A-ECA8-443B-BEEF-A4D2794229E0}.Release|x86.ActiveCfg = Release|Win32
-		{83587E1A-ECA8-443B-BEEF-A4D2794229E0}.Release|x86.Build.0 = Release|Win32
 		{749F7949-755A-4F56-B5C9-6E2309E34049}.Debug|x64.ActiveCfg = Debug|x64
 		{749F7949-755A-4F56-B5C9-6E2309E34049}.Debug|x64.Build.0 = Debug|x64
 		{749F7949-755A-4F56-B5C9-6E2309E34049}.Debug|x86.ActiveCfg = Debug|Win32
