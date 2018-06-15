@@ -1,13 +1,16 @@
 #include "UniScene.h"
 #include <memory>
-
+#include "Systems.h"
 
 UniScene::UniScene() {
 	m_World = ECS::World::createWorld();
+	m_World->registerSystem(new MovementSystem());
 }
 
 
-UniScene::~UniScene() {}
+UniScene::~UniScene() {
+	m_World->destroyWorld();
+}
 
 void UniScene::Tick(float deltaTime) {
 	m_World->tick(deltaTime);

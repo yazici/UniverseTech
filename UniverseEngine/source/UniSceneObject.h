@@ -17,9 +17,17 @@ public:
 
 	ECS::Entity* m_Entity = nullptr;
 
-	ECS::ComponentHandle<Transform> GetTransform();
+	ECS::ComponentHandle<TransformComponent> GetTransform();
+
+	template<class T, class... _Types>
+	void AddComponent(_Types&&... _Args);
 
 private:
 	UniScene * m_Scene;
 };
+
+template<class T, class... _Types>
+void UniSceneObject::AddComponent(_Types&&... _Args) {
+	m_Entity->assign<T>(_Args...);
+}
 

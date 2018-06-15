@@ -28,6 +28,11 @@
 class UniEngine : public VulkanExampleBase {
 public:
 
+	static UniEngine* GetInstance() {
+		static UniEngine* instance = new UniEngine();
+		return instance;
+	}
+
 	// Vertex layout for the models
 	vks::VertexLayout vertexLayout = vks::VertexLayout({
 		vks::VERTEX_COMPONENT_POSITION,
@@ -147,6 +152,4 @@ public:
 
 	std::shared_ptr<UniScene> m_CurrentScene;
 
-
-	void updateModelPosition();
 };

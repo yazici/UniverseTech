@@ -456,6 +456,7 @@ void UniEngine::buildCommandBuffers() {
 void UniEngine::loadAssets() {
 	
 	auto armor = m_CurrentScene->Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
+	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5.0), glm::vec3(0, 1, 0), 90.f);
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
 
@@ -467,7 +468,6 @@ void UniEngine::loadAssets() {
 	auto floor = m_CurrentScene->Make<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
 	floor->SetCreateInfo(glm::vec3(0.0f, 2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
 	floor->Load(vertexLayout, vulkanDevice, queue, true);
-
 
 }
 
@@ -1058,7 +1058,7 @@ void UniEngine::render() {
 		return;
 	draw();
 	updateUniformBufferDeferredLights();
-	updateModelPosition();
+	m_CurrentScene->Tick(frameTimer);
 	updateDynamicUniformBuffers();
 }
 
@@ -1084,14 +1084,3 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 	}
 }
 
-
-
-void UniEngine::updateModelPosition() {
-
-	auto model = m_CurrentScene->GetModels()[0];
-	model->GetTransform()->SetPosition(-4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f, 0.f, 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f);
-	model->GetTransform()->SetPosition(-4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f, 0.f, 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f);
-
-	if(!paused)
-		model->GetTransform()->SetYaw(model->GetTransform()->m_Rot.y + (frameTimer * 90.f));
-}

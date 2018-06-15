@@ -14,10 +14,10 @@ void UniSceneObject::SetScene(UniScene *scene) {
 
 void UniSceneObject::SetEntity(ECS::Entity* ent) {
 	m_Entity = ent;
-	m_Entity->assign<Transform>();
+	m_Entity->assign<TransformComponent>();
 }
 
-ECS::ComponentHandle<Transform> UniSceneObject::GetTransform() {
-	ECS::ComponentHandle<Transform> transform = m_Entity->get<Transform>();
+ECS::ComponentHandle<TransformComponent> UniSceneObject::GetTransform() {
+	ECS::ComponentHandle<TransformComponent> transform = m_Entity->get<TransformComponent>();
 	return transform;
 }
