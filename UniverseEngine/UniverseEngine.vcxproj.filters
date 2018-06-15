@@ -42,9 +42,6 @@
     <ClInclude Include="source\vks\camera.hpp">
       <Filter>Header Files\vks</Filter>
     </ClInclude>
-    <ClInclude Include="source\vks\frustum.hpp">
-      <Filter>Header Files\vks</Filter>
-    </ClInclude>
     <ClInclude Include="source\vks\keycodes.hpp">
       <Filter>Header Files\vks</Filter>
     </ClInclude>
@@ -132,6 +129,27 @@
     <ClInclude Include="source\Systems.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\UniBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Triangulator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Patch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Geometry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UniFrustum.cpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UniFrustum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\frustum.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -174,6 +192,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\Systems.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Triangulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Patch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

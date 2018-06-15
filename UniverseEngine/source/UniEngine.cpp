@@ -1058,7 +1058,8 @@ void UniEngine::render() {
 		return;
 	draw();
 	updateUniformBufferDeferredLights();
-	m_CurrentScene->Tick(frameTimer);
+	if(!paused)
+		m_CurrentScene->Tick(frameTimer);
 	updateDynamicUniformBuffers();
 }
 

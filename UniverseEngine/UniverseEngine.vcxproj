@@ -172,7 +172,13 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\Components.h" />
     <ClInclude Include="source\ECS.h" />
+    <ClCompile Include="source\UniFrustum.cpp" />
+    <ClInclude Include="source\UniFrustum.hpp" />
+    <ClInclude Include="source\Geometry.hpp" />
+    <ClInclude Include="source\Patch.hpp" />
     <ClInclude Include="source\Systems.h" />
+    <ClInclude Include="source\Triangulator.hpp" />
+    <ClInclude Include="source\UniBody.h" />
     <ClInclude Include="source\UniEngine.h" />
     <ClInclude Include="source\UniModel.h" />
     <ClInclude Include="source\UniScene.h" />
@@ -201,7 +207,10 @@
     <ClCompile Include="..\external\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\Patch.cpp" />
     <ClCompile Include="source\Systems.cpp" />
+    <ClCompile Include="source\Triangulator.cpp" />
+    <ClCompile Include="source\UniBody.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
     <ClCompile Include="source\UniModel.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
