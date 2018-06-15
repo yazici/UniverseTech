@@ -75,6 +75,13 @@ void UniModel::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue
 
 	if(!m_NormalMapPath.empty())
 		m_NormalMap.loadFromFile(getAssetPath() + m_NormalMapPath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
+	else {
+		std::vector<glm::vec3> buffer(4 * 4);
+		for(int32_t i = 0; i < buffer.size(); i++) {
+			buffer[i] = glm::vec3(0, 0, 1);
+		}
+		m_NormalMap.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec3), VK_FORMAT_R32G32B32_SFLOAT, 2, 2, device, copyQueue, VK_FILTER_LINEAR);
+	}
 
 
 }
