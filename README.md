@@ -11,9 +11,10 @@ Base engine capabilities in current version:
 
 - Arbitrary model loading with texture and normal maps. (Uses ASSIMP importer.)
 - Basic (single level) scene graph handling loaded models.
+- Entity Component System architecture for data-driven behaviour models.
 - Deferred shading and lighting model with MSAA.
 - GUI overlay with input handling.
-- GBuffer visualisation.
+- GBuffer debug visualisation.
 - Multithreading.
 - Input management.
 - Windows, Mac, Linux, iOS and Android support in-engine (but project needs work to compile targets).
