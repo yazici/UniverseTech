@@ -105,7 +105,7 @@ struct TransformComponent {
 		m_dPos += (glm::dvec3)m_Up * velocity.y;
 		m_dPos += (glm::dvec3)m_Forward * velocity.z;
 
-		std::cout << "Position now: " << m_dPos.x << ", " << m_dPos.y << ", " << m_dPos.z << std::endl;
+		//std::cout << "Position now: " << m_dPos.x << ", " << m_dPos.y << ", " << m_dPos.z << std::endl;
 	}
 
 	glm::mat4 GetModelMat() {
