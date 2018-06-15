@@ -83,7 +83,7 @@ static void handleEvent(const xcb_generic_event_t *event)											\
 int main(const int argc, const char *argv[])													    \
 {																									\
 	for (size_t i = 0; i < argc; i++) { UniEngine::args.push_back(argv[i]); };  				\
-	engine = new UniEngine();															\
+	engine = UniEngine::GetInstance();											\
 	engine->initVulkan();																	\
 	engine->setupWindow();					 												\
 	engine->prepare();																		\

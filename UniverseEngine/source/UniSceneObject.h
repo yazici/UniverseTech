@@ -1,25 +1,33 @@
 #pragma once
+
+#include <vector>
 #include "glm/glm.hpp"
+#include "ECS.h"
+#include "Components.h"
+
+class UniScene;
 
 class UniSceneObject {
 public:
 	UniSceneObject();
 	virtual ~UniSceneObject();
 
-	glm::vec3 m_Position;
-	glm::vec3 m_Rotation;
-	glm::vec3 m_Scale;
+	void SetScene(UniScene *scene);
+	void SetEntity(ECS::Entity* ent);
 
-	glm::mat4 m_ModelMat;
+	ECS::Entity* m_Entity = nullptr;
 
-	void SetPosition(const glm::vec3 &pos);
-	void SetPosition(float x, float y, float z);
-	void SetPitch(float p);
-	void SetYaw(float y);
-	void SetRoll(float r);
-	void SetScale(const glm::vec3 &scale);
+	ECS::ComponentHandle<TransformComponent> GetTransform();
 
-	glm::mat4 GetModelMat();
+	template<class T, class... _Types>
+	void AddComponent(_Types&&... _Args);
 
+private:
+	UniScene * m_Scene;
 };
+
+template<class T, class... _Types>
+void UniSceneObject::AddComponent(_Types&&... _Args) {
+	m_Entity->assign<T>(_Args...);
+}
 

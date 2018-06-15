@@ -123,6 +123,15 @@
     <ClInclude Include="source\UniSceneObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\ECS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Systems.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -140,9 +149,6 @@
     <ClCompile Include="source\vks\VulkanUIOverlay.cpp">
       <Filter>Source Files\vks</Filter>
     </ClCompile>
-    <ClCompile Include="source\scenerendering.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\external\imgui\imgui_draw.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
@@ -151,9 +157,6 @@
     </ClCompile>
     <ClCompile Include="..\external\imgui\imgui_demo.cpp">
       <Filter>Source Files\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="source\deferredmultisampling.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
@@ -168,6 +171,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\UniEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Systems.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

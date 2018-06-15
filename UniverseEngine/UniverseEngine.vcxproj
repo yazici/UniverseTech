@@ -170,6 +170,9 @@
     <ClInclude Include="..\external\imgui\stb_textedit.h" />
     <ClInclude Include="..\external\imgui\stb_truetype.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="source\Components.h" />
+    <ClInclude Include="source\ECS.h" />
+    <ClInclude Include="source\Systems.h" />
     <ClInclude Include="source\UniEngine.h" />
     <ClInclude Include="source\UniModel.h" />
     <ClInclude Include="source\UniScene.h" />
@@ -198,8 +201,7 @@
     <ClCompile Include="..\external\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="source\deferredmultisampling.cpp" />
-    <ClCompile Include="source\scenerendering.cpp" />
+    <ClCompile Include="source\Systems.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
     <ClCompile Include="source\UniModel.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
