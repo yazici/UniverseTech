@@ -455,35 +455,19 @@ void UniEngine::buildCommandBuffers() {
 
 void UniEngine::loadAssets() {
 	
-	std::shared_ptr<UniModel> armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
+	auto armor = m_CurrentScene->Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_CurrentScene->AddSceneObject(armor);
 
-	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
-	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(1.2f), glm::vec2(1.0f, 1.0f));
-	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_CurrentScene->AddSceneObject(armor);
+	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "models/armor/normal"); // yes the normal map sucks.
+	vgr->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
+	vgr->Load(vertexLayout, vulkanDevice, queue, true);
 
-	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
-	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(1.35f), glm::vec2(1.0f, 1.0f));
-	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_CurrentScene->AddSceneObject(armor);
 
-	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
-	armor->SetCreateInfo(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(.9f), glm::vec2(1.0f, 1.0f));
-	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_CurrentScene->AddSceneObject(armor);
-
-	armor = std::make_shared<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
-	armor->SetCreateInfo(glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(.75f), glm::vec2(1.0f, 1.0f));
-	armor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_CurrentScene->AddSceneObject(armor);
-
-	std::shared_ptr<UniModel> floor = std::make_shared<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
+	auto floor = m_CurrentScene->Make<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
 	floor->SetCreateInfo(glm::vec3(0.0f, 2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
 	floor->Load(vertexLayout, vulkanDevice, queue, true);
-	m_CurrentScene->AddSceneObject(floor);
+
 
 }
 
@@ -1011,7 +995,7 @@ void UniEngine::updateDynamicUniformBuffers() {
 	auto models = m_CurrentScene->GetModels();
 	for_each(models.begin(), models.end(), [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
 		glm::mat4* modelMat = (glm::mat4*)(((uint64_t)uboModelMatDynamic.model + (index * dynamicAlignment)));
-		*modelMat = model->GetModelMat();
+		*modelMat = model->GetTransform()->GetModelMat();
 		//std::cout << "Updating model matrix index: " << index << std::endl;
 		index++;
 	});
@@ -1105,9 +1089,9 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 void UniEngine::updateModelPosition() {
 
 	auto model = m_CurrentScene->GetModels()[0];
-	model->SetPosition(-4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f, 0.f, 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f);
-	model->SetPosition(-4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f, 0.f, 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f);
+	model->GetTransform()->SetPosition(-4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f, 0.f, 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f);
+	model->GetTransform()->SetPosition(-4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f, 0.f, 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f);
 
 	if(!paused)
-		model->SetYaw(model->m_Rotation.y + (frameTimer * 90.f));
+		model->GetTransform()->SetYaw(model->GetTransform()->m_Rot.y + (frameTimer * 90.f));
 }

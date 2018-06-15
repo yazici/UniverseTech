@@ -70,8 +70,11 @@ void UniModel::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue
 		vks::tools::exitFatal("Device does not support any compressed texture format!", VK_ERROR_FEATURE_NOT_PRESENT);
 	}
 
-	m_Texture.loadFromFile(getAssetPath() + m_TexturePath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
-	m_NormalMap.loadFromFile(getAssetPath() + m_NormalMapPath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
+	if(!m_TexturePath.empty())
+		m_Texture.loadFromFile(getAssetPath() + m_TexturePath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
+
+	if(!m_NormalMapPath.empty())
+		m_NormalMap.loadFromFile(getAssetPath() + m_NormalMapPath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
 
 
 }

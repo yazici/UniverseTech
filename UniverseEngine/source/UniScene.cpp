@@ -2,14 +2,20 @@
 #include <memory>
 
 
-UniScene::UniScene() {}
+UniScene::UniScene() {
+	m_World = ECS::World::createWorld();
+}
 
 
 UniScene::~UniScene() {}
 
+void UniScene::Tick(float deltaTime) {
+	m_World->tick(deltaTime);
+}
+
 std::vector<std::shared_ptr<UniModel>> UniScene::GetModels() {
 
-	if(m_ModelCache.size() > 0) {
+	if(!m_ModelCache.empty()) {
 		return m_ModelCache;
 	}
 
@@ -24,10 +30,10 @@ std::vector<std::shared_ptr<UniModel>> UniScene::GetModels() {
 	return models;
 }
 
-
 void UniScene::AddSceneObject(std::shared_ptr<UniSceneObject> so)
 {
 	m_SceneObjects.push_back(so);
 	m_ModelCache.clear();
 	m_ModelCache = GetModels();
 }
+
