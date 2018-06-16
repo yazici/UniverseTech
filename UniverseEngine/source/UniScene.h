@@ -5,11 +5,14 @@
 #include "UniSceneObject.h"
 #include "UniModel.h"
 
+class UniBody;
+
 class UniScene {
 public:
 	UniScene();
 	~UniScene();
 
+	void Initialize();
 	template <class T> std::shared_ptr<T> Make(std::shared_ptr<T> so);
 	template<class _Ty0, class... _Types> std::shared_ptr<_Ty0> Make(_Types&&... _Args);
 
@@ -24,6 +27,8 @@ public:
 
 	std::vector<std::shared_ptr<UniModel>> GetModels();
 	void AddSceneObject(std::shared_ptr<UniSceneObject> so);
+private:
+	std::shared_ptr<UniBody> m_BodyTest;
 };
 
 

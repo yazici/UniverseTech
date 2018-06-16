@@ -1,4 +1,5 @@
 #include "UniFrustum.hpp"
+#include "vks/camera.hpp"
 
 UniFrustum::UniFrustum() {
 	m_Corners = FrustumCorners();

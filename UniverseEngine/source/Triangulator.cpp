@@ -137,7 +137,8 @@ bool Triangulator::Update() {
 	//if(INPUT->IsKeyboardKeyPressed(SDL_SCANCODE_SPACE))m_LockFrustum = !m_LockFrustum;
 
 	m_pFrustum->SetCullTransform(m_pPlanet->GetTransform()->GetModelMat());
-	if(!m_LockFrustum) m_pFrustum->SetToCamera(&UniEngine::GetInstance()->camera);
+	if(!m_LockFrustum) 
+		m_pFrustum->SetToCamera(&UniEngine::GetInstance()->camera);
 	
 	m_pFrustum->Update();
 

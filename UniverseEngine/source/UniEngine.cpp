@@ -88,6 +88,7 @@ UniEngine::~UniEngine() {
 	// Uniform buffers
 	uniformBuffers.vsOffscreen.destroy();
 	uniformBuffers.vsFullScreen.destroy();
+	uniformBuffers.modelViews.destroy();
 	uniformBuffers.fsLights.destroy();
 
 	vkFreeCommandBuffers(device, cmdPool, 1, &m_offScreenCmdBuffer);
@@ -99,7 +100,7 @@ UniEngine::~UniEngine() {
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
 
-	m_CurrentScene = std::make_shared<UniScene>();
+	m_CurrentScene = std::make_unique<UniScene>();
 
 	title = "Multi sampled deferred shading";
 	camera.type = Camera::CameraType::firstperson;
@@ -1039,6 +1040,7 @@ void UniEngine::draw() {
 
 void UniEngine::prepare() {
 
+	m_CurrentScene->Initialize();
 	VulkanExampleBase::prepare();
 	loadAssets();
 	setupVertexDescriptions();

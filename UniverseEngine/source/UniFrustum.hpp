@@ -3,9 +3,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "Geometry.hpp"
-#include "vks/camera.hpp"
 
-//class CameraComponent;
+class Camera;
 
 enum class VolumeCheck {
 	OUTSIDE,

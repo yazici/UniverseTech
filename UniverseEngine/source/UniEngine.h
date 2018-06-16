@@ -150,6 +150,6 @@ public:
 	// Semaphore used to synchronize between offscreen and final scene rendering
 	VkSemaphore m_offscreenSemaphore = VK_NULL_HANDLE;
 
-	std::shared_ptr<UniScene> m_CurrentScene;
+	std::unique_ptr<UniScene> m_CurrentScene;
 
 };

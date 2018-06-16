@@ -14,11 +14,12 @@ UniBody::~UniBody() {
 }
 
 uint32_t UniBody::GetVertexCount() {
-	return m_pTriangulator->GetVertexCount() * m_pPatch->GetVertexCount();
+	return m_pTriangulator->GetVertexCount() *m_pPatch->GetVertexCount();
 }
 
 void UniBody::Initialize() {
-	Load();
+	//Load();
+	GetTransform()->SetPosition(glm::vec3(0, 0, 12));
 	m_pTriangulator->Init();
 	m_pPatch->Init();
 }
@@ -28,7 +29,9 @@ void UniBody::Update() {
 		m_pTriangulator->GenerateGeometry();
 		m_pPatch->BindInstances(m_pTriangulator->m_Positions);
 		m_pPatch->UploadDistanceLUT(m_pTriangulator->m_DistanceLUT);
+		std::cout << "Updated Triangulator." << std::endl;
 	}
+	std::cout << "Body now has " << GetVertexCount() << " vertices." << std::endl;
 }
 
 void UniBody::Draw() {

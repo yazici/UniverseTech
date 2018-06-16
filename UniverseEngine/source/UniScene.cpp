@@ -1,19 +1,29 @@
 #include "UniScene.h"
 #include <memory>
 #include "Systems.h"
+#include "UniBody.h"
 
-UniScene::UniScene() {
-	m_World = ECS::World::createWorld();
-	m_World->registerSystem(new MovementSystem());
-}
-
+UniScene::UniScene() {}
 
 UniScene::~UniScene() {
 	m_World->destroyWorld();
 }
 
+void UniScene::Initialize() {
+	m_World = ECS::World::createWorld();
+	m_World->registerSystem(new MovementSystem());
+
+	std::cout << "Unibody loading..." << std::endl;
+
+	m_BodyTest = Make<UniBody>();
+	m_BodyTest->Initialize();
+
+	std::cout << "Unibody loaded." << std::endl;
+}
+
 void UniScene::Tick(float deltaTime) {
 	m_World->tick(deltaTime);
+	m_BodyTest->Update();
 }
 
 std::vector<std::shared_ptr<UniModel>> UniScene::GetModels() {

@@ -78,9 +78,9 @@ void UniModel::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue
 	else {
 		std::vector<glm::vec3> buffer(4 * 4);
 		for(int32_t i = 0; i < buffer.size(); i++) {
-			buffer[i] = glm::vec3(0, 0, 1);
+			buffer[i] = glm::vec4(0.f, 0.f, 1.f, 0.f);
 		}
-		m_NormalMap.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec3), VK_FORMAT_R32G32B32_SFLOAT, 2, 2, device, copyQueue, VK_FILTER_LINEAR);
+		m_NormalMap.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec3), VK_FORMAT_R32G32B32A32_SFLOAT, 2, 2, device, copyQueue, VK_FILTER_LINEAR);
 	}
 
 

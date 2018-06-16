@@ -1,4 +1,6 @@
 #include "source/UniEngine.h"
+#include <iostream>
+#include <limits>
 
 // OS specific macros for the example main entry points
 #if defined(_WIN32)
