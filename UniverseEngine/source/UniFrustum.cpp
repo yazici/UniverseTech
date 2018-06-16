@@ -11,15 +11,15 @@ void UniFrustum::SetCullTransform(glm::mat4 objectWorld) {
 	m_CullInverse = glm::inverse(objectWorld);
 }
 
-//void Frustum::SetToCamera(CameraComponent* pCamera) {
-//	m_Position = pCamera->GetTransform()->GetPosition();
-//	m_Forward = pCamera->GetTransform()->GetForward();
-//	m_Up = pCamera->GetTransform()->GetUp();
-//	m_Right = pCamera->GetTransform()->GetRight();
-//	m_NearPlane = pCamera->GetNearPlane();
-//	m_FarPlane = pCamera->GetFarPlane();
-//	m_FOV = pCamera->GetFOV();
-//}
+void UniFrustum::SetToCamera(Camera* pCamera) {
+	m_Position = pCamera->position;
+	m_Forward = pCamera->GetForward();
+	m_Up = pCamera->GetUp();
+	m_Right = pCamera->GetRight();
+	m_NearPlane = pCamera->getNearClip();
+	m_FarPlane = pCamera->getFarClip();
+	m_FOV = pCamera->GetFov();
+}
 
 void UniFrustum::Update() {
 	//calculate generalized relative width and aspect ratio

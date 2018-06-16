@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "Geometry.hpp"
+#include "vks/camera.hpp"
 
 //class CameraComponent;
 
@@ -51,6 +52,7 @@ public:
 	// void SetToCamera(CameraComponent* pCamera);
 	void SetCullTransform(glm::mat4 objectWorld);
 
+	void SetToCamera(Camera* pCamera);
 	VolumeCheck ContainsPoint(const glm::vec3 &point) const;
 	VolumeCheck ContainsSphere(const Sphere &sphere) const;
 	VolumeCheck ContainsTriangle(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c);

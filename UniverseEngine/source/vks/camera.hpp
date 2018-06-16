@@ -215,4 +215,34 @@ public:
 		return retVal;
 	}
 
+	glm::vec3 GetForward() {
+		glm::vec3 camFront;
+		camFront = matrices.view[2];
+		camFront = glm::normalize(camFront);
+
+		return camFront;
+	}
+
+	glm::vec3 GetUp() {
+		glm::vec3 camFront;
+		camFront = matrices.view[1];
+		camFront = glm::normalize(camFront);
+
+		return camFront;
+	}
+
+	glm::vec3 GetRight() {
+		glm::vec3 camFront;
+		camFront = matrices.view[0];
+		camFront = glm::normalize(camFront);
+
+		return camFront;
+	}
+
+	float GetFov() {
+		return fov;
+	}
+
+
+
 };

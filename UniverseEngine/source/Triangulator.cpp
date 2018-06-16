@@ -100,7 +100,7 @@ Triangulator::Triangulator(UniBody* pPlanet)
 	m_pFrustum = new UniFrustum();
 }
 Triangulator::~Triangulator() {
-	//delete m_pFrustum;
+	delete m_pFrustum;
 }
 
 void Triangulator::Init() {
@@ -136,8 +136,8 @@ bool Triangulator::Update() {
 	//Frustum update
 	//if(INPUT->IsKeyboardKeyPressed(SDL_SCANCODE_SPACE))m_LockFrustum = !m_LockFrustum;
 
-	/*m_pFrustum->SetCullTransform(m_pPlanet->GetTransform()->GetWorld());
-	if(!m_LockFrustum) m_pFrustum->SetToCamera(CAMERA);*/
+	m_pFrustum->SetCullTransform(m_pPlanet->GetTransform()->GetModelMat());
+	if(!m_LockFrustum) m_pFrustum->SetToCamera(&UniEngine::GetInstance()->camera);
 	
 	m_pFrustum->Update();
 
