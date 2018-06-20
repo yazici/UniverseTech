@@ -481,10 +481,11 @@ void UniEngine::loadAssets() {
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
 
+	/*
 	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "");
 	vgr->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, -1.0f));
 	vgr->Load(vertexLayout, vulkanDevice, queue, true);
-
+	*/
 
 	auto floor = m_CurrentScene->Make<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
 	floor->SetCreateInfo(glm::vec3(0.0f, 2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));

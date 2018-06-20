@@ -30,9 +30,9 @@ void UniBody::Update() {
 		m_pTriangulator->GenerateGeometry();
 		m_pPatch->BindInstances(m_pTriangulator->m_Positions);
 		m_pPatch->UploadDistanceLUT(m_pTriangulator->m_DistanceLUT);
-		std::cout << "Updated Triangulator." << std::endl;
+		//std::cout << "Updated Triangulator." << std::endl;
 	}
-	std::cout << "Body now has " << GetVertexCount() << " vertices." << std::endl;
+	//std::cout << "Body now has " << GetVertexCount() << " vertices." << std::endl;
 }
 
 void UniBody::Draw() {
