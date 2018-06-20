@@ -9,6 +9,7 @@
 #include "UniEngine.h"
 #include "vks/VulkanTools.h"
 #include <assert.h>
+#include "UniBody.h"
 
 #define ENABLE_VALIDATION true
 
@@ -115,6 +116,11 @@ UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
 	settings.overlay = true;
 }
 
+
+UniEngine& UniEngine::GetInstance() {
+	static UniEngine instance;
+	return instance;
+}
 
 // Enable physical device features required for this example				
 void UniEngine::getEnabledFeatures() {
@@ -393,6 +399,20 @@ void UniEngine::buildDeferredCommandBuffer() {
 		index++;
 	});
 
+	//VkDeviceSize offsets[1] = { 0 };
+	//uint32_t dynamicOffset = index * static_cast<uint32_t>(dynamicAlignment);
+	//// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
+	//auto body = m_CurrentScene->m_BodyTest;
+	//vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 1, &dynamicOffset);
+	//vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
+	//vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
+	//vkCmdBindVertexBuffers(m_offScreenCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->instanceBuffer.buffer, offsets);
+	//vkCmdBindIndexBuffer(m_offScreenCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+	////// Render instances
+	//vkCmdDrawIndexed(m_offScreenCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
+
+
 	vkCmdEndRenderPass(m_offScreenCmdBuffer);
 
 	VK_CHECK_RESULT(vkEndCommandBuffer(m_offScreenCmdBuffer));
@@ -540,7 +560,7 @@ void UniEngine::setupDescriptorPool() {
 		vks::initializers::descriptorPoolCreateInfo(
 			static_cast<uint32_t>(poolSizes.size()),
 			poolSizes.data(),
-			static_cast<uint32_t>(m_CurrentScene->GetModels().size() + 2));
+			static_cast<uint32_t>(m_CurrentScene->GetModels().size() + 4));
 
 	VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 }
@@ -582,7 +602,6 @@ void UniEngine::setupDescriptorSetLayout() {
 
 	};
 
-
 	VkDescriptorSetLayoutCreateInfo descriptorLayout =
 		vks::initializers::descriptorSetLayoutCreateInfo(
 			setLayoutBindings.data(),
@@ -600,6 +619,60 @@ void UniEngine::setupDescriptorSetLayout() {
 
 	// Offscreen (scene) rendering pipeline layout
 	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayouts.offscreen));
+
+	setLayoutBindings =
+	{
+		// Binding 0 : Vertex shader uniform buffer
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			VK_SHADER_STAGE_VERTEX_BIT,
+			0),
+		// Binding 1 : Position texture target / Scene colormap
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			VK_SHADER_STAGE_VERTEX_BIT,
+			1),
+		// Binding 2 : Position texture target / Scene colormap
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+			2),
+		// Binding 3 : Position texture target / Scene colormap
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+			3),
+		// Binding 4 : Position texture target / Scene colormap
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+			4),
+		// Binding 5 : Position texture target / Scene colormap
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+			5),
+		// Binding 6 : Position texture target / Scene colormap
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+			6),
+	};
+
+	descriptorLayout =
+		vks::initializers::descriptorSetLayoutCreateInfo(
+			setLayoutBindings.data(),
+			static_cast<uint32_t>(setLayoutBindings.size()));
+
+	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &m_descriptorSetLayoutPlanet));
+
+	pPipelineLayoutCreateInfo =
+		vks::initializers::pipelineLayoutCreateInfo(
+			&m_descriptorSetLayoutPlanet,
+			1);
+
+	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayouts.planetOffscreen));
+
 }
 
 void UniEngine::setupDescriptorSets() {
@@ -682,7 +755,6 @@ void UniEngine::setupDescriptorSets() {
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSetDynamic));
 
 
-
 	// Models
 	auto models = m_CurrentScene->GetModels();
 	for_each(models.begin(), models.end(), [allocInfo, this](std::shared_ptr<UniModel> model) {
@@ -723,6 +795,30 @@ void UniEngine::setupDescriptorSets() {
 		};
 		vkUpdateDescriptorSets(device, static_cast<uint32_t>(modelWriteDescriptorSets.size()), modelWriteDescriptorSets.data(), 0, nullptr);
 	});
+
+
+	// offscreen planets
+
+	allocInfoDynamic =
+		vks::initializers::descriptorSetAllocateInfo(
+			descriptorPool,
+			&m_descriptorSetLayoutPlanet,
+			1);
+
+	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_CurrentScene->m_BodyTest->m_pPatch->m_DescriptorSet));
+
+	writeDescriptorSets = {
+		// Binding 0 : Vertex shader uniform buffer
+		vks::initializers::writeDescriptorSet(
+			m_CurrentScene->m_BodyTest->m_pPatch->m_DescriptorSet,
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			0,
+			&m_CurrentScene->m_BodyTest->m_pPatch->instanceBuffer.descriptor),
+	};
+
+	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+
+
 }
 
 void UniEngine::preparePipelines() {
@@ -830,7 +926,6 @@ void UniEngine::preparePipelines() {
 
 	// Offscreen scene rendering pipeline
 	pipelineCreateInfo.pVertexInputState = &vertices.inputState;
-
 	shaderStages[0] = loadShader(getAssetPath() + "shaders/deferredmultisampling/mrt.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 	shaderStages[1] = loadShader(getAssetPath() + "shaders/deferredmultisampling/mrt.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
@@ -862,6 +957,17 @@ void UniEngine::preparePipelines() {
 	multisampleState.sampleShadingEnable = VK_TRUE;
 	multisampleState.minSampleShading = 0.25f;
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offscreenSampleShading));
+
+
+	// planet offscreen pipeline
+
+	pipelineCreateInfo.layout = pipelineLayouts.planetOffscreen;
+
+	pipelineCreateInfo.pVertexInputState = &m_CurrentScene->m_BodyTest->m_pPatch->vertexDescription.inputState;
+	shaderStages[0] = loadShader(getAssetPath() + "shaders/planet.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+	shaderStages[1] = loadShader(getAssetPath() + "shaders/planet.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+
+	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanet));
 }
 
 size_t UniEngine::getDynamicAlignment() {
@@ -903,6 +1009,7 @@ void UniEngine::prepareUniformBuffers() {
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 
 		&uniformBuffers.modelViews, bufferSize));
+
 
 	// Deferred fragment shader
 	VK_CHECK_RESULT(vulkanDevice->createBuffer(

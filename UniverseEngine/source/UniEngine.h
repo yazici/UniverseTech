@@ -21,17 +21,25 @@
 #include "UniScene.h"
 
 #define VERTEX_BUFFER_BIND_ID 0
+#define INSTANCE_BUFFER_BIND_ID 1
 #define ENABLE_VALIDATION false
 // todo: check if hardware supports sample number (or select max. supported)
 #define SAMPLE_COUNT VK_SAMPLE_COUNT_8_BIT
 
-class UniEngine : public VulkanExampleBase {
+class UniEngine final : public VulkanExampleBase {
+
+private:
+	UniEngine();
+	~UniEngine();
+	UniEngine(const UniEngine&) = delete;
+	UniEngine& operator=(const UniEngine&) = delete;
+	UniEngine(UniEngine&&) = delete;
+	UniEngine& operator=(UniEngine&&) = delete;
+
+
 public:
 
-	static UniEngine* GetInstance() {
-		static UniEngine* instance = new UniEngine();
-		return instance;
-	}
+	static UniEngine& GetInstance();
 
 	// Vertex layout for the models
 	vks::VertexLayout vertexLayout = vks::VertexLayout({
@@ -86,16 +94,19 @@ public:
 		VkPipeline offscreen;				// (Offscreen) scene rendering (fill G-Buffers)
 		VkPipeline offscreenSampleShading;	// (Offscreen) scene rendering (fill G-Buffers) with sample shading rate enabled
 		VkPipeline debug;					// G-Buffers debug display
+		VkPipeline offScreenPlanet;
 	} pipelines;
 
 	struct {
 		VkPipelineLayout deferred;
 		VkPipelineLayout offscreen;
+		VkPipelineLayout planetOffscreen;
 	} pipelineLayouts;
 
 	VkDescriptorSet m_descriptorSet;
 	VkDescriptorSet m_descriptorSetDynamic;
 	VkDescriptorSetLayout m_descriptorSetLayout;
+	VkDescriptorSetLayout m_descriptorSetLayoutPlanet;
 	VkDescriptorSetLayout m_descriptorSetLayoutDynamic;
 
 	// Framebuffer for offscreen rendering
@@ -113,7 +124,7 @@ public:
 		VkRenderPass renderPass;
 	} offScreenFrameBuf;
 
-	UniEngine();
+
 	void getEnabledFeatures() override;
 	void createAttachment(VkFormat format, VkImageUsageFlagBits usage, FrameBufferAttachment *attachment);
 	void prepareOffscreenFramebuffer();
@@ -136,7 +147,9 @@ public:
 	void render() override;
 	void viewChanged() override;
 	void OnUpdateUIOverlay(vks::UIOverlay *overlay) override;
-	~UniEngine();
+
+	VkDevice GetDevice() { return device; }
+	VkQueue GetQueue() { return queue; }
 
 	bool m_debugDisplay = false;
 	bool m_useMSAA = true;
@@ -151,5 +164,6 @@ public:
 	VkSemaphore m_offscreenSemaphore = VK_NULL_HANDLE;
 
 	std::unique_ptr<UniScene> m_CurrentScene;
+
 
 };

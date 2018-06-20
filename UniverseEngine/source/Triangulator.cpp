@@ -104,7 +104,7 @@ Triangulator::~Triangulator() {
 }
 
 void Triangulator::Init() {
-	auto ico = GetIcosahedronPositions(m_pPlanet->GetRadius());
+	auto ico = GetIcosahedronPositions((float)m_pPlanet->GetRadius());
 	auto indices = GetIcosahedronIndices();
 	for(size_t i = 0; i < indices.size(); i += 3) {
 		m_Icosahedron.emplace_back(ico[indices[i]], ico[indices[i + 1]], ico[indices[i + 2]], nullptr, 0);
@@ -138,7 +138,7 @@ bool Triangulator::Update() {
 
 	m_pFrustum->SetCullTransform(m_pPlanet->GetTransform()->GetModelMat());
 	if(!m_LockFrustum) 
-		m_pFrustum->SetToCamera(&UniEngine::GetInstance()->camera);
+		m_pFrustum->SetToCamera(&UniEngine::GetInstance().camera);
 	
 	m_pFrustum->Update();
 
@@ -147,7 +147,7 @@ bool Triangulator::Update() {
 
 void Triangulator::Precalculate() {
 	//determine culling angle behind planet based on max height
-	float cullingAngle = acosf(m_pPlanet->GetRadius() / (m_pPlanet->GetRadius() + m_pPlanet->GetMaxHeight()));
+	float cullingAngle = acosf((float)(m_pPlanet->GetRadius() / (m_pPlanet->GetRadius() + m_pPlanet->GetMaxHeight())));
 	//Dot Product LUT
 	m_TriLevelDotLUT.clear();
 	m_TriLevelDotLUT.push_back(0.5f + sinf(cullingAngle));
@@ -164,7 +164,7 @@ void Triangulator::Precalculate() {
 	glm::vec3 center = (a + b + c) / 3.f;
 	center = center * (float)m_pPlanet->GetRadius() / glm::length(center);//+maxHeight
 	m_HeightMultLUT.push_back(1 / glm::dot(glm::normalize(a), glm::normalize(center)));
-	float normMaxHeight = m_pPlanet->GetMaxHeight() / m_pPlanet->GetRadius();
+	float normMaxHeight = (float)(m_pPlanet->GetMaxHeight() / m_pPlanet->GetRadius());
 	for(uint32_t i = 1; i <= m_MaxLevel; i++) {
 		glm::vec3 A = b + ((c - b)*0.5f);
 		glm::vec3 B = c + ((a - c)*0.5f);
@@ -182,7 +182,7 @@ void Triangulator::GenerateGeometry() {
 	//In future only recalculate on FOV or triangle density change
 	m_DistanceLUT.clear();
 	float sizeL = glm::length(m_Icosahedron[0].a - m_Icosahedron[0].b);
-	float frac = tanf((m_AllowedTriPx * glm::radians(m_pFrustum->GetFOV())) / UniEngine::GetInstance()->width);
+	float frac = tanf((m_AllowedTriPx * glm::radians(m_pFrustum->GetFOV())) / UniEngine::GetInstance().width);
 	for(uint32_t level = 0; level < m_MaxLevel + 5; level++) {
 		m_DistanceLUT.push_back(sizeL / frac);
 		sizeL *= 0.5f;

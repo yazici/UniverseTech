@@ -231,6 +231,8 @@
     <None Include="data\shaders\deferredmultisampling\deferred.vert" />
     <None Include="data\shaders\deferredmultisampling\mrt.frag" />
     <None Include="data\shaders\deferredmultisampling\mrt.vert" />
+    <None Include="data\shaders\planet.frag" />
+    <None Include="data\shaders\planet.vert" />
     <None Include="data\shaders\scenerendering\scene.frag" />
     <None Include="data\shaders\scenerendering\scene.vert" />
   </ItemGroup>

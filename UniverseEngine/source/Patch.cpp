@@ -2,79 +2,83 @@
 
 #include "Components.h"
 // #include "../Components/CameraComponent.hpp"
-
+#include "UniEngine.h"
 #include "UniBody.h"
 #include "UniFrustum.hpp"
 #include "Triangulator.hpp"
+#include "vks/VulkanTools.h"
+
 
 Patch::Patch(uint16_t levels)
 	:m_Levels(levels) {}
 
 void Patch::Init() {
-	//Shader Init
-	//***********
-	/*m_pPatchShader = CONTENT::Load<ShaderData>("Shaders/PlanetPatch.glsl");
-	STATE->SetShader(m_pPatchShader);
-	m_uCamPos = glGetUniformLocation(m_pPatchShader->GetProgram(), "camPos");
-	m_uRadius = glGetUniformLocation(m_pPatchShader->GetProgram(), "radius");
-	m_uMorphRange = glGetUniformLocation(m_pPatchShader->GetProgram(), "morphRange");
 
-	m_uMaxHeight = glGetUniformLocation(m_pPatchShader->GetProgram(), "maxHeight");
+	auto device = UniEngine::GetInstance().vulkanDevice;
 
-	m_uModel = glGetUniformLocation(m_pPatchShader->GetProgram(), "model");
-	m_uViewProj = glGetUniformLocation(m_pPatchShader->GetProgram(), "viewProj");
+	auto bufferSize = 256 * sizeof(PatchInstance); // initially allocate a buffer big enough for 256 patch instances
 
-	m_uAmbient = glGetUniformLocation(m_pPatchShader->GetProgram(), "ambient");
-	m_uDelta = glGetUniformLocation(m_pPatchShader->GetProgram(), "patchDelta");*/
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+		&instanceBuffer, bufferSize));
 
-	//glUniform1i(glGetUniformLocation(m_pPatchShader->GetProgram(), "texDiffuse"), 0);
-	//glUniform1i(glGetUniformLocation(m_pPatchShader->GetProgram(), "texHeight"), 1);
-	//glUniform1i(glGetUniformLocation(m_pPatchShader->GetProgram(), "texDetail1"), 2);
-	//glUniform1i(glGetUniformLocation(m_pPatchShader->GetProgram(), "texDetail2"), 3);
-	//glUniform1i(glGetUniformLocation(m_pPatchShader->GetProgram(), "texHeightDetail"), 4);
-	/*m_pPatchShader->Upload("texDiffuse"_hash, (int32)0);
-	m_pPatchShader->Upload("texHeight"_hash, (int32)1);
-	m_pPatchShader->Upload("texDetail1"_hash, (int32)2);
-	m_pPatchShader->Upload("texDetail2"_hash, (int32)3);
-	m_pPatchShader->Upload("texHeightDetail"_hash, (int32)4);*/
+	instanceBuffer.map();
 
-	//Buffer Initialisation
-	//*********************
-	//Generate buffers and arrays
-	/*glGenVertexArrays(1, &m_VAO);
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_EBO);
-	glGenBuffers(1, &m_VBOInstance);*/
-	//bind
-	/*STATE->BindVertexArray(m_VAO);
-	STATE->BindBuffer(GL_ARRAY_BUFFER, m_VBO);*/
-	//input layout
-	//************
-	//geometry
-	//glEnableVertexAttribArray(0);
-	//glEnableVertexAttribArray(1);
-	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(PatchVertex), (GLvoid*)offsetof(PatchVertex, pos));
-	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(PatchVertex), (GLvoid*)offsetof(PatchVertex, morph));
-	////instances
-	////bind
-	//STATE->BindBuffer(GL_ARRAY_BUFFER, m_VBOInstance);
-	//glEnableVertexAttribArray(2);
-	//glEnableVertexAttribArray(3);
-	//glEnableVertexAttribArray(4);
-	//glEnableVertexAttribArray(5);
-	//glVertexAttribIPointer(2, 1, GL_INT, sizeof(PatchInstance), (GLvoid*)offsetof(PatchInstance, level));
-	//glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(PatchInstance), (GLvoid*)offsetof(PatchInstance, a));
-	//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(PatchInstance), (GLvoid*)offsetof(PatchInstance, r));
-	//glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(PatchInstance), (GLvoid*)offsetof(PatchInstance, s));
-	//glVertexAttribDivisor(2, 1);
-	//glVertexAttribDivisor(3, 1);
-	//glVertexAttribDivisor(4, 1);
-	//glVertexAttribDivisor(5, 1);
-	////Indices
-	//STATE->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	////unbind
-	//STATE->BindBuffer(GL_ARRAY_BUFFER, 0);
-	//STATE->BindVertexArray(0);
+	// Attribute descriptions
+	vertexDescription.attributeDescriptions.resize(6);
+	uint32_t offset = 0;
+	// Location 0: Pos
+	vertexDescription.attributeDescriptions[0] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			0,
+			VK_FORMAT_R32G32_SFLOAT,
+			offset);
+	offset += sizeof(glm::vec2);
+	// Location 1: Morph
+	vertexDescription.attributeDescriptions[1] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			1,
+			VK_FORMAT_R32G32_SFLOAT,
+			offset);
+	offset += sizeof(glm::vec2);
+	// Location 2: Level
+	vertexDescription.attributeDescriptions[2] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			2,
+			VK_FORMAT_R32_UINT,
+			offset);
+	offset += sizeof(uint32_t);
+	// Location 3: A
+	vertexDescription.attributeDescriptions[3] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			3,
+			VK_FORMAT_R32G32B32_SFLOAT,
+			offset);
+	offset += sizeof(glm::vec3);
+	// Location 4: R
+	vertexDescription.attributeDescriptions[4] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			3,
+			VK_FORMAT_R32G32B32_SFLOAT,
+			offset);
+	offset += sizeof(glm::vec3);
+	// Location 5: S
+	vertexDescription.attributeDescriptions[5] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			3,
+			VK_FORMAT_R32G32B32_SFLOAT,
+			offset);
+
+	vertexDescription.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
+	vertexDescription.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexDescription.attributeDescriptions.size());
+	vertexDescription.inputState.pVertexAttributeDescriptions = vertexDescription.attributeDescriptions.data();
 
 	GenerateGeometry(m_Levels);
 }
@@ -121,70 +125,110 @@ void Patch::GenerateGeometry(uint16_t levels) {
 		}
 		rowIdx = nextIdx;
 	}
-	//Rebind dat shizzle
-	/*STATE->BindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(PatchVertex), m_Vertices.data(), GL_DYNAMIC_DRAW);
-	STATE->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*m_Indices.size(), m_Indices.data(), GL_STATIC_DRAW);
-	STATE->BindBuffer(GL_ARRAY_BUFFER, 0);*/
+
+	uint32_t vertexBufferSize = static_cast<uint32_t>(m_Vertices.size() * sizeof(PatchVertex));
+	uint32_t indexBufferSize = static_cast<uint32_t>(m_Indices.size() * sizeof(uint32_t));
+
+	vks::Buffer vertexStaging, indexStaging;
+
+	auto device = UniEngine::GetInstance().vulkanDevice;
+
+	// Vertex buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&vertexStaging,
+		vertexBufferSize,
+		m_Vertices.data()));
+
+	// Index buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&indexStaging,
+		indexBufferSize,
+		m_Indices.data()));
+
+	// Create device local target buffers
+	// Vertex buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&vertexBuffer,
+		vertexBufferSize));
+
+	// Index buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&indexBuffer,
+		indexBufferSize));
+
+	// Copy from staging buffers
+	VkCommandBuffer copyCmd = device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+	VkBufferCopy copyRegion{};
+
+	copyRegion.size = vertexBuffer.size;
+	vkCmdCopyBuffer(copyCmd, vertexStaging.buffer, vertexBuffer.buffer, 1, &copyRegion);
+
+	copyRegion.size = indexBuffer.size;
+	vkCmdCopyBuffer(copyCmd, indexStaging.buffer, indexBuffer.buffer, 1, &copyRegion);
+
+	device->flushCommandBuffer(copyCmd, UniEngine::GetInstance().GetQueue());
+
+	// Destroy staging resources
+	vkDestroyBuffer(device->logicalDevice, vertexStaging.buffer, nullptr);
+	vkFreeMemory(device->logicalDevice, vertexStaging.memory, nullptr);
+	vkDestroyBuffer(device->logicalDevice, indexStaging.buffer, nullptr);
+	vkFreeMemory(device->logicalDevice, indexStaging.memory, nullptr);
+
 }
 
 void Patch::BindInstances(std::vector<PatchInstance> &instances) {
 	//update buffer
 	m_NumInstances = (uint32_t)instances.size();
-	/*STATE->BindBuffer(GL_ARRAY_BUFFER, m_VBOInstance);
-	glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(PatchInstance), instances.data(), GL_STATIC_DRAW);
-	STATE->BindBuffer(GL_ARRAY_BUFFER, 0);*/
+	
+	auto device = UniEngine::GetInstance().vulkanDevice;
+	auto neededSize = m_NumInstances * sizeof(PatchInstance);
+	if(neededSize > instanceBuffer.size) {
+		instanceBuffer.destroy();
+		VK_CHECK_RESULT(device->createBuffer(
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+			&instanceBuffer, neededSize));
+		instanceBuffer.map();
+	}
+
+	instanceBuffer.copyTo(instances.data(), neededSize);
+	
 }
 
 void Patch::UploadDistanceLUT(std::vector<float> &distances) {
-	//STATE->SetShader(m_pPatchShader);
-	//for(size_t i = 0; i < distances.size(); i++) {
-	//	glUniform1f(glGetUniformLocation(m_pPatchShader->GetProgram(),
-	//		("distanceLUT[" + std::to_string(i) + "]").c_str()), distances[i]);
-	//	//m_pPatchShader->Upload(FnvHash("distanceLUT[" + std::to_string(i) + "]"), distances[i]);
-	//}
+	for(size_t i = 0; i < distances.size(); i++) {
+		uniformBufferData.distanceLut[i] = distances[i];
+	}
 }
 
 void Patch::Draw() {
-	//STATE->SetShader(m_pPatchShader);
-
+	
 	//// Pass transformations to the shader
-	//glUniformMatrix4fv(m_uModel, 1, GL_FALSE, etm::valuePtr(m_pPlanet->GetTransform()->GetWorld()));
-	////m_pPatchShader->Upload("model"_hash, m_pPlanet->GetTransform()->GetWorld());
-	////m_pPatchShader->Upload("viewProj"_hash, CAMERA->GetViewProj());
-	//glUniformMatrix4fv(m_uViewProj, 1, GL_FALSE, etm::valuePtr(CAMERA->GetViewProj()));
+	uniformBufferData.model = m_pPlanet->GetTransform()->GetModelMat();
+	uniformBufferData.viewProj = UniEngine::GetInstance().camera.matrices.perspective * UniEngine::GetInstance().camera.matrices.view;
 
 	////Set other uniforms here too!
-	//vec3 camPos = m_pPlanet->GetTriangulator()->GetFrustum()->GetPositionOS();
-	//glUniform3f(m_uCamPos, camPos.x, camPos.y, camPos.z);
-	////m_pPatchShader->Upload("camPos"_hash, camPos);
-	////m_pPatchShader->Upload("radius"_hash, m_pPlanet->GetRadius());
-	////m_pPatchShader->Upload("morphRange"_hash, m_MorphRange);
-	//glUniform1f(m_uRadius, m_pPlanet->GetRadius());
-	//glUniform1f(m_uMorphRange, m_MorphRange);
-
-	//glUniform1f(m_uDelta, 1 / (float)(m_RC - 1));
-	////m_pPatchShader->Upload("patchDelta"_hash, 1 / (float)(m_RC - 1));
-
-	//STATE->LazyBindTexture(0, GL_TEXTURE_2D, m_pPlanet->GetDiffuseMap()->GetHandle());
-	//STATE->LazyBindTexture(1, GL_TEXTURE_2D, m_pPlanet->GetHeightMap()->GetHandle());
-	//STATE->LazyBindTexture(2, GL_TEXTURE_2D, m_pPlanet->GetDetail1Map()->GetHandle());
-	//STATE->LazyBindTexture(3, GL_TEXTURE_2D, m_pPlanet->GetDetail2Map()->GetHandle());
-	//STATE->LazyBindTexture(4, GL_TEXTURE_2D, m_pPlanet->GetHeightDetailMap()->GetHandle());
-
-	////Bind Object vertex array
-	//STATE->BindVertexArray(m_VAO);
-
-	////Draw the object
-	//STATE->DrawElementsInstanced(GL_TRIANGLES, (uint32)m_Indices.size(), GL_UNSIGNED_INT, 0, m_NumInstances);
-
-	////unbind vertex array
-	//STATE->BindVertexArray(0);
+	uniformBufferData.camPos = m_pPlanet->GetTriangulator()->GetFrustum()->GetPositionOS();
+	uniformBufferData.radius = m_pPlanet->GetRadius();
+	uniformBufferData.morphRange = m_MorphRange;
+	uniformBufferData.radius = m_pPlanet->GetRadius();
+		
 }
 
 Patch::~Patch() {
-	/*glDeleteVertexArrays(1, &m_EBO);
-	glDeleteVertexArrays(1, &m_VAO);
-	glDeleteBuffers(1, &m_VBO);*/
+
+	vertexBuffer.destroy();
+	indexBuffer.destroy();
+	instanceBuffer.destroy();
+	uniformBuffer.destroy();
+
 }

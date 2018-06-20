@@ -27,7 +27,7 @@ public:
 
 	std::vector<std::shared_ptr<UniModel>> GetModels();
 	void AddSceneObject(std::shared_ptr<UniSceneObject> so);
-private:
+
 	std::shared_ptr<UniBody> m_BodyTest;
 };
 

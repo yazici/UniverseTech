@@ -1,9 +1,14 @@
 #pragma once
+
 #include <glm/glm.hpp>
 #include <vector>
 
-class ShaderData;
+#include "vulkan/vulkan.h"
+#include "vks/VulkanDevice.hpp"
+#include "vks/VulkanBuffer.hpp"
+
 class UniBody;
+
 
 struct PatchVertex {
 	PatchVertex(glm::vec2 position, glm::vec2 morphVec) {
@@ -29,6 +34,28 @@ struct PatchInstance {
 
 class Patch {
 public:
+
+	struct UniformBufferData {
+
+		glm::vec3 camPos;
+		float radius;
+		float morphRange;
+		float distanceLut[32];
+		glm::mat4 model;
+		glm::mat4 viewProj;
+		float maxHeight;
+	} uniformBufferData;
+
+	vks::Buffer uniformBuffer;
+	vks::Buffer instanceBuffer;
+
+	struct {
+		VkPipelineVertexInputStateCreateInfo inputState;
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions;
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+	} vertexDescription;
+
+
 	Patch(uint16_t levels = 5);
 	~Patch();
 
@@ -41,38 +68,26 @@ public:
 	void BindInstances(std::vector<PatchInstance> &instances);
 	void UploadDistanceLUT(std::vector<float> &distances);
 	void Draw();
+
+	vks::Buffer vertexBuffer;
+	vks::Buffer indexBuffer;
+	uint32_t indexCount = 0;
+	uint32_t vertexCount = 0;
+	uint32_t m_NumInstances = 0;
+
+	VkDescriptorSet m_DescriptorSet;
+
 private:
 	std::vector<PatchVertex>m_Vertices;
 	std::vector<uint32_t>m_Indices;
 
 	UniBody *m_pPlanet = nullptr;
 
-	uint32_t m_NumInstances = 0;
-
 	uint16_t m_Levels;
 	uint32_t m_RC;
 
-	////OpenGl stuff
-	//GLuint m_VAO;
-	//GLuint m_VBO;
-	//GLuint m_EBO;
-	//GLuint m_VBOInstance;
+	float m_MorphRange = 0.5f;
 
-	//ShaderData *m_pPatchShader = nullptr;
-
-	//GLint m_uModel;
-	//GLint m_uViewProj;
-
-	//GLint m_uMaxHeight;
-
-	//GLint m_uCamPos;
-	//GLint m_uRadius;
-	//float m_MorphRange = 0.5f;
-	//GLint m_uMorphRange;
-
-	//GLint m_uDelta;
-
-	////shading
-	//vec3 m_Ambient = vec3(0.05f, 0.05f, 0.08f);
-	//GLint m_uAmbient;
+	glm::vec3 m_Ambient = glm::vec3(0.05f, 0.05f, 0.08f);
+	
 };
