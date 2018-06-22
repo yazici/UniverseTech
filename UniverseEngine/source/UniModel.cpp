@@ -7,20 +7,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-#if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
-// iOS & macOS: getAssetPath() implemented externally to allow access to Objective-C components
-const std::string getAssetPath() {
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-	return "";
-#elif defined(VK_EXAMPLE_DATA_DIR)
-	return VK_EXAMPLE_DATA_DIR;
-#else
-	return "./../data/";
-#endif
-}
-#endif
-
-
 UniModel::UniModel() {
 
 	UniSceneObject();
@@ -76,11 +62,11 @@ void UniModel::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue
 	if(!m_NormalMapPath.empty())
 		m_NormalMap.loadFromFile(getAssetPath() + m_NormalMapPath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
 	else {
-		std::vector<glm::vec3> buffer(4 * 4);
+		std::vector<glm::vec4> buffer(4 * 4);
 		for(int32_t i = 0; i < buffer.size(); i++) {
 			buffer[i] = glm::vec4(0.f, 0.f, 1.f, 0.f);
 		}
-		m_NormalMap.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec3), VK_FORMAT_R32G32B32A32_SFLOAT, 2, 2, device, copyQueue, VK_FILTER_LINEAR);
+		m_NormalMap.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec4), VK_FORMAT_R32G32B32A32_SFLOAT, 4, 4, device, copyQueue, VK_FILTER_LINEAR);
 	}
 
 

@@ -5,49 +5,38 @@ layout(location = 1) in vec3 Normal;
 layout(location = 2) in vec3 TriPos;
 	
 layout(binding = 0) uniform UBO {
-	//Morph calculation
-	vec3 camPos;
-	float radius;
-	float morphRange;
-	float distanceLUT[32];
 	//Transformation
 	mat4 model;
 	mat4 viewProj;
+	//Morph calculation
+	float distanceLUT[32];
+	vec3 camPos;
+	float radius;
+	float morphRange;
 	//Height sampling
 	float maxHeight;
 } ubo;
 	
-layout(binding = 2) uniform sampler2D texDiffuse;
-layout(binding = 3) uniform sampler2D texHeight;
-layout(binding = 4) uniform sampler2D texHeightDetail;
-layout(binding = 5) uniform sampler2D texDetail1;
-layout(binding = 6) uniform sampler2D texDetail2;
+layout(binding = 1) uniform sampler2D texDiffuse;
+layout(binding = 2) uniform sampler2D texHeight;
+layout(binding = 3) uniform sampler2D texHeightDetail;
+layout(binding = 4) uniform sampler2D texDetail1;
+layout(binding = 5) uniform sampler2D texDetail2;
 
-	
-const vec3 lightDir = vec3(-1, -0.3, 1);
-	
-const vec3 diffuse = vec3(1.0f, 0.5f, 0.2f);
-const vec3 ambient = vec3(0.05f, 0.05f, 0.08f);
-	
+		
 const vec3 texOffset = vec3(1.0f/8192.0f, 1.0f/4096.0f, 0.0f);
 const vec3 texOffsetDetail = vec3(1.0f/800.0f, 1.0f/800.0f, 0.0f);
 
-layout(location = 0) out vec4 outColor;
+layout (location = 0) out vec4 outPosition;
+layout (location = 1) out vec4 outNormal;
+layout (location = 2) out vec4 outAlbedo;
+
 	
-float Lambert(vec3 norm, vec3 lightDir)
-{
-	return max(dot(norm, -lightDir), 0);
-}
-vec3 DirLighting(vec3 dif, vec3 norm)
-{
-	vec3 diffuse = (dif) * Lambert(norm, lightDir);
-	//vec3 specular = (spec * light.Color) * Blinn(norm, light.Direction, viewDir, specPow);
-	return diffuse;// + specular;
-}
 float height(vec2 uv, sampler2D tex)
 {
 	return texture(tex, uv).r*ubo.maxHeight;
 }
+
 vec3 CalculateNormal(vec2 uv, sampler2D tex, vec3 texOffset)
 {
 	// read neightbor heights using an arbitrary small offset
@@ -64,6 +53,7 @@ vec3 CalculateNormal(vec2 uv, sampler2D tex, vec3 texOffset)
 	mat3 localAxis = mat3(tang, biTan, norm);
 	return normalize(localAxis * normalize(N));
 }
+
 void main()
 {
 	vec3 tc3 = normalize(Tex3);
@@ -90,8 +80,9 @@ void main()
 	vec3 norm = CalculateNormal(uv, texHeight, texOffset);
 	vec3 normDetail = CalculateNormal(detailUV, texHeightDetail, texOffsetDetail);
 	norm = normalize(norm+normDetail*detail*2);
-	
-	vec3 lit = DirLighting(dif, norm);
-	lit*=0.8f;
-	outColor = vec4(lit+ambient*dif, 1.0f);
+
+	outAlbedo = vec4(dif, 1.0);
+	outNormal = vec4(norm, 1.0);
+	outPosition = vec4(TriPos, 1.0);
+
 } 

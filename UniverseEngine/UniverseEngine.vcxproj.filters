@@ -240,5 +240,11 @@
     <None Include="data\shaders\planet.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="data\shaders\planet.frag.spv">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\planet.vert.spv">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

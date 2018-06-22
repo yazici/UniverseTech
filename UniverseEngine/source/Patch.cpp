@@ -9,6 +9,33 @@
 #include "vks/VulkanTools.h"
 
 
+vks::Buffer* Patch::GetInstanceBuffer() {
+	return &instanceBuffers[instanceBuffers.size() - 1];
+}
+
+void Patch::MakeInstanceBuffer(uint32_t size) {
+
+	//if(instanceBuffers.size() > 4) {
+	//	instanceBuffers[0].destroy();
+	//	std::vector<vks::Buffer> tmp;
+	//	for(int i = 1; i < instanceBuffers.size(); i++) {
+	//		tmp.emplace_back(instanceBuffers[i]);
+	//	}
+	//	instanceBuffers = tmp;
+	//}
+
+	auto device = UniEngine::GetInstance().vulkanDevice;
+	vks::Buffer instanceBuffer;
+
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&instanceBuffer,
+		size));
+
+	instanceBuffers.push_back(instanceBuffer);
+}
+
 Patch::Patch(uint16_t levels)
 	:m_Levels(levels) {}
 
@@ -16,14 +43,26 @@ void Patch::Init() {
 
 	auto device = UniEngine::GetInstance().vulkanDevice;
 
-	auto bufferSize = 256 * sizeof(PatchInstance); // initially allocate a buffer big enough for 256 patch instances
+	uint32_t ubSize = static_cast<uint32_t>(sizeof(UniformBufferData));
 
 	VK_CHECK_RESULT(device->createBuffer(
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-		&instanceBuffer, bufferSize));
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&uniformBuffer, ubSize));
 
-	instanceBuffer.map();
+
+	MakeInstanceBuffer(256 * sizeof(PatchInstance));
+
+	vertexDescription.bindingDescriptions.resize(2);
+	vertexDescription.bindingDescriptions = {
+		// Binding point 0: Mesh vertex layout description at per-vertex rate
+		vks::initializers::vertexInputBindingDescription(VERTEX_BUFFER_BIND_ID, sizeof(glm::vec2) * 2, VK_VERTEX_INPUT_RATE_VERTEX),
+		// Binding point 1: Instanced data at per-instance rate
+		vks::initializers::vertexInputBindingDescription(INSTANCE_BUFFER_BIND_ID, sizeof(PatchInstance), VK_VERTEX_INPUT_RATE_INSTANCE)
+	};
+
+
+	// PER VERTEX
 
 	// Attribute descriptions
 	vertexDescription.attributeDescriptions.resize(6);
@@ -43,11 +82,15 @@ void Patch::Init() {
 			1,
 			VK_FORMAT_R32G32_SFLOAT,
 			offset);
-	offset += sizeof(glm::vec2);
+	
+	
+	// PER INSTANCE
+	
+	offset = 0;
 	// Location 2: Level
 	vertexDescription.attributeDescriptions[2] =
 		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
+			INSTANCE_BUFFER_BIND_ID,
 			2,
 			VK_FORMAT_R32_UINT,
 			offset);
@@ -55,7 +98,7 @@ void Patch::Init() {
 	// Location 3: A
 	vertexDescription.attributeDescriptions[3] =
 		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
+			INSTANCE_BUFFER_BIND_ID,
 			3,
 			VK_FORMAT_R32G32B32_SFLOAT,
 			offset);
@@ -63,22 +106,25 @@ void Patch::Init() {
 	// Location 4: R
 	vertexDescription.attributeDescriptions[4] =
 		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
-			3,
+			INSTANCE_BUFFER_BIND_ID,
+			4,
 			VK_FORMAT_R32G32B32_SFLOAT,
 			offset);
 	offset += sizeof(glm::vec3);
 	// Location 5: S
 	vertexDescription.attributeDescriptions[5] =
 		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
-			3,
+			INSTANCE_BUFFER_BIND_ID,
+			5,
 			VK_FORMAT_R32G32B32_SFLOAT,
 			offset);
 
 	vertexDescription.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
 	vertexDescription.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexDescription.attributeDescriptions.size());
 	vertexDescription.inputState.pVertexAttributeDescriptions = vertexDescription.attributeDescriptions.data();
+	vertexDescription.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexDescription.bindingDescriptions.size());
+	vertexDescription.inputState.pVertexBindingDescriptions = vertexDescription.bindingDescriptions.data();
+	
 
 	GenerateGeometry(m_Levels);
 }
@@ -125,6 +171,9 @@ void Patch::GenerateGeometry(uint16_t levels) {
 		}
 		rowIdx = nextIdx;
 	}
+
+	indexCount = static_cast<uint32_t>(m_Indices.size());
+	vertexCount = static_cast<uint32_t>(m_Vertices.size());
 
 	uint32_t vertexBufferSize = static_cast<uint32_t>(m_Vertices.size() * sizeof(PatchVertex));
 	uint32_t indexBufferSize = static_cast<uint32_t>(m_Indices.size() * sizeof(uint32_t));
@@ -188,25 +237,61 @@ void Patch::GenerateGeometry(uint16_t levels) {
 void Patch::BindInstances(std::vector<PatchInstance> &instances) {
 	//update buffer
 	m_NumInstances = (uint32_t)instances.size();
+
+	if(m_NumInstances == 0) {
+		return;
+	}
 	
 	auto device = UniEngine::GetInstance().vulkanDevice;
 	auto neededSize = m_NumInstances * sizeof(PatchInstance);
-	if(neededSize > instanceBuffer.size) {
-		instanceBuffer.destroy();
-		VK_CHECK_RESULT(device->createBuffer(
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-			&instanceBuffer, neededSize));
-		instanceBuffer.map();
-	}
+	/*auto requestedSize = neededSize * 2;
 
-	instanceBuffer.copyTo(instances.data(), neededSize);
-	
+	vks::Buffer* instanceBuffer = GetInstanceBuffer();
+
+	if(neededSize > instanceBuffer->size) {
+		MakeInstanceBuffer(requestedSize);
+		instanceBuffer = GetInstanceBuffer();
+	}*/
+
+	m_instanceBuffer.destroy();
+
+	vks::Buffer instanceStaging;
+
+	// Vertex buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&instanceStaging,
+		neededSize,
+		instances.data()));
+
+	// Create device local target buffers
+	// Vertex buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&m_instanceBuffer,
+		neededSize));
+
+	// Copy from staging buffers
+	VkCommandBuffer copyCmd = device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+	VkBufferCopy copyRegion{};
+
+	copyRegion.size = neededSize;
+	vkCmdCopyBuffer(copyCmd, instanceStaging.buffer, m_instanceBuffer.buffer, 1, &copyRegion);
+
+	device->flushCommandBuffer(copyCmd, UniEngine::GetInstance().GetQueue());
+
+	// Destroy staging resources
+	vkDestroyBuffer(device->logicalDevice, instanceStaging.buffer, nullptr);
+	vkFreeMemory(device->logicalDevice, instanceStaging.memory, nullptr);
+
 }
 
 void Patch::UploadDistanceLUT(std::vector<float> &distances) {
 	for(size_t i = 0; i < distances.size(); i++) {
-		uniformBufferData.distanceLut[i] = distances[i];
+		uniformBufferData.distanceLut[i*4] = distances[i]; // dumb uniform float array packing!
 	}
 }
 
@@ -218,17 +303,43 @@ void Patch::Draw() {
 
 	////Set other uniforms here too!
 	uniformBufferData.camPos = m_pPlanet->GetTriangulator()->GetFrustum()->GetPositionOS();
-	uniformBufferData.radius = m_pPlanet->GetRadius();
+	uniformBufferData.radius = (float)m_pPlanet->GetRadius();
 	uniformBufferData.morphRange = m_MorphRange;
-	uniformBufferData.radius = m_pPlanet->GetRadius();
-		
+
+	vks::Buffer uniformStaging;
+	auto device = UniEngine::GetInstance().vulkanDevice;
+
+	// Vertex buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&uniformStaging,
+		static_cast<uint32_t>(sizeof(UniformBufferData)),
+		&uniformBufferData));
+
+	// Copy from staging buffers
+	VkCommandBuffer copyCmd = device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+	VkBufferCopy copyRegion{};
+
+	copyRegion.size = static_cast<uint32_t>(sizeof(UniformBufferData));
+	vkCmdCopyBuffer(copyCmd, uniformStaging.buffer, uniformBuffer.buffer, 1, &copyRegion);
+
+	device->flushCommandBuffer(copyCmd, UniEngine::GetInstance().GetQueue());
+
+	// Destroy staging resources
+	vkDestroyBuffer(device->logicalDevice, uniformStaging.buffer, nullptr);
+	vkFreeMemory(device->logicalDevice, uniformStaging.memory, nullptr);
+
 }
 
 Patch::~Patch() {
 
 	vertexBuffer.destroy();
 	indexBuffer.destroy();
-	instanceBuffer.destroy();
+	for(auto & instanceBuffer : instanceBuffers)
+		instanceBuffer.destroy();
+
 	uniformBuffer.destroy();
 
 }

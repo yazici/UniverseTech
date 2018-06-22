@@ -25,7 +25,8 @@ void UniFrustum::SetToCamera(Camera* pCamera) {
 void UniFrustum::Update() {
 	//calculate generalized relative width and aspect ratio
 	float normHalfWidth = tan(glm::radians(m_FOV));
-	float aspectRatio = 800.f / 600.f; // WINDOW.GetAspectRatio();
+	float aspectRatio = 1280.f / 720.f; // (float)UniEngine::GetInstance().width / (float)UniEngine::GetInstance().height;
+
 
 	//calculate width and height for near and far plane
 	float nearHW = normHalfWidth * m_NearPlane;
@@ -70,7 +71,7 @@ void UniFrustum::Update() {
 	m_Corners.Transform(m_CullInverse);
 
 	m_PositionObject = (m_CullInverse*glm::vec4(m_Position, 0));
-	m_RadInvFOV = 1 / glm::radians(m_FOV);
+	m_RadInvFOV = 1.f / glm::radians(m_FOV);
 
 	//construct planes
 	m_Planes.clear();

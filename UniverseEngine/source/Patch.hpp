@@ -37,17 +37,21 @@ public:
 
 	struct UniformBufferData {
 
+		glm::mat4 model;
+		glm::mat4 viewProj;
+		float distanceLut[32*4]; // stupid uniform float packing!
 		glm::vec3 camPos;
 		float radius;
 		float morphRange;
-		float distanceLut[32];
-		glm::mat4 model;
-		glm::mat4 viewProj;
 		float maxHeight;
+
 	} uniformBufferData;
 
 	vks::Buffer uniformBuffer;
-	vks::Buffer instanceBuffer;
+	vks::Buffer m_instanceBuffer;
+	vks::Buffer* GetInstanceBuffer();
+	void MakeInstanceBuffer(uint32_t size);
+	std::vector<vks::Buffer> instanceBuffers;
 
 	struct {
 		VkPipelineVertexInputStateCreateInfo inputState;

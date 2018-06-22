@@ -150,7 +150,8 @@ public:
 
 	VkDevice GetDevice() { return device; }
 	VkQueue GetQueue() { return queue; }
-
+	void Shutdown();
+	void buildPlanetCommandBuffer();
 	bool m_debugDisplay = false;
 	bool m_useMSAA = true;
 	bool m_useSampleShading = true;
@@ -159,6 +160,7 @@ public:
 	VkSampler m_colorSampler;
 
 	VkCommandBuffer m_offScreenCmdBuffer = VK_NULL_HANDLE;
+	VkCommandBuffer m_planetCmdBuffer = VK_NULL_HANDLE;
 
 	// Semaphore used to synchronize between offscreen and final scene rendering
 	VkSemaphore m_offscreenSemaphore = VK_NULL_HANDLE;

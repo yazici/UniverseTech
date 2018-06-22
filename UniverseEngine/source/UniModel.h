@@ -6,6 +6,7 @@
 
 #include "UniSceneObject.h"
 
+
 class UniModel : public UniSceneObject{
 public:
 	UniModel();
