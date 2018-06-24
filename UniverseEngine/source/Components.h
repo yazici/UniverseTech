@@ -111,12 +111,7 @@ struct TransformComponent {
 	glm::mat4 GetModelMat() {
 		glm::dmat4 mat = glm::dmat4(1.0);
 
-		mat = glm::translate(mat, m_dPos);
-		mat = glm::scale(mat, (glm::dvec3)m_Scale);
-
-		
-
-		mat = (glm::mat4)mat * glm::mat4(glm::mat3(m_Right, -m_Up, m_Forward));
+		mat = glm::translate(mat, m_dPos) * glm::dmat4(glm::mat3(m_Right, m_Up, m_Forward)) * glm::scale(mat, (glm::dvec3)m_Scale);
 
 		return mat;
 	}

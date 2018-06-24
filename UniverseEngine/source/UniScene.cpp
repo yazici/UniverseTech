@@ -15,7 +15,7 @@ void UniScene::Initialize() {
 
 	std::cout << "Unibody loading..." << std::endl;
 
-	m_BodyTest = Make<UniBody>();
+	m_BodyTest = Make<UniBody>(100.0);
 	m_BodyTest->Initialize();
 
 	std::cout << "Unibody loaded." << std::endl;

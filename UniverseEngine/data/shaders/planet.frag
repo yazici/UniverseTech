@@ -3,11 +3,13 @@
 layout(location = 0) in vec3 Tex3;
 layout(location = 1) in vec3 Normal;
 layout(location = 2) in vec3 TriPos;
+layout(location = 3) in vec3 vColor;
 	
 layout(binding = 0) uniform UBO {
 	//Transformation
 	mat4 model;
-	mat4 viewProj;
+	mat4 view;
+	mat4 proj;
 	//Morph calculation
 	float distanceLUT[32];
 	vec3 camPos;
@@ -47,7 +49,7 @@ vec3 CalculateNormal(vec2 uv, sampler2D tex, vec3 texOffset)
 	// deduce terrain normal
 	vec3 N = normalize(vec3(hL - hR, hD - hU, 2.0));
 	vec3 norm = normalize(Normal);
-	vec3 up = vec3(0, 1, 0)-norm;
+	vec3 up = vec3(0, -1, 0)-norm;
 	vec3 tang = normalize(cross(norm, up));//might need flipping
 	vec3 biTan = normalize(cross(norm, tang));//same
 	mat3 localAxis = mat3(tang, biTan, norm);
@@ -81,7 +83,8 @@ void main()
 	vec3 normDetail = CalculateNormal(detailUV, texHeightDetail, texOffsetDetail);
 	norm = normalize(norm+normDetail*detail*2);
 
-	outAlbedo = vec4(dif, 1.0);
+	//outAlbedo = vec4(dif, 1.0);
+	outAlbedo = vec4(vColor, 1.0);
 	outNormal = vec4(norm, 1.0);
 	outPosition = vec4(TriPos, 1.0);
 

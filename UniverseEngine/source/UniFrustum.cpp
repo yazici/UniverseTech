@@ -70,7 +70,7 @@ void UniFrustum::Update() {
 	//m_Corners.fd = fCenter - farHH + farHW;
 	m_Corners.Transform(m_CullInverse);
 
-	m_PositionObject = (m_CullInverse*glm::vec4(m_Position, 0));
+	m_PositionObject = m_CullInverse * glm::vec4(m_Position, 0);
 	m_RadInvFOV = 1.f / glm::radians(m_FOV);
 
 	//construct planes

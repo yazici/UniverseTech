@@ -1,5 +1,6 @@
 #pragma once
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -38,7 +39,8 @@ public:
 	struct UniformBufferData {
 
 		glm::mat4 model;
-		glm::mat4 viewProj;
+		glm::mat4 view;
+		glm::mat4 proj;
 		float distanceLut[32*4]; // stupid uniform float packing!
 		glm::vec3 camPos;
 		float radius;

@@ -113,8 +113,8 @@ UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
 #ifndef __ANDROID__
 	camera.rotationSpeed = 0.25f;
 #endif
-	camera.position = { 2.15f, 0.3f, -8.75f };
-	camera.setRotation(glm::vec3(-0.75f, 12.5f, 0.0f));
+	camera.setPosition({ 0.f, 0.f, 100.f });
+	camera.setRotation(glm::vec3(0.f, 0.0f, 0.0f));
 	camera.setPerspective(60.0f, (float)width / (float)height, 0.1f, 256.0f);
 	paused = true;
 	settings.overlay = true;
@@ -403,21 +403,24 @@ void UniEngine::buildDeferredCommandBuffer() {
 		index++;
 	});
 
-	VkDeviceSize offsets[1] = { 0 };
-	// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
 	auto body = m_CurrentScene->m_BodyTest;
-	vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-	vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
-	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
-	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
-	vkCmdBindIndexBuffer(m_offScreenCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+	if(body->m_pPatch->indexCount > 0) {
+
+		VkDeviceSize offsets[1] = { 0 };
+		// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
+		
+		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
+		vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
+		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
+		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
+		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
 
-	//// Render instances
-	std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
-	std::cout << "Buffer bytes - vertex: " << body->m_pPatch->vertexBuffer.size << ", instance: " << body->m_pPatch->m_instanceBuffer.size << ", index: " << body->m_pPatch->indexBuffer.size << std::endl;
-	vkCmdDrawIndexed(m_offScreenCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
-
+		//// Render instances
+		//std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
+		//std::cout << "Buffer bytes - vertex: " << body->m_pPatch->vertexBuffer.size << ", instance: " << body->m_pPatch->m_instanceBuffer.size << ", index: " << body->m_pPatch->indexBuffer.size << std::endl;
+		vkCmdDrawIndexed(m_offScreenCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
+	}
 
 	vkCmdEndRenderPass(m_offScreenCmdBuffer);
 
@@ -542,10 +545,11 @@ void UniEngine::buildCommandBuffers() {
 
 void UniEngine::loadAssets() {
 	
-	//auto armor = m_CurrentScene->Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
-	//armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5.0), glm::vec3(0, 1, 0), 90.f);
-	//armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
-	//armor->Load(vertexLayout, vulkanDevice, queue, true);
+	auto armor = m_CurrentScene->Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
+	armor->GetTransform()->SetPosition(glm::vec3( 0.0f, 0.0f, 10.0f ));
+	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5.0), glm::vec3(0, -1, 0), 90.f);
+	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
+	armor->Load(vertexLayout, vulkanDevice, queue, true);
 
 	/*
 	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "");
@@ -554,7 +558,7 @@ void UniEngine::loadAssets() {
 	*/
 
 	auto floor = m_CurrentScene->Make<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
-	floor->SetCreateInfo(glm::vec3(0.0f, 2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
+	floor->SetCreateInfo(glm::vec3(0.0f, -2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
 	floor->Load(vertexLayout, vulkanDevice, queue, true);
 
 }
@@ -1151,33 +1155,33 @@ void UniEngine::updateUniformBufferDeferredLights() {
 	// White
 	uboFragmentLights.lights[0].position = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
 	uboFragmentLights.lights[0].color = glm::vec3(1.5f);
-	uboFragmentLights.lights[0].radius = 15.0f * 0.25f;
+	uboFragmentLights.lights[0].radius = 1500.0f * 0.25f;
 	// Red
-	uboFragmentLights.lights[1].position = glm::vec4(-2.0f, 0.0f, 0.0f, 0.0f);
+	uboFragmentLights.lights[1].position = glm::vec4(10.0f, 0.0f, 10.0f, 0.0f);
 	uboFragmentLights.lights[1].color = glm::vec3(1.0f, 0.0f, 0.0f);
-	uboFragmentLights.lights[1].radius = 15.0f;
+	uboFragmentLights.lights[1].radius = 150.0f;
 	// Blue
-	uboFragmentLights.lights[2].position = glm::vec4(2.0f, 1.0f, 0.0f, 0.0f);
+	uboFragmentLights.lights[2].position = glm::vec4(2.0f, -1.0f, 0.0f, 0.0f);
 	uboFragmentLights.lights[2].color = glm::vec3(0.0f, 0.0f, 2.5f);
-	uboFragmentLights.lights[2].radius = 5.0f;
+	uboFragmentLights.lights[2].radius = 50.0f;
 	// Yellow
-	uboFragmentLights.lights[3].position = glm::vec4(0.0f, 0.9f, 0.5f, 0.0f);
+	uboFragmentLights.lights[3].position = glm::vec4(0.0f, -0.9f, 0.5f, 0.0f);
 	uboFragmentLights.lights[3].color = glm::vec3(1.0f, 1.0f, 0.0f);
-	uboFragmentLights.lights[3].radius = 2.0f;
+	uboFragmentLights.lights[3].radius = 20.0f;
 	// Green
-	uboFragmentLights.lights[4].position = glm::vec4(0.0f, 0.5f, 0.0f, 0.0f);
+	uboFragmentLights.lights[4].position = glm::vec4(0.0f, -0.5f, 0.0f, 0.0f);
 	uboFragmentLights.lights[4].color = glm::vec3(0.0f, 1.0f, 0.2f);
-	uboFragmentLights.lights[4].radius = 5.0f;
+	uboFragmentLights.lights[4].radius = 50.0f;
 	// Yellow
-	uboFragmentLights.lights[5].position = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	uboFragmentLights.lights[5].position = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
 	uboFragmentLights.lights[5].color = glm::vec3(1.0f, 0.7f, 0.3f);
-	uboFragmentLights.lights[5].radius = 25.0f;
+	uboFragmentLights.lights[5].radius = 250.0f;
 
 	uboFragmentLights.lights[0].position.x = sin(glm::radians(360.0f * timer)) * 5.0f;
 	uboFragmentLights.lights[0].position.z = cos(glm::radians(360.0f * timer)) * 5.0f;
 
-	uboFragmentLights.lights[1].position.x = -4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f;
-	uboFragmentLights.lights[1].position.z = 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f;
+	//uboFragmentLights.lights[1].position.x = -4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f;
+	//uboFragmentLights.lights[1].position.z = 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f;
 
 	uboFragmentLights.lights[2].position.x = 4.0f + sin(glm::radians(360.0f * timer)) * 2.0f;
 	uboFragmentLights.lights[2].position.z = 0.0f + cos(glm::radians(360.0f * timer)) * 2.0f;

@@ -1,7 +1,8 @@
 #include "UniBody.h"
 #include "UniEngine.h"
 
-UniBody::UniBody() {
+UniBody::UniBody(double radius) {
+	m_Radius = radius;
 	m_pTriangulator = new Triangulator(this);
 	m_pPatch = new Patch(4);
 	m_pPatch->SetPlanet(this);

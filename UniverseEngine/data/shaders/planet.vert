@@ -17,7 +17,8 @@ layout (location = 5) in vec3 s;
 layout(binding = 0) uniform UBO {
 	//Transformation
 	mat4 model;
-	mat4 viewProj;
+	mat4 view;
+	mat4 proj;
 	//Morph calculation
 	float distanceLUT[32];
 	vec3 camPos;
@@ -36,7 +37,8 @@ layout(binding = 5) uniform sampler2D texDetail2;
 //outputs
 layout(location = 0) out vec3 Tex3;
 layout(location = 1) out vec3 Normal;
-layout(location = 2) out vec3 TriPos;
+layout(location = 2) out vec3 outWorldPos;
+layout(location = 3) out vec3 outColor;
 
 out gl_PerVertex
 {
@@ -67,16 +69,30 @@ void main()
 {
 	//initial position
 	vec3 TriPos = a + r*pos.x + s*pos.y;
+
 	//morph factor
 	float dist = length(TriPos-ubo.camPos);
 	float mPerc = morphFac(dist, int(level));
 	//morph
 	TriPos += mPerc*(r*morph.x + s*morph.y);
 	//add height
+	//TriPos = (ubo.model * vec4(TriPos, 1)).xyz;
 	Tex3 = normalize(TriPos);
-	TriPos = Tex3 * (ubo.radius + height(Tex3));
-		
-	Normal = normalize((ubo.model*vec4(Tex3, 1.0f)).xyz);
-	gl_Position = ubo.viewProj * ubo.model * vec4(TriPos, 1.0f);
+	//TriPos = Tex3 * (ubo.radius + height(Tex3));
+	TriPos = Tex3 * ubo.radius;
+	
+	
+	Normal = normalize(Tex3);
+	mat3 mNormal = transpose(inverse(mat3(ubo.model)));
+	Normal = mNormal * Normal;
+	
+	gl_Position = ubo.proj * ubo.view * ubo.model * vec4(TriPos, 1.0f);
+
+	outWorldPos = (ubo.model * vec4(TriPos, 1.f)).xyz;
+	outWorldPos.y = -outWorldPos.y;
+
+	float levelDiv = 0.5f / 22;
+	outColor = vec3(levelDiv * level + 0.5f);  
+	
 }
 

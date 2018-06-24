@@ -1,5 +1,6 @@
 #pragma once
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <vector>
 #include "Patch.hpp"
@@ -57,7 +58,7 @@ private:
 
 	//Triangulation paramenters
 	float m_AllowedTriPx = 300.f;
-	uint32_t m_MaxLevel = 15;
+	uint32_t m_MaxLevel = 0;
 
 	std::vector<Tri> m_Icosahedron;
 	std::vector<float> m_DistanceLUT;
@@ -69,6 +70,8 @@ private:
 	UniBody* m_pPlanet = nullptr;
 	UniFrustum* m_pFrustum = nullptr;
 	bool m_LockFrustum = false;
+
+	glm::vec3 m_CameraObjectSpacePos;
 
 	std::vector<PatchInstance> m_Positions;
 };

@@ -85,7 +85,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)									\
 	engine.prepare();																		\
 	engine.renderLoop();																	\
     engine.Shutdown(); \
-    system("pause"); \
+    /* system("pause");*/ \
     std::cout << std::endl ; \
     std::cout.rdbuf(stdoutbuf); \
     std::cerr << std::endl ; \

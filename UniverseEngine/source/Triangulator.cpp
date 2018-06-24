@@ -20,15 +20,15 @@ std::vector<glm::vec3> GetIcosahedronPositions(float size) {
 	ico.emplace_back(ratio, 0, scale);	//rb 2
 	ico.emplace_back(-ratio, 0, scale);	//lb 3 
 										//Y plane													 
-	ico.emplace_back(0, -scale, ratio);	//db 4
-	ico.emplace_back(0, -scale, -ratio);	//df 5
-	ico.emplace_back(0, scale, ratio);	//ub 6
-	ico.emplace_back(0, scale, -ratio);	//uf 7
+	ico.emplace_back(0, scale, ratio);	//db 4
+	ico.emplace_back(0, scale, -ratio);	//df 5
+	ico.emplace_back(0, -scale, ratio);	//ub 6
+	ico.emplace_back(0, -scale, -ratio);	//uf 7
 										//Z plane													 
-	ico.emplace_back(-scale, ratio, 0);	//lu 8
-	ico.emplace_back(-scale, -ratio, 0);	//ld 9
-	ico.emplace_back(scale, ratio, 0);	//ru 10
-	ico.emplace_back(scale, -ratio, 0);	//rd 11
+	ico.emplace_back(-scale, -ratio, 0);	//lu 8
+	ico.emplace_back(-scale, ratio, 0);	//ld 9
+	ico.emplace_back(scale, -ratio, 0);	//ru 10
+	ico.emplace_back(scale, ratio, 0);	//rd 11
 
 	return ico;
 }
@@ -68,8 +68,8 @@ std::vector<uint32_t> GetIcosahedronIndicesBFC() {
 	{
 		1,8,3,
 		1,3,9,
-		0,2, 10,
-		0,11,2,
+		0,2,10,
+		2,0,11,
 
 		5,0,7,
 		5,7,1,
@@ -105,7 +105,7 @@ Triangulator::~Triangulator() {
 
 void Triangulator::Init() {
 	auto ico = GetIcosahedronPositions((float)m_pPlanet->GetRadius());
-	auto indices = GetIcosahedronIndices();
+	auto indices = GetIcosahedronIndicesBFC();
 	for(size_t i = 0; i < indices.size(); i += 3) {
 		m_Icosahedron.emplace_back(ico[indices[i]], ico[indices[i + 1]], ico[indices[i + 2]], nullptr, 0);
 	}
@@ -133,12 +133,18 @@ bool Triangulator::Update() {
 	m_MaxLevel = 22;
 	Precalculate();
 
+	m_LockFrustum = false;
+
 	//Frustum update
 	//if(INPUT->IsKeyboardKeyPressed(SDL_SCANCODE_SPACE))m_LockFrustum = !m_LockFrustum;
+	// 
+	auto camera = UniEngine::GetInstance().camera;
+
+	m_CameraObjectSpacePos = glm::vec3(glm::inverse(m_pPlanet->GetTransform()->GetModelMat()) * glm::vec4(camera.position, 1.f));
 
 	m_pFrustum->SetCullTransform(m_pPlanet->GetTransform()->GetModelMat());
 	if(!m_LockFrustum) 
-		m_pFrustum->SetToCamera(&UniEngine::GetInstance().camera);
+		m_pFrustum->SetToCamera(&camera);
 	
 	m_pFrustum->Update();
 
@@ -197,15 +203,17 @@ void Triangulator::GenerateGeometry() {
 }
 
 TriNext Triangulator::SplitHeuristic(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c, uint16_t level, bool frustumCull) {
+	auto camPosWorld = UniEngine::GetInstance().camera.position;
 	glm::vec3 center = (a + b + c) / 3.f;
 	//Perform backface culling
-	float dotNV = glm::dot(glm::normalize(center), glm::normalize(center - m_pFrustum->GetPositionOS()));
-	if(dotNV >= m_TriLevelDotLUT[level]) {
+	float dotNV = glm::dot(glm::normalize(center), glm::normalize(center - m_CameraObjectSpacePos));
+	if(dotNV >= m_TriLevelDotLUT[level]) { // TODO: DotLUTS are wrong!!!
 		return TriNext::CULL;
 	}
 
 	//Perform Frustum culling
-	if(frustumCull) {
+	//if(frustumCull) {
+	if(false){
 		auto intersect = m_pFrustum->ContainsTriVolume(a, b, c, m_HeightMultLUT[level]);
 		//auto intersect = m_pFrustum->ContainsTriangle(a, b, c);
 		if(intersect == VolumeCheck::OUTSIDE) return TriNext::CULL;
@@ -214,9 +222,9 @@ TriNext Triangulator::SplitHeuristic(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c, u
 			//check if new splits are allowed
 			if(level >= m_MaxLevel)return TriNext::LEAF;
 			//split according to distance
-			float aDist = glm::length(a - m_pFrustum->GetPositionOS());
-			float bDist = glm::length(b - m_pFrustum->GetPositionOS());
-			float cDist = glm::length(c - m_pFrustum->GetPositionOS());
+			float aDist = glm::length(a - m_CameraObjectSpacePos);
+			float bDist = glm::length(b - m_CameraObjectSpacePos);
+			float cDist = glm::length(c - m_CameraObjectSpacePos);
 			if(std::fminf(aDist, std::fminf(bDist, cDist)) < m_DistanceLUT[level])return TriNext::SPLIT;
 			return TriNext::LEAF;
 		}
@@ -224,9 +232,9 @@ TriNext Triangulator::SplitHeuristic(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c, u
 	//check if new splits are allowed
 	if(level >= m_MaxLevel)return TriNext::LEAF;
 	//split according to distance
-	float aDist = glm::length(a - m_pFrustum->GetPositionOS());
-	float bDist = glm::length(b - m_pFrustum->GetPositionOS());
-	float cDist = glm::length(c - m_pFrustum->GetPositionOS());
+	float aDist = glm::length(a - m_CameraObjectSpacePos);
+	float bDist = glm::length(b - m_CameraObjectSpacePos);
+	float cDist = glm::length(c - m_CameraObjectSpacePos);
 	if(std::fminf(aDist, std::fminf(bDist, cDist)) < m_DistanceLUT[level])return TriNext::SPLITCULL;
 	return TriNext::LEAF;
 }
@@ -246,9 +254,9 @@ void Triangulator::RecursiveTriangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, uint
 		C = C * (float)m_pPlanet->GetRadius() / glm::length(C);
 		//Make 4 new triangles
 		uint16_t nLevel = level + 1;
-		RecursiveTriangle(a, B, C, nLevel, next == SPLITCULL);//Winding is inverted
-		RecursiveTriangle(A, b, C, nLevel, next == SPLITCULL);//Winding is inverted
-		RecursiveTriangle(A, B, c, nLevel, next == SPLITCULL);//Winding is inverted
+		RecursiveTriangle(a, C, B, nLevel, next == SPLITCULL);//Winding is inverted
+		RecursiveTriangle(A, C, b, nLevel, next == SPLITCULL);//Winding is inverted
+		RecursiveTriangle(A, c, B, nLevel, next == SPLITCULL);//Winding is inverted
 		RecursiveTriangle(A, B, C, nLevel, next == SPLITCULL);
 	} else //put the triangle in the buffer
 	{

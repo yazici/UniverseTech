@@ -7,7 +7,7 @@
 class UniBody :
 	public UniSceneObject {
 public:
-	UniBody();
+	UniBody(double radius = 10.f);
 	~UniBody();
 
 	double GetRadius() { return m_Radius;  }

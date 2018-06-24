@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "glm/glm.hpp"
 #include "ECS.h"
 #include "Components.h"
