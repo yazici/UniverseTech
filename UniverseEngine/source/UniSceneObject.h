@@ -13,8 +13,11 @@ public:
 	UniSceneObject();
 	virtual ~UniSceneObject();
 
+	std::shared_ptr<UniSceneObject> m_Parent;
+
 	void SetScene(UniScene *scene);
 	void SetEntity(ECS::Entity* ent);
+	void SetParent(std::shared_ptr<UniSceneObject> parent);
 
 	ECS::Entity* m_Entity = nullptr;
 

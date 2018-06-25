@@ -171,6 +171,7 @@
     <ClInclude Include="..\external\imgui\stb_truetype.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\Components.h" />
+    <ClInclude Include="source\components\Transform.h" />
     <ClInclude Include="source\ECS.h" />
     <ClCompile Include="source\UniFrustum.cpp" />
     <ClInclude Include="source\UniFrustum.hpp" />

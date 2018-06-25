@@ -34,6 +34,12 @@
     <Filter Include="shaders\deferredmulti">
       <UniqueIdentifier>{b05c8669-3195-4f56-b5f9-abb5a7c6427f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\components">
+      <UniqueIdentifier>{34588440-f845-4917-beaf-164ecde64229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\components">
+      <UniqueIdentifier>{a6138d90-99c8-41c6-958d-bcb0a5dbdad8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\vks\benchmark.hpp">
@@ -146,6 +152,9 @@
     </ClInclude>
     <ClInclude Include="source\vks\frustum.hpp">
       <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Transform.h">
+      <Filter>Header Files\components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
