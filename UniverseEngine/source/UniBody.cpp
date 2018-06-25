@@ -12,6 +12,13 @@ UniBody::UniBody(double radius) {
 UniBody::~UniBody() {
 	delete m_pPatch;
 	delete m_pTriangulator;
+
+	m_Texture.destroy();
+	m_HeightMap.destroy();
+	m_Detail1.destroy();
+	m_Detail2.destroy();
+	m_HeightDetail.destroy();
+
 }
 
 void UniBody::LoadTextures(vks::VulkanDevice *device, VkQueue copyQueue) {

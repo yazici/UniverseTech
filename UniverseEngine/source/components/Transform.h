@@ -24,7 +24,10 @@ struct TransformComponent {
 		m_Up(glm::vec3(0, -1.f, 0)),
 		m_Right(glm::vec3(1.f, 0, 0)) {}
 
-	TransformComponent(glm::vec3 pos) : m_dPos((glm::dvec3)pos) {}
+	TransformComponent(glm::vec3 pos) {
+		TransformComponent();
+		m_dPos = glm::dvec3(pos);
+	}
 
 	glm::dvec3 m_dPos; // relative to parent, no parent == world space
 	glm::vec3 m_Forward;

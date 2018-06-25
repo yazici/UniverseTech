@@ -9,7 +9,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <iostream>
 #include "Transform.h"
-#include "ECS.h"
+#include "../ECS.h"
 
 struct CameraComponent {
 
@@ -53,9 +53,10 @@ struct CameraComponent {
 
 	void CalculateView(ECS::ComponentHandle<TransformComponent> transform) {
 		auto mat = transform->GetModelMat();
+		
 		m_Position = mat[3];
-		glm::vec3 forward = mat[2];
-		glm::vec3 up = mat[1];
+		auto forward = transform->TransformLocalToWS(glm::vec3(0, 0, 1));
+		auto up = glm::mat3(mat) * glm::vec3(0, 1, 0);
 
 		if(cameraType == CameraType::CAMERA_FIXED) {
 			target = forward;

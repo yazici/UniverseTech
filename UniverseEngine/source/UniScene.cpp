@@ -18,7 +18,7 @@ void UniScene::Initialize(UniEngine* engine) {
 	std::cout << "Unibody loading..." << std::endl;
 
 	m_CurrentCamera = Make<UniSceneObject>();
-	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 90.f, 0.1f, 1000.0f);
+	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 0.1f, 1000.0f);
 
 	m_BodyTest = Make<UniBody>(100.0);
 	m_BodyTest->Initialize();

@@ -70,12 +70,16 @@ void UniEngine::Shutdown() {
 	vkDestroyPipeline(device, pipelines.offscreen, nullptr);
 	vkDestroyPipeline(device, pipelines.offscreenSampleShading, nullptr);
 	vkDestroyPipeline(device, pipelines.debug, nullptr);
+	vkDestroyPipeline(device, pipelines.offScreenPlanet, nullptr);
 
 	vkDestroyPipelineLayout(device, pipelineLayouts.deferred, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayouts.offscreen, nullptr);
+	vkDestroyPipelineLayout(device, pipelineLayouts.planetOffscreen, nullptr);
+
 
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayoutDynamic, nullptr);
+	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayoutPlanet, nullptr);
 
 	// Meshes
 	auto models = m_CurrentScene->GetModels();
@@ -544,8 +548,10 @@ void UniEngine::loadAssets() {
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
 
-	GetScene()->GetCameraObject()->SetParent(armor);
-	GetScene()->GetCameraComponent()->CalculateView(GetScene()->GetCameraObject()->GetTransform());
+	auto camObj = GetScene()->GetCameraObject();
+	camObj->SetParent(armor);
+	camObj->GetTransform()->SetPosition(1.f, 3.5f, -4.f);
+	GetScene()->GetCameraComponent()->CalculateView(camObj->GetTransform());
 
 	/*
 	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "");

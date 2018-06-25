@@ -342,7 +342,7 @@ Patch::~Patch() {
 	indexBuffer.destroy();
 	for(auto & instanceBuffer : instanceBuffers)
 		instanceBuffer.destroy();
-
+	
 	uniformBuffer.destroy();
 
 }
