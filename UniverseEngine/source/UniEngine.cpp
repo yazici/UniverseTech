@@ -523,6 +523,9 @@ void UniEngine::buildCommandBuffers() {
 			vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
 		}
 
+		GetScene()->GetCameraComponent()->aspect = (float)viewport.width / (float)viewport.height;
+		GetScene()->GetCameraComponent()->CalculateProjection();
+
 		// Final composition as full screen quad
 		vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_useMSAA ? pipelines.deferred : pipelines.deferredNoMSAA);
 		vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
@@ -540,6 +543,9 @@ void UniEngine::loadAssets() {
 	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5.0), glm::vec3(0, -1, 0), 90.f);
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
+
+	GetScene()->GetCameraObject()->SetParent(armor);
+	GetScene()->GetCameraComponent()->CalculateView(GetScene()->GetCameraObject()->GetTransform());
 
 	/*
 	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "");
@@ -1134,8 +1140,8 @@ void UniEngine::updateUniformBuffersScreen() {
 }
 
 void UniEngine::updateUniformBufferDeferredMatrices() {
-	uboOffscreenVS.projection = GetScene()->GetCamera()->matrices.projection;
-	uboOffscreenVS.view = GetScene()->GetCamera()->matrices.view;
+	uboOffscreenVS.projection = GetScene()->GetCameraComponent()->matrices.projection;
+	uboOffscreenVS.view = GetScene()->GetCameraComponent()->matrices.view;
 	uboOffscreenVS.model = glm::mat4(1.f);
 	memcpy(uniformBuffers.vsOffscreen.mapped, &uboOffscreenVS, sizeof(uboOffscreenVS));
 }
@@ -1183,7 +1189,7 @@ void UniEngine::updateUniformBufferDeferredLights() {
 	uboFragmentLights.lights[5].position.z = 0.0f - cos(glm::radians(-360.0f * timer - 45.0f)) * 10.0f;
 
 	// Current view position
-	uboFragmentLights.viewPos = glm::vec4(GetScene()->GetCamera()->GetPosition(), 0.0f) * glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
+	uboFragmentLights.viewPos = glm::vec4(GetScene()->GetCameraComponent()->GetPosition(), 0.0f) * glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
 
 	memcpy(uniformBuffers.fsLights.mapped, &uboFragmentLights, sizeof(uboFragmentLights));
 }
@@ -1273,6 +1279,12 @@ void UniEngine::viewChanged() {
 	updateUniformBufferDeferredMatrices();
 	uboFragmentLights.windowSize = glm::ivec2(width, height);
 }
+
+void UniEngine::windowResized() {
+	GetScene()->GetCameraComponent()->aspect = (float)width / (float)height;
+	GetScene()->GetCameraComponent()->CalculateProjection();
+}
+
 
 void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 	if(overlay->header("Settings")) {

@@ -20,7 +20,7 @@ void UniSceneObject::SetEntity(ECS::Entity* ent) {
 void UniSceneObject::SetParent(std::shared_ptr<UniSceneObject> parent) {
 	m_Parent = parent;
 	auto t = GetTransform();
-	t->SetParent(m_Parent->GetTransform());
+	t->SetParent(m_Parent);
 }
 
 ECS::ComponentHandle<TransformComponent> UniSceneObject::GetTransform() {

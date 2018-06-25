@@ -138,7 +138,7 @@ bool Triangulator::Update() {
 	//Frustum update
 	//if(INPUT->IsKeyboardKeyPressed(SDL_SCANCODE_SPACE))m_LockFrustum = !m_LockFrustum;
 	// 
-	auto camera = UniEngine::GetInstance().GetScene()->GetCamera();
+	auto camera = UniEngine::GetInstance().GetScene()->GetCameraComponent();
 
 	m_CameraObjectSpacePos = glm::vec3(glm::inverse(m_pPlanet->GetTransform()->GetModelMat()) * glm::vec4(camera->GetPosition(), 1.f));
 
@@ -203,7 +203,7 @@ void Triangulator::GenerateGeometry() {
 }
 
 TriNext Triangulator::SplitHeuristic(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c, uint16_t level, bool frustumCull) {
-	auto camPosWorld = UniEngine::GetInstance().GetScene()->GetCamera()->GetPosition();
+	auto camPosWorld = UniEngine::GetInstance().GetScene()->GetCameraComponent()->GetPosition();
 	glm::vec3 center = (a + b + c) / 3.f;
 	//Perform backface culling
 	float dotNV = glm::dot(glm::normalize(center), glm::normalize(center - m_CameraObjectSpacePos));

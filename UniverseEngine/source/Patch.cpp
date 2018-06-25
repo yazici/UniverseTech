@@ -297,7 +297,7 @@ void Patch::UploadDistanceLUT(std::vector<float> &distances) {
 
 void Patch::Draw() {
 	
-	auto camera = UniEngine::GetInstance().GetScene()->GetCamera();
+	auto camera = UniEngine::GetInstance().GetScene()->GetCameraComponent();
 	//// Pass transformations to the shader
 	uniformBufferData.model = m_pPlanet->GetTransform()->GetModelMat();
 	uniformBufferData.view = camera->matrices.view;

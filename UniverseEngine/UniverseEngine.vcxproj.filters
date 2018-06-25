@@ -156,6 +156,12 @@
     <ClInclude Include="source\components\Transform.h">
       <Filter>Header Files\components</Filter>
     </ClInclude>
+    <ClInclude Include="source\components\Camera.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Movement.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -211,6 +217,9 @@
     </ClCompile>
     <ClCompile Include="source\UniFrustum.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\Transform.cpp">
+      <Filter>Source Files\components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

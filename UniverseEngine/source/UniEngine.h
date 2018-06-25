@@ -170,7 +170,7 @@ private:
 
 public:
 	std::shared_ptr<UniScene> GetScene() { return m_CurrentScene; }
-
+	void windowResized() override;
 
 
 };

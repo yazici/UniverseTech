@@ -46,18 +46,21 @@ struct CameraComponent {
 		CalculateView(transform);
 	}
 
+	void UpdateTarget(glm::vec3 t) {
+		target = t;
+	}
+
 
 	void CalculateView(ECS::ComponentHandle<TransformComponent> transform) {
 		auto mat = transform->GetModelMat();
-		m_Position = glm::vec3(mat[3]);
+		m_Position = mat[3];
+		glm::vec3 forward = mat[2];
+		glm::vec3 up = mat[1];
 
 		if(cameraType == CameraType::CAMERA_FIXED) {
-			matrices.view = glm::inverse(mat);
-		} else {
-			auto position = glm::vec3(mat[3]);
-			auto up = glm::vec3(mat[1]);
-			matrices.view = glm::lookAt(position, target, up);
+			target = forward;
 		}
+		matrices.view = glm::lookAt(m_Position, target, up);
 	}
 
 	void CalculateProjection() {

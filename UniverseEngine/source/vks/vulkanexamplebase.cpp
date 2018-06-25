@@ -237,11 +237,7 @@ VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShader(std::string fileNa
 void VulkanExampleBase::renderFrame()
 {
 	auto tStart = std::chrono::high_resolution_clock::now();
-	if (viewUpdated)
-	{
-		viewUpdated = false;
-		viewChanged();
-	}
+	viewChanged();
 
 	render();
 	frameCounter++;
