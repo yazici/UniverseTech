@@ -2,6 +2,7 @@
 #include <memory>
 #include "Systems.h"
 #include "UniBody.h"
+#include "UniEngine.h"
 
 UniScene::UniScene() {}
 
@@ -9,11 +10,15 @@ UniScene::~UniScene() {
 	m_World->destroyWorld();
 }
 
-void UniScene::Initialize() {
+void UniScene::Initialize(UniEngine* engine) {
 	m_World = ECS::World::createWorld();
 	m_World->registerSystem(new MovementSystem());
+	m_World->registerSystem(new CameraSystem());
 
 	std::cout << "Unibody loading..." << std::endl;
+
+	m_CurrentCamera = Make<UniSceneObject>();
+	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 90.f, 0.1f, 1000.0f);
 
 	m_BodyTest = Make<UniBody>(100.0);
 	m_BodyTest->Initialize();

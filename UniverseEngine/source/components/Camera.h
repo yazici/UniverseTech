@@ -9,6 +9,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <iostream>
 #include "Transform.h"
+#include "ECS.h"
 
 struct CameraComponent {
 
@@ -16,6 +17,8 @@ struct CameraComponent {
 	float nearClip;
 	float farClip;
 	float aspect = 1.777778f;
+
+	glm::vec3 m_Position;
 
 	glm::vec3 target;
 
@@ -33,8 +36,12 @@ struct CameraComponent {
 
 	CameraType cameraType = CAMERA_FIXED;
 
-	CameraComponent(ECS::ComponentHandle<TransformComponent> transform) {
+	CameraComponent(ECS::ComponentHandle<TransformComponent> transform, float ratio=1.77778f, float verticalFOV=60.f, float nClip=0.1f, float fClip=1000.f) {
 		target = { 0, 0, 1 };
+		aspect = aspect;
+		fov = verticalFOV;
+		nearClip = nClip;
+		farClip = fClip;
 		CalculateProjection();
 		CalculateView(transform);
 	}
@@ -42,8 +49,10 @@ struct CameraComponent {
 
 	void CalculateView(ECS::ComponentHandle<TransformComponent> transform) {
 		auto mat = transform->GetModelMat();
+		m_Position = glm::vec3(mat[3]);
+
 		if(cameraType == CameraType::CAMERA_FIXED) {
-			matrices.view = mat;
+			matrices.view = glm::inverse(mat);
 		} else {
 			auto position = glm::vec3(mat[3]);
 			auto up = glm::vec3(mat[1]);
@@ -52,7 +61,11 @@ struct CameraComponent {
 	}
 
 	void CalculateProjection() {
-		matrices.projection = glm::perspective(fov, aspect, nearClip, farClip);
+		matrices.projection = glm::perspective(glm::radians(fov), aspect, nearClip, farClip);
+	}
+
+	glm::vec3 GetPosition() {
+		return m_Position;
 	}
 
 

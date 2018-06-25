@@ -105,17 +105,9 @@ UniEngine::~UniEngine() {
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
 
-	m_CurrentScene = std::make_unique<UniScene>();
+	m_CurrentScene = std::make_shared<UniScene>();
 
 	title = "Multi sampled deferred shading";
-	camera.type = Camera::CameraType::firstperson;
-	camera.movementSpeed = 5.0f;
-#ifndef __ANDROID__
-	camera.rotationSpeed = 0.25f;
-#endif
-	camera.setPosition({ 0.f, 0.f, 100.f });
-	camera.setRotation(glm::vec3(0.f, 0.0f, 0.0f));
-	camera.setPerspective(60.0f, (float)width / (float)height, 0.1f, 256.0f);
 	paused = true;
 	settings.overlay = true;
 }
@@ -404,7 +396,7 @@ void UniEngine::buildDeferredCommandBuffer() {
 	});
 
 	auto body = m_CurrentScene->m_BodyTest;
-	if(body->m_pPatch->indexCount > 0) {
+	if(body->m_pPatch->m_NumInstances > 0) {
 
 		VkDeviceSize offsets[1] = { 0 };
 		// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
@@ -530,8 +522,6 @@ void UniEngine::buildCommandBuffers() {
 			viewport.height = (float)height * 0.5f;
 			vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
 		}
-
-		camera.updateAspectRatio((float)viewport.width / (float)viewport.height);
 
 		// Final composition as full screen quad
 		vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_useMSAA ? pipelines.deferred : pipelines.deferredNoMSAA);
@@ -1144,8 +1134,8 @@ void UniEngine::updateUniformBuffersScreen() {
 }
 
 void UniEngine::updateUniformBufferDeferredMatrices() {
-	uboOffscreenVS.projection = camera.matrices.perspective;
-	uboOffscreenVS.view = camera.matrices.view;
+	uboOffscreenVS.projection = GetScene()->GetCamera()->matrices.projection;
+	uboOffscreenVS.view = GetScene()->GetCamera()->matrices.view;
 	uboOffscreenVS.model = glm::mat4(1.f);
 	memcpy(uniformBuffers.vsOffscreen.mapped, &uboOffscreenVS, sizeof(uboOffscreenVS));
 }
@@ -1193,7 +1183,7 @@ void UniEngine::updateUniformBufferDeferredLights() {
 	uboFragmentLights.lights[5].position.z = 0.0f - cos(glm::radians(-360.0f * timer - 45.0f)) * 10.0f;
 
 	// Current view position
-	uboFragmentLights.viewPos = glm::vec4(camera.position, 0.0f) * glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
+	uboFragmentLights.viewPos = glm::vec4(GetScene()->GetCamera()->GetPosition(), 0.0f) * glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
 
 	memcpy(uniformBuffers.fsLights.mapped, &uboFragmentLights, sizeof(uboFragmentLights));
 }
@@ -1252,7 +1242,7 @@ void UniEngine::draw() {
 
 void UniEngine::prepare() {
 
-	m_CurrentScene->Initialize();
+	m_CurrentScene->Initialize(this);
 	VulkanExampleBase::prepare();
 	loadAssets();
 	setupVertexDescriptions();

@@ -1,5 +1,5 @@
 #include "UniFrustum.hpp"
-#include "vks/camera.hpp"
+
 
 UniFrustum::UniFrustum() {
 	m_Corners = FrustumCorners();
@@ -12,20 +12,22 @@ void UniFrustum::SetCullTransform(glm::mat4 objectWorld) {
 	m_CullInverse = glm::inverse(objectWorld);
 }
 
-void UniFrustum::SetToCamera(Camera* pCamera) {
-	m_Position = pCamera->position;
-	m_Forward = pCamera->GetForward();
-	m_Up = pCamera->GetUp();
-	m_Right = pCamera->GetRight();
-	m_NearPlane = pCamera->getNearClip();
-	m_FarPlane = pCamera->getFarClip();
-	m_FOV = pCamera->GetFov();
+void UniFrustum::SetToCamera(ECS::ComponentHandle<CameraComponent> camera) {
+	auto mat = camera->matrices.view;
+	m_Position = glm::vec3(mat[3]);
+	m_Up = glm::vec3(mat[1]);
+	m_Forward = glm::vec3(mat[2]);
+	m_Right = glm::vec3(mat[0]);
+	m_NearPlane = camera->nearClip;
+	m_FarPlane = camera->farClip;
+	m_FOV = camera->fov;
+	m_Aspect = camera->aspect;
 }
 
 void UniFrustum::Update() {
 	//calculate generalized relative width and aspect ratio
 	float normHalfWidth = tan(glm::radians(m_FOV));
-	float aspectRatio = 1280.f / 720.f; // (float)UniEngine::GetInstance().width / (float)UniEngine::GetInstance().height;
+	float aspectRatio = m_Aspect; // (float)UniEngine::GetInstance().width / (float)UniEngine::GetInstance().height;
 
 
 	//calculate width and height for near and far plane

@@ -11,3 +11,10 @@ void MovementSystem::tick(ECS::World* world, float deltaTime) {
 		
 	});
 }
+
+
+void CameraSystem::tick(ECS::World* world, float deltaTime) {
+	world->each<TransformComponent, CameraComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<CameraComponent> camera) {
+		camera->CalculateView(transform);
+	});
+}

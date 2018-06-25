@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "Geometry.hpp"
+#include "components/Camera.h"
 
 class Camera;
 
@@ -51,7 +52,7 @@ public:
 	// void SetToCamera(CameraComponent* pCamera);
 	void SetCullTransform(glm::mat4 objectWorld);
 
-	void SetToCamera(Camera* pCamera);
+	void SetToCamera(ECS::ComponentHandle<CameraComponent> camera);
 	VolumeCheck ContainsPoint(const glm::vec3 &point) const;
 	VolumeCheck ContainsSphere(const Sphere &sphere) const;
 	VolumeCheck ContainsTriangle(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c);
@@ -80,4 +81,5 @@ private:
 	glm::vec3 m_Up;
 	glm::vec3 m_Right;
 	float m_NearPlane, m_FarPlane, m_FOV;
+	float m_Aspect;
 };

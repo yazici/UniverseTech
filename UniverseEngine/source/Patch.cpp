@@ -297,14 +297,14 @@ void Patch::UploadDistanceLUT(std::vector<float> &distances) {
 
 void Patch::Draw() {
 	
-	auto camera = UniEngine::GetInstance().camera;
+	auto camera = UniEngine::GetInstance().GetScene()->GetCamera();
 	//// Pass transformations to the shader
 	uniformBufferData.model = m_pPlanet->GetTransform()->GetModelMat();
-	uniformBufferData.view = UniEngine::GetInstance().camera.matrices.view;
-	uniformBufferData.proj = UniEngine::GetInstance().camera.matrices.perspective;
+	uniformBufferData.view = camera->matrices.view;
+	uniformBufferData.proj = camera->matrices.projection;
 
 	////Set other uniforms here too!
-	auto camPos = glm::vec3(glm::inverse(m_pPlanet->GetTransform()->GetModelMat()) * glm::vec4(camera.position, 1.f));
+	auto camPos = glm::vec3(glm::inverse(m_pPlanet->GetTransform()->GetModelMat()) * glm::vec4(camera->GetPosition(), 1.f));
 	uniformBufferData.camPos = camPos;
 	uniformBufferData.radius = (float)m_pPlanet->GetRadius();
 	uniformBufferData.morphRange = m_MorphRange;
