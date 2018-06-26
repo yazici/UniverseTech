@@ -34,15 +34,18 @@
     <Filter Include="shaders\deferredmulti">
       <UniqueIdentifier>{b05c8669-3195-4f56-b5f9-abb5a7c6427f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\components">
+      <UniqueIdentifier>{34588440-f845-4917-beaf-164ecde64229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\components">
+      <UniqueIdentifier>{a6138d90-99c8-41c6-958d-bcb0a5dbdad8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\vks\benchmark.hpp">
       <Filter>Header Files\vks</Filter>
     </ClInclude>
     <ClInclude Include="source\vks\camera.hpp">
-      <Filter>Header Files\vks</Filter>
-    </ClInclude>
-    <ClInclude Include="source\vks\frustum.hpp">
       <Filter>Header Files\vks</Filter>
     </ClInclude>
     <ClInclude Include="source\vks\keycodes.hpp">
@@ -132,6 +135,33 @@
     <ClInclude Include="source\Systems.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\UniBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Triangulator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Patch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Geometry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UniFrustum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\vks\frustum.hpp">
+      <Filter>Header Files\vks</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Transform.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Camera.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Movement.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -176,6 +206,21 @@
     <ClCompile Include="source\Systems.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\UniBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Triangulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Patch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniFrustum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\Transform.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UniverseEngine.rc">
@@ -206,6 +251,18 @@
     </None>
     <None Include="data\shaders\deferredmultisampling\mrt.vert">
       <Filter>shaders\deferredmulti</Filter>
+    </None>
+    <None Include="data\shaders\planet.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\planet.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\planet.frag.spv">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\planet.vert.spv">
+      <Filter>shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

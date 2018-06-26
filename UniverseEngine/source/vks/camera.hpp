@@ -24,10 +24,10 @@ private:
 		glm::mat4 transM;
 
 		rotM = glm::rotate(rotM, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		rotM = glm::rotate(rotM, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		rotM = glm::rotate(rotM, glm::radians(rotation.y), glm::vec3(0.0f, -1.0f, 0.0f));
 		rotM = glm::rotate(rotM, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		transM = glm::translate(glm::mat4(1.0f), position);
+		transM = glm::inverse(glm::translate(glm::mat4(1.0f), position));
 
 		if (type == CameraType::firstperson)
 		{
@@ -130,25 +130,25 @@ public:
 			if (moving())
 			{
 				glm::vec3 camFront;
-				camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
+				camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(-rotation.y));
 				camFront.y = sin(glm::radians(rotation.x));
-				camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(rotation.y));
+				camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(-rotation.y));
 				camFront = glm::normalize(camFront);
 
 				float moveSpeed = deltaTime * movementSpeed;
 
 				if (keys.up)
-					position += camFront * moveSpeed;
-				if (keys.down)
 					position -= camFront * moveSpeed;
+				if (keys.down)
+					position += camFront * moveSpeed;
 				if (keys.left)
-					position -= glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
+					position -= glm::normalize(glm::cross(camFront, glm::vec3(0.0f, -1.0f, 0.0f))) * moveSpeed;
 				if (keys.right)
-					position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
+					position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, -1.0f, 0.0f))) * moveSpeed;
 
-				updateViewMatrix();
 			}
 		}
+		updateViewMatrix();
 	};
 
 	// Update camera passing separate axis data (gamepad)
@@ -184,7 +184,7 @@ public:
 			if (fabsf(axisLeft.x) > deadZone)
 			{
 				float pos = (fabsf(axisLeft.x) - deadZone) / range;
-				position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) * pos * ((axisLeft.x < 0.0f) ? -1.0f : 1.0f) * moveSpeed;
+				position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, -1.0f, 0.0f))) * pos * ((axisLeft.x < 0.0f) ? -1.0f : 1.0f) * moveSpeed;
 				retVal = true;
 			}
 
@@ -214,5 +214,35 @@ public:
 
 		return retVal;
 	}
+
+	glm::vec3 GetForward() {
+		glm::vec3 camFront;
+		camFront = matrices.view[1];
+		camFront = glm::normalize(camFront);
+
+		return camFront;
+	}
+
+	glm::vec3 GetUp() {
+		glm::vec3 camFront;
+		camFront = matrices.view[0];
+		camFront = glm::normalize(camFront);
+
+		return camFront;
+	}
+
+	glm::vec3 GetRight() {
+		glm::vec3 camFront;
+		camFront = matrices.view[2];
+		camFront = glm::normalize(camFront);
+
+		return camFront;
+	}
+
+	float GetFov() {
+		return fov;
+	}
+
+
 
 };

@@ -25,6 +25,24 @@
 #include <android/asset_manager.h>
 #endif
 
+#ifndef GET_ASSET_PATH_FUNC
+#define GET_ASSET_PATH_FUNC
+#if !(defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
+// iOS & macOS: getAssetPath() implemented externally to allow access to Objective-C components
+const static std::string getAssetPath() {
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+	return "";
+#elif defined(VK_EXAMPLE_DATA_DIR)
+	return VK_EXAMPLE_DATA_DIR;
+#else
+	return "./../data/";
+#endif
+}
+#endif
+#endif
+
+
+
 namespace vks
 {
 	/** @brief Vulkan texture base class */

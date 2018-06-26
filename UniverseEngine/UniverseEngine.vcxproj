@@ -171,8 +171,18 @@
     <ClInclude Include="..\external\imgui\stb_truetype.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\Components.h" />
+    <ClInclude Include="source\components\Camera.h" />
+    <ClInclude Include="source\components\Movement.h" />
+    <ClInclude Include="source\components\Transform.h" />
     <ClInclude Include="source\ECS.h" />
+    <ClCompile Include="source\components\Transform.cpp" />
+    <ClCompile Include="source\UniFrustum.cpp" />
+    <ClInclude Include="source\UniFrustum.hpp" />
+    <ClInclude Include="source\Geometry.hpp" />
+    <ClInclude Include="source\Patch.hpp" />
     <ClInclude Include="source\Systems.h" />
+    <ClInclude Include="source\Triangulator.hpp" />
+    <ClInclude Include="source\UniBody.h" />
     <ClInclude Include="source\UniEngine.h" />
     <ClInclude Include="source\UniModel.h" />
     <ClInclude Include="source\UniScene.h" />
@@ -201,7 +211,10 @@
     <ClCompile Include="..\external\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\Patch.cpp" />
     <ClCompile Include="source\Systems.cpp" />
+    <ClCompile Include="source\Triangulator.cpp" />
+    <ClCompile Include="source\UniBody.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
     <ClCompile Include="source\UniModel.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
@@ -222,6 +235,19 @@
     <None Include="data\shaders\deferredmultisampling\deferred.vert" />
     <None Include="data\shaders\deferredmultisampling\mrt.frag" />
     <None Include="data\shaders\deferredmultisampling\mrt.vert" />
+    <None Include="data\shaders\planet.frag" />
+    <None Include="data\shaders\planet.frag.spv" />
+    <None Include="data\shaders\planet.vert" />
+    <None Include="data\shaders\planet.vert.spv">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </None>
     <None Include="data\shaders\scenerendering\scene.frag" />
     <None Include="data\shaders\scenerendering\scene.vert" />
   </ItemGroup>

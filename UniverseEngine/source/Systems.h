@@ -13,3 +13,13 @@ public:
 	virtual void tick(ECS::World* world, float deltaTime) override;
 
 };
+
+class CameraSystem : public ECS::EntitySystem {
+public:
+	CameraSystem() {
+	}
+
+	virtual ~CameraSystem() {}
+
+	virtual void tick(ECS::World* world, float deltaTime) override;
+};

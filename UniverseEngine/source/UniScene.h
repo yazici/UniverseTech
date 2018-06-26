@@ -5,15 +5,22 @@
 #include "UniSceneObject.h"
 #include "UniModel.h"
 
+
+class UniBody;
+class UniEngine;
+
 class UniScene {
 public:
 	UniScene();
 	~UniScene();
 
+	ECS::ComponentHandle<CameraComponent> GetCameraComponent() { return m_CurrentCamera->m_Entity->get<CameraComponent>(); }
+
+	void Initialize(UniEngine* engine);
 	template <class T> std::shared_ptr<T> Make(std::shared_ptr<T> so);
 	template<class _Ty0, class... _Types> std::shared_ptr<_Ty0> Make(_Types&&... _Args);
 
-
+	std::shared_ptr<UniSceneObject> GetCameraObject() { return m_CurrentCamera; }
 
 	ECS::World* m_World;
 
@@ -24,6 +31,10 @@ public:
 
 	std::vector<std::shared_ptr<UniModel>> GetModels();
 	void AddSceneObject(std::shared_ptr<UniSceneObject> so);
+
+	std::shared_ptr<UniBody> m_BodyTest;
+private:
+	std::shared_ptr<UniSceneObject> m_CurrentCamera;
 };
 
 
