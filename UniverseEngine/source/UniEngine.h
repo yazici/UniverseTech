@@ -11,6 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <gainput/gainput.h>
+
 #include <vulkan/vulkan.h>
 #include "vks/vulkanexamplebase.h"
 #include "vks/VulkanBuffer.hpp"
@@ -40,6 +42,8 @@ private:
 public:
 
 	static UniEngine& GetInstance();
+
+	gainput::InputManager m_InputManager;
 
 	// Vertex layout for the models
 	vks::VertexLayout vertexLayout = vks::VertexLayout({
