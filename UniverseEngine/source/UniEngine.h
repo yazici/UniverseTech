@@ -95,6 +95,7 @@ public:
 		VkPipeline offscreenSampleShading;	// (Offscreen) scene rendering (fill G-Buffers) with sample shading rate enabled
 		VkPipeline debug;					// G-Buffers debug display
 		VkPipeline offScreenPlanet;
+		VkPipeline offScreenPlanetWireframe;
 	} pipelines;
 
 	struct {
@@ -147,6 +148,7 @@ public:
 	void render() override;
 	void viewChanged() override;
 	void OnUpdateUIOverlay(vks::UIOverlay *overlay) override;
+	void ToggleWireframe();
 
 	VkDevice GetDevice() { return device; }
 	VkQueue GetQueue() { return queue; }
@@ -155,6 +157,7 @@ public:
 	bool m_debugDisplay = false;
 	bool m_useMSAA = true;
 	bool m_useSampleShading = true;
+	bool m_useWireframe = false;
 
 	// One sampler for the frame buffer color attachments
 	VkSampler m_colorSampler;

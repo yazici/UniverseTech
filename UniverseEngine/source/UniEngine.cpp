@@ -71,6 +71,10 @@ void UniEngine::Shutdown() {
 	vkDestroyPipeline(device, pipelines.offscreenSampleShading, nullptr);
 	vkDestroyPipeline(device, pipelines.debug, nullptr);
 	vkDestroyPipeline(device, pipelines.offScreenPlanet, nullptr);
+	if (deviceFeatures.fillModeNonSolid)
+	{
+		vkDestroyPipeline(device, pipelines.offScreenPlanetWireframe, nullptr);
+	}
 
 	vkDestroyPipelineLayout(device, pipelineLayouts.deferred, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayouts.offscreen, nullptr);
@@ -140,6 +144,15 @@ void UniEngine::getEnabledFeatures() {
 	} else if(deviceFeatures.textureCompressionETC2) {
 		enabledFeatures.textureCompressionETC2 = VK_TRUE;
 	}
+
+	// Fill mode non solid is required for wireframe display
+	if (deviceFeatures.fillModeNonSolid) {
+		enabledFeatures.fillModeNonSolid = VK_TRUE;
+		// Wide lines must be present for line width > 1.0f
+		if (deviceFeatures.wideLines) {
+			enabledFeatures.wideLines = VK_TRUE;
+		}
+	};
 }
 
 // Create a frame buffer attachment
@@ -406,7 +419,12 @@ void UniEngine::buildDeferredCommandBuffer() {
 		// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
 		
 		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-		vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
+		if (m_useWireframe) {
+			vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
+		}
+		else {
+			vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
+		}
 		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
 		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
 		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
@@ -466,10 +484,14 @@ void UniEngine::buildPlanetCommandBuffer() {
 	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_useSampleShading ? pipelines.offscreenSampleShading : pipelines.offscreen);
 
 	VkDeviceSize offsets[1] = { 0 };
-	// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
 	auto body = m_CurrentScene->m_BodyTest;
 	vkCmdBindDescriptorSets(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
+	if (m_useWireframe) {
+		vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
+	}
+	else {
+		vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
+	}
 	vkCmdBindVertexBuffers(m_planetCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
 	vkCmdBindVertexBuffers(m_planetCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
 	vkCmdBindIndexBuffer(m_planetCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
@@ -1032,8 +1054,6 @@ void UniEngine::preparePipelines() {
 	shaderStages[0] = loadShader(getAssetPath() + "shaders/deferredmultisampling/mrt.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 	shaderStages[1] = loadShader(getAssetPath() + "shaders/deferredmultisampling/mrt.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
-	//rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
-	//rasterizationState.lineWidth = 2.0f;
 	multisampleState.rasterizationSamples = SAMPLE_COUNT;
 	multisampleState.alphaToCoverageEnable = VK_TRUE;
 
@@ -1071,6 +1091,13 @@ void UniEngine::preparePipelines() {
 	shaderStages[1] = loadShader(getAssetPath() + "shaders/planet.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanet));
+
+	rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
+	rasterizationState.lineWidth = 2.0f;
+
+	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanetWireframe));
+
+
 }
 
 size_t UniEngine::getDynamicAlignment() {
@@ -1306,6 +1333,16 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 				buildDeferredCommandBuffer();
 			}
 		}
+		if (vulkanDevice->features.fillModeNonSolid) {
+			if (overlay->checkBox("Wireframe Planet", &m_useWireframe)) {
+				//buildDeferredCommandBuffer();
+			}
+		}
 	}
+}
+
+void UniEngine::ToggleWireframe()
+{
+	preparePipelines();
 }
 
