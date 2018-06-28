@@ -184,6 +184,7 @@
     <ClInclude Include="source\Triangulator.hpp" />
     <ClInclude Include="source\UniBody.h" />
     <ClInclude Include="source\UniEngine.h" />
+    <ClInclude Include="source\UniInput.h" />
     <ClInclude Include="source\UniModel.h" />
     <ClInclude Include="source\UniScene.h" />
     <ClInclude Include="source\UniSceneObject.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="source\Triangulator.cpp" />
     <ClCompile Include="source\UniBody.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
+    <ClCompile Include="source\UniInput.cpp" />
     <ClCompile Include="source\UniModel.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
     <ClCompile Include="source\UniSceneObject.cpp" />
