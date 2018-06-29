@@ -257,6 +257,9 @@ public:
 	void setupDPIAwareness();
 	HWND setupWindow(HINSTANCE hinstance, WNDPROC wndproc);
 	void handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	/** @brief (Virtual) Called when Windows checks the MSG queue, passes msg to engine for, e.g., Input Manager */
+	virtual void handleWMMessages(MSG* msg);
+
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 	static int32_t handleAppInput(struct android_app* app, AInputEvent* event);
 	static void handleAppCommand(android_app* app, int32_t cmd);
