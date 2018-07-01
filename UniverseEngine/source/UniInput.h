@@ -5,6 +5,7 @@
 #include <map>
 #include "vks/VulkanAndroid.h"
 #include <vector>
+#include <utility>
 
 
 class UniInput {
@@ -17,6 +18,13 @@ public:
 		ButtonToggleUI,
 		ButtonClick,
 		ButtonRightClick,
+		PointerX,
+		PointerY
+	};
+
+	struct PointerPos {
+		float X = 0.0f;
+		float Y = 0.0f;
 	};
 
 
@@ -27,6 +35,7 @@ public:
 	std::unique_ptr<gainput::InputMap> m_InputMap;
 
 	std::map<Button, std::vector<std::function<void(bool)>>> m_ButtonCallbacks;
+	std::vector<std::function<void(float, float)>> m_PointerPosCallbacks;
 
 	void Initialize(int height, int width);
 
@@ -34,7 +43,12 @@ public:
 
 	void HandleWM(MSG& msg);
 
-	void RegisterCallback(Button button, std::function<void(bool)>func);
+	void RegisterButtonCallback(Button button, std::function<void(bool)>func);
 	void HandleButton(Button button);
+
+	void RegisterPointerPosCallback(std::function<void(float, float)>func);
+	PointerPos GetPointerXY();
+
+	bool GetButtonState(Button button);
 };
 

@@ -19,6 +19,7 @@
 
 #include "UniModel.h"
 #include "UniScene.h"
+#include "UniInput.h"
 
 #define VERTEX_BUFFER_BIND_ID 0
 #define INSTANCE_BUFFER_BIND_ID 1
@@ -170,10 +171,16 @@ public:
 
 private:
 	std::shared_ptr<UniScene> m_CurrentScene;
+	std::shared_ptr<UniInput> m_InputManager;
 
 public:
 	std::shared_ptr<UniScene> GetScene() { return m_CurrentScene; }
 	void windowResized() override;
+	std::shared_ptr<UniInput> GetInputManager() { return m_InputManager; }
+	void SetupInput();
 
+	void handleWMMessages(MSG& msg) override;
+
+	void updateOverlay() override;
 
 };

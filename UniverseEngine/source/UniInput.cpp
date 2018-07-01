@@ -29,17 +29,43 @@ void UniInput::Initialize(int height, int width) {
 	m_InputMap->MapBool(ButtonQuit, keyboardId, gainput::KeyEscape);
 
 	m_InputMap->MapBool(ButtonPause, keyboardId, gainput::KeyP);
+
+	m_InputMap->MapFloat(PointerX, mouseId, gainput::MouseAxisX);
+	m_InputMap->MapFloat(PointerY, mouseId, gainput::MouseAxisY);
+}
+
+UniInput::PointerPos UniInput::GetPointerXY() {
+	return { m_InputMap->GetFloat(PointerX) * m_InputManager.GetDisplayWidth(), m_InputMap->GetFloat(PointerY) * m_InputManager.GetDisplayHeight() };
+}
+
+bool UniInput::GetButtonState(Button button) {
+	return m_InputMap->GetBool(button);
 }
 
 void UniInput::Tick() {
 	m_InputManager.Update();
+
+	for(auto key : m_ButtonCallbacks) {
+		if(m_InputMap->GetBoolWasDown(key.first)) {
+			HandleButton(key.first);
+		}
+	}
+
+	if(m_InputMap->GetFloatDelta(PointerX) != 0.0f || m_InputMap->GetFloatDelta(PointerY) != 0.0f) {
+		for(const auto& cb : m_PointerPosCallbacks) {
+			auto pos = GetPointerXY();
+			cb(pos.X, pos.Y);
+		}
+	}
+
+
 }
 
 void UniInput::HandleWM(MSG& msg) {
 	m_InputManager.HandleMessage(msg);
 }
 
-void UniInput::RegisterCallback(Button button, std::function<void(bool)>func)
+void UniInput::RegisterButtonCallback(Button button, std::function<void(bool)>func)
 {
 	m_ButtonCallbacks[button].push_back(func);
 }
@@ -47,8 +73,13 @@ void UniInput::RegisterCallback(Button button, std::function<void(bool)>func)
 void UniInput::HandleButton(Button button)
 {
 	auto callbacks = m_ButtonCallbacks[button];
-	for (auto cb : callbacks) {
-		cb(m_InputMap->GetBool(button));
+
+	for (const auto& cb : callbacks) {
+		cb(true);
 	}
+}
+
+void UniInput::RegisterPointerPosCallback(std::function<void(float, float)>func) {
+	m_PointerPosCallbacks.push_back(func);
 }
 

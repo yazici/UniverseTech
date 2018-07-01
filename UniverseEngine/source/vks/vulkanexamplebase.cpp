@@ -286,16 +286,16 @@ void VulkanExampleBase::renderLoop()
 	destHeight = height;
 #if defined(_WIN32)
 	MSG msg;
-	bool quitMessageReceived = false;
-	while (!quitMessageReceived) {
-		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+	m_QuitMessageReceived = false;
+	while (!m_QuitMessageReceived) {
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 			if (msg.message == WM_QUIT) {
-				quitMessageReceived = true;
+				m_QuitMessageReceived = true;
 				break;
 			}
-			handleWMMessages(&msg);
+			handleWMMessages(msg);
 		}
 		renderFrame();
 	}
@@ -2054,7 +2054,7 @@ void VulkanExampleBase::OnUpdateUIOverlay(vks::UIOverlay *overlay) {}
 
 
 #if defined(_WIN32)
-void VulkanExampleBase::handleWMMessages(MSG* msg)
+void VulkanExampleBase::handleWMMessages(MSG& msg)
 {
 	throw std::logic_error("The method or operation is not implemented.");
 }
