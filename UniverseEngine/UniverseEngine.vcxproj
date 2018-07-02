@@ -173,8 +173,12 @@
     <ClInclude Include="source\Components.h" />
     <ClInclude Include="source\components\Camera.h" />
     <ClInclude Include="source\components\Movement.h" />
+    <ClInclude Include="source\components\PlayerControlSystem.h" />
+    <ClInclude Include="source\components\PlayerMovement.h" />
     <ClInclude Include="source\components\Transform.h" />
     <ClInclude Include="source\ECS.h" />
+    <ClCompile Include="source\components\Movement.cpp" />
+    <ClCompile Include="source\components\PlayerControlSystem.cpp" />
     <ClCompile Include="source\components\Transform.cpp" />
     <ClCompile Include="source\UniFrustum.cpp" />
     <ClInclude Include="source\UniFrustum.hpp" />

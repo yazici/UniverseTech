@@ -1,4 +1,5 @@
 #include "UniInput.h"
+#include <GainputMapFilters.h>
 
 UniInput::UniInput() {
 
@@ -22,6 +23,7 @@ void UniInput::Initialize(int height, int width) {
 	m_InputMap->MapBool(ButtonClick, touchId, gainput::Touch0Down);
 
 	m_InputMap->MapBool(ButtonRightClick, mouseId, gainput::MouseButtonRight);
+	m_InputMap->MapBool(ButtonRightClick, padId, gainput::PadButtonB);
 
 	m_InputMap->MapBool(ButtonToggleUI, keyboardId, gainput::KeyF1);
 	m_InputMap->MapBool(ButtonToggleUI, keyboardId, gainput::KeyU);
@@ -32,6 +34,19 @@ void UniInput::Initialize(int height, int width) {
 
 	m_InputMap->MapFloat(PointerX, mouseId, gainput::MouseAxisX);
 	m_InputMap->MapFloat(PointerY, mouseId, gainput::MouseAxisY);
+
+	m_InputMap->MapFloat(AxisThrust, padId, gainput::PadButtonR2, 0.f, 1.f);
+	m_InputMap->MapFloat(AxisThrust, padId, gainput::PadButtonL2, 0.f, 1.f, gainput::InvertSymmetricInput);
+	m_InputMap->MapFloat(AxisStrafe, padId, gainput::PadButtonRight, 0.f, 1.f);
+	m_InputMap->MapFloat(AxisStrafe, padId, gainput::PadButtonLeft, 0.f, 1.f, gainput::InvertSymmetricInput);
+
+
+	m_InputMap->MapFloat(AxisYaw, padId, gainput::PadButtonLeftStickX);
+	m_InputMap->MapFloat(AxisPitch, padId, gainput::PadButtonLeftStickY);
+	m_InputMap->MapFloat(AxisRoll, padId, gainput::PadButtonRightStickX);
+	m_InputMap->MapFloat(AxisAscend, padId, gainput::PadButtonRightStickY);
+	
+
 }
 
 UniInput::PointerPos UniInput::GetPointerXY() {
@@ -67,7 +82,7 @@ void UniInput::HandleWM(MSG& msg) {
 
 void UniInput::RegisterButtonCallback(Button button, std::function<void(bool)>func)
 {
-	m_ButtonCallbacks[button].push_back(func);
+	m_ButtonCallbacks[button].emplace_back(func);
 }
 
 void UniInput::HandleButton(Button button)
@@ -79,7 +94,11 @@ void UniInput::HandleButton(Button button)
 	}
 }
 
+void UniInput::RegisterAxisCallback(Button axis, std::function<void(float)>func) {
+	m_AxisCallbacks[axis].emplace_back(func);
+}
+
 void UniInput::RegisterPointerPosCallback(std::function<void(float, float)>func) {
-	m_PointerPosCallbacks.push_back(func);
+	m_PointerPosCallbacks.emplace_back(func);
 }
 

@@ -3,20 +3,61 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <algorithm>
 
 
 struct MovementComponent {
-	MovementComponent() : m_dVelocity(glm::dvec3(0.0)), m_Rotation(glm::vec3(0.f)), m_RotationSpeed(float(0.f)) {}
-	MovementComponent(glm::dvec3 vel, glm::vec3 rot = glm::vec3(0), float rotSpeed = 0.f) : m_dVelocity(vel), m_Rotation(rot), m_RotationSpeed(rotSpeed) {}
+	MovementComponent() : m_dVelocity(glm::dvec3(0.0)), m_Rotation(glm::vec3(0.f)) {}
+	MovementComponent(glm::dvec3 vel, glm::vec3 rot = glm::vec3(0)) : m_dVelocity(vel), m_Rotation(rot) {}
 
-	glm::dvec3 m_dVelocity;
-	glm::vec3 m_Rotation;
-	float m_RotationSpeed;
+	/** @brief units per second */
+	glm::dvec3 m_dVelocity; 
+	/** @brief degrees per second, pitch yaw roll */
+	glm::vec3 m_Rotation; 
+
+	/** @brief units per second */
+	float m_MaxSpeed = 0.0f; 
+	 /** @brief units per second */
+	float m_MaxReverse = 0.0f;
+	/** @brief units per second */
+	float m_MaxStrafe = 0.0f; 
+	/** @brief units per second */
+	float m_MaxVertical = 0.0f; 
+
+	/** @brief units per second, per second */
+	float m_MaxAccel = 0.0f; 
+	/** @brief units per second, per second */
+	float m_MaxDecel = 0.0f; 
+	/** @brief units per second, per second */
+	float m_MaxStrafeAccel = 0.0f; 
+	/** @brief units per second, per second */
+	float m_MaxVerticalAccel = 0.0f; 
+	/** @brief units per second, per second */
+	float m_Drag = 0.0f; 
+
+	/** @brief degrees per second */
+	float m_MaxPitch = 0.0f; 
+	/** @brief degrees per second */
+	float m_MaxYaw = 0.0f; 
+	/** @brief degrees per second */
+	float m_MaxRoll = 0.0f; 
+
+	/** @brief degrees per second per second */
+	float m_MaxPitchAccel = 0.f;
+	/** @brief degrees per second per second */
+	float m_MaxYawAccel = 0.f;
+	/** @brief degrees per second per second */
+	float m_MaxRollAccel = 0.f;
+	/** @brief degrees per second per second */
+	float m_RotationalDrag = 0.0f;
+
 
 	bool isRelative = true;
 
-	glm::dvec3 m_dNewPosition;
-	glm::vec4 m_NewRotation;
-
+	void ApplyAcceleration(glm::vec3 accel, float deltaTime);
+	void ApplyTorque(glm::vec3 euler, float deltaTime);
+	void CrashStop(float deltaTime = 0.f);
+	void FullStop(float deltaTime);
+	void ApplyDrag(float deltaTime);
 };
 

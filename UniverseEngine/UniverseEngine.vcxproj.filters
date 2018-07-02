@@ -165,6 +165,12 @@
     <ClInclude Include="source\UniInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\components\PlayerMovement.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\PlayerControlSystem.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -226,6 +232,12 @@
     </ClCompile>
     <ClCompile Include="source\UniInput.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\PlayerControlSystem.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\Movement.cpp">
+      <Filter>Source Files\components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

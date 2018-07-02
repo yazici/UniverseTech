@@ -39,16 +39,11 @@ void TransformComponent::SetPitch(float p) {
 	if(p > 360)
 		p -= 360.f;
 
-	m_Rot.x = p;
 }
 
 void TransformComponent::SetYaw(float y) {
-	if(y < 0)
-		y += 360.f;
-	if(y > 360)
-		y -= 360.f;
-
-	m_Rot.y = y;
+	glm::vec3 euler = glm::vec3(0, y, 0);
+	Rotate(euler);
 }
 
 void TransformComponent::SetRoll(float r) {
@@ -57,7 +52,6 @@ void TransformComponent::SetRoll(float r) {
 	if(r > 360)
 		r -= 360.f;
 
-	m_Rot.z = r;
 }
 
 void TransformComponent::SetScale(const glm::vec3 &scale) {
@@ -71,7 +65,14 @@ void TransformComponent::Rotate(glm::vec3 axis, float degrees) {
 	m_Forward = rotQ * m_Forward;
 	m_Up = rotQ * m_Up;
 	m_Right = rotQ * m_Right;
-	m_Rot = glm::degrees(glm::eulerAngles(rotQ));
+}
+
+void TransformComponent::Rotate(glm::vec3 euler) {
+	auto rotQ = glm::quat(glm::radians(euler));
+	m_Forward = rotQ * m_Forward;
+	m_Up = rotQ * m_Up;
+	m_Right = rotQ * m_Right;
+
 }
 
 void TransformComponent::MoveForward(double distance) {

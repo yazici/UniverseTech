@@ -19,7 +19,13 @@ public:
 		ButtonClick,
 		ButtonRightClick,
 		PointerX,
-		PointerY
+		PointerY,
+		AxisPitch,
+		AxisRoll,
+		AxisYaw,
+		AxisThrust,
+		AxisStrafe,
+		AxisAscend
 	};
 
 	struct PointerPos {
@@ -35,6 +41,7 @@ public:
 	std::unique_ptr<gainput::InputMap> m_InputMap;
 
 	std::map<Button, std::vector<std::function<void(bool)>>> m_ButtonCallbacks;
+	std::map<Button, std::vector<std::function<void(float)>>> m_AxisCallbacks;
 	std::vector<std::function<void(float, float)>> m_PointerPosCallbacks;
 
 	void Initialize(int height, int width);
@@ -46,6 +53,7 @@ public:
 	void RegisterButtonCallback(Button button, std::function<void(bool)>func);
 	void HandleButton(Button button);
 
+	void RegisterAxisCallback(Button axis, std::function<void(float)>func);
 	void RegisterPointerPosCallback(std::function<void(float, float)>func);
 	PointerPos GetPointerXY();
 
