@@ -96,7 +96,6 @@ glm::mat4 TransformComponent::GetModelMat() {
 	glm::dmat4 mat = glm::dmat4(1.0);
 	mat = glm::translate(mat, m_dPos) * glm::dmat4(glm::mat3(m_Right, m_Up, m_Forward)) * glm::scale(mat, (glm::dvec3)m_Scale);
 
-	// TODO: this is not picking up rotation from parent!!!
 	if(m_Parent) {
 		mat = glm::dmat4(m_Parent->GetTransform()->GetModelMat()) * mat;
 	}

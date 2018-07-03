@@ -9,16 +9,16 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 	switch (event.axis)
 	{
 	case UniInput::AxisThrust:
-		inputDirection.z += event.value;
+		inputDirection.z = event.value;
 		break;
 	case UniInput::AxisStrafe:
-		inputDirection.x += event.value;
+		inputDirection.x = event.value;
 		break;
 	case UniInput::AxisPitch:
-		inputRotation.x += event.value;
+		inputRotation.x = event.value;
 		break;
 	case UniInput::AxisYaw:
-		inputRotation.y += event.value;
+		inputRotation.y = event.value;
 		break;
 	}
 
@@ -34,7 +34,5 @@ void PlayerControlSystem::tick(ECS::World* world, float deltaTime) {
 		movement->ApplyAcceleration(direction, deltaTime);
 	});
 
-	inputDirection = glm::vec3(0);
-	inputRotation = glm::vec3(0);
 
 }

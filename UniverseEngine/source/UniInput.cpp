@@ -1,5 +1,8 @@
 #include "UniInput.h"
 #include <GainputMapFilters.h>
+#include <ostream>
+#include <iostream>
+#include "UniEngine.h"
 
 UniInput::UniInput() {
 
@@ -11,12 +14,23 @@ UniInput::~UniInput() {
 
 void UniInput::Initialize(int height, int width) {
 	m_InputManager.SetDisplaySize(width, height);
+	
+	m_InputManager.CreateDevice<gainput::InputDeviceKeyboard>(gainput::InputDevice::DV_RAW);
 	const gainput::DeviceId keyboardId = m_InputManager.CreateDevice<gainput::InputDeviceKeyboard>();
+	
+	m_InputManager.CreateDevice<gainput::InputDeviceMouse>(gainput::InputDevice::DV_RAW);
 	const gainput::DeviceId mouseId = m_InputManager.CreateDevice<gainput::InputDeviceMouse>();
+	
+	//m_InputManager.CreateDevice<gainput::InputDevicePad>(gainput::InputDevice::DV_RAW);
 	const gainput::DeviceId padId = m_InputManager.CreateDevice<gainput::InputDevicePad>();
+	
+	//m_InputManager.CreateDevice<gainput::InputDeviceTouch>(gainput::InputDevice::DV_RAW);
 	const gainput::DeviceId touchId = m_InputManager.CreateDevice<gainput::InputDeviceTouch>();
 
-	m_InputMap = std::make_unique<gainput::InputMap>(m_InputManager);
+	m_InputMap = std::make_unique<gainput::InputMap>(m_InputManager, "playermap");
+
+	// map for per-frame buttons
+
 	m_InputMap->MapBool(ButtonClick, keyboardId, gainput::KeyReturn);
 	m_InputMap->MapBool(ButtonClick, mouseId, gainput::MouseButtonLeft);
 	m_InputMap->MapBool(ButtonClick, padId, gainput::PadButtonA);
@@ -31,6 +45,7 @@ void UniInput::Initialize(int height, int width) {
 	m_InputMap->MapBool(ButtonQuit, keyboardId, gainput::KeyEscape);
 
 	m_InputMap->MapBool(ButtonPause, keyboardId, gainput::KeyP);
+	m_InputMap->MapBool(ButtonPause, padId, gainput::PadButtonStart);
 
 	m_InputMap->MapFloat(PointerX, mouseId, gainput::MouseAxisX);
 	m_InputMap->MapFloat(PointerY, mouseId, gainput::MouseAxisY);
@@ -46,6 +61,9 @@ void UniInput::Initialize(int height, int width) {
 	m_InputMap->MapFloat(AxisRoll, padId, gainput::PadButtonRightStickX);
 	m_InputMap->MapFloat(AxisAscend, padId, gainput::PadButtonRightStickY);
 	
+
+	m_Listener = std::make_unique<UniMappedButtonListener>(1, *this);
+	gainput::ListenerId buttonListenerId = m_InputMap->AddListener(m_Listener.get());
 
 }
 
@@ -98,7 +116,66 @@ void UniInput::RegisterAxisCallback(Button axis, std::function<void(float)>func)
 	m_AxisCallbacks[axis].emplace_back(func);
 }
 
+void UniInput::RegisterFloatCallback(Button button, std::function<void(float, float)>func) {
+	m_FloatButtonCallbacks[button].emplace_back(func);
+}
+
+void UniInput::RegisterBoolCallback(Button button, std::function<void(bool, bool)>func) {
+	m_BoolButtonCallbacks[button].emplace_back(func);
+}
+
+void UniInput::OnPress(Button button, std::function<void()>func) {
+	m_KeyDownCallbacks[button].emplace_back(func);
+}
+
+void UniInput::OnRelease(Button button, std::function<void()>func) {
+	m_KeyUpCallbacks[button].emplace_back(func);
+}
+
 void UniInput::RegisterPointerPosCallback(std::function<void(float, float)>func) {
 	m_PointerPosCallbacks.emplace_back(func);
 }
 
+void UniInput::HandleBoolCallback(gainput::UserButtonId button, bool oldValue, bool newValue) {
+	auto b = static_cast<Button>(button);
+	auto callbacks = m_BoolButtonCallbacks[b];
+	for(const auto& cb : callbacks) {
+		cb(oldValue, newValue);
+	}
+
+	if(newValue && !oldValue) {
+		auto kdCallbacks = m_KeyDownCallbacks[b];
+		for(const auto& cb : kdCallbacks) {
+			cb();
+		}
+	}
+	
+	if(oldValue && !newValue) {
+		auto kuCallbacks = m_KeyUpCallbacks[b];
+		for(const auto& cb : kuCallbacks) {
+			cb();
+		}
+	}
+
+}
+
+
+void UniInput::HandleFloatCallback(gainput::UserButtonId button, float oldValue, float newValue) {
+	auto callbacks = m_FloatButtonCallbacks[static_cast<Button>(button)];
+	for(const auto& cb : callbacks) {
+		std::cout << "Handling callback for button: " << button << ", new value: " << newValue << std::endl;
+		cb(oldValue, newValue);
+	}
+}
+
+
+bool UniMappedButtonListener::OnUserButtonBool(gainput::UserButtonId button, bool oldValue, bool newValue) {
+
+	m_InputManager.HandleBoolCallback(button, oldValue, newValue);
+	return true;
+}
+
+bool UniMappedButtonListener::OnUserButtonFloat(gainput::UserButtonId button, float oldValue, float newValue) {
+	m_InputManager.HandleFloatCallback(button, oldValue, newValue);
+	return true;
+}

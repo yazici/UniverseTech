@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "UniBody.h"
 #include <algorithm>
+#include "components/PlayerControlSystem.h"
 
 #define ENABLE_VALIDATION true
 
@@ -1282,8 +1283,8 @@ void UniEngine::draw() {
 
 void UniEngine::prepare() {
 
-	SetupInput();
 	m_CurrentScene->Initialize(this);
+	SetupInput();
 	VulkanExampleBase::prepare();
 	loadAssets();
 	setupVertexDescriptions();
@@ -1352,11 +1353,14 @@ void UniEngine::ToggleWireframe()
 }
 
 void UniEngine::SetupInput() {
+	m_CurrentScene->m_World->registerSystem(new PlayerControlSystem());
 	m_InputManager = std::make_shared<UniInput>();
 	m_InputManager->Initialize(height, width);
 
-	m_InputManager->RegisterButtonCallback(UniInput::ButtonQuit, [this](bool state){ if(state) m_QuitMessageReceived = true; });
-	m_InputManager->RegisterButtonCallback(UniInput::ButtonPause, [this](bool state) { paused = !paused; });
+	m_InputManager->OnPress(UniInput::ButtonQuit, [this](){ m_QuitMessageReceived = true; });
+	m_InputManager->OnRelease(UniInput::ButtonPause, [this]() { paused = !paused; });
+
+	m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisYaw, newValue }); });
 }
 
 void UniEngine::handleWMMessages(MSG& msg) {
