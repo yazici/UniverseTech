@@ -16,6 +16,9 @@ public:
 	glm::vec3 inputDirection = glm::vec3(0);
 	glm::vec3 inputRotation = glm::vec3(0);
 
+	bool isCrashStop = false;
+	bool isFullStop = false;
+
 
 	virtual ~PlayerControlSystem() {}
 

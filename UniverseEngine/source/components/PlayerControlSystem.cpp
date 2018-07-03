@@ -9,6 +9,7 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 	switch (event.axis)
 	{
 	case UniInput::AxisThrust:
+		std::cout << "Setting THRUST: " << event.value << std::endl;
 		inputDirection.z = event.value;
 		break;
 	case UniInput::AxisStrafe:
@@ -18,8 +19,10 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 		inputRotation.x = event.value;
 		break;
 	case UniInput::AxisYaw:
-		inputRotation.y = event.value;
+		inputRotation.y = -event.value;
 		break;
+	case UniInput::ButtonRightClick:
+		isFullStop = event.value == 1.f;
 	}
 
 }
@@ -30,9 +33,14 @@ void PlayerControlSystem::tick(ECS::World* world, float deltaTime) {
 		glm::vec3 direction = inputDirection;
 		glm::vec3 rotation = inputRotation;
 
-		movement->ApplyTorque(rotation, deltaTime);
-		movement->ApplyAcceleration(direction, deltaTime);
+		if(!isFullStop) {
+			movement->ApplyTorque(rotation, deltaTime);
+			movement->ApplyAcceleration(direction, deltaTime);
+		} else {
+			movement->FullStop(deltaTime);
+		}
 	});
+
 
 
 }

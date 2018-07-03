@@ -1,4 +1,5 @@
 #include "Movement.h"
+#include <iostream>
 
 void MovementComponent::ApplyAcceleration(glm::vec3 accel, float deltaTime) {
 	accel.x *= m_MaxStrafeAccel;
@@ -8,20 +9,26 @@ void MovementComponent::ApplyAcceleration(glm::vec3 accel, float deltaTime) {
 	else
 		accel.z *= m_MaxDecel;
 
-	accel.x = std::clamp(accel.x, -m_MaxStrafeAccel, m_MaxStrafeAccel);
-	accel.y = std::clamp(accel.y, -m_MaxVerticalAccel, m_MaxVerticalAccel);
-	accel.z = std::clamp(accel.z, m_MaxDecel, m_MaxAccel);
 	m_dVelocity += accel * deltaTime;
+
+	m_dVelocity = glm::clamp(m_dVelocity, glm::dvec3(-m_MaxStrafe, -m_MaxVertical, -m_MaxReverse), glm::dvec3(m_MaxStrafe, m_MaxVertical, m_MaxSpeed));
 }
 
 void MovementComponent::ApplyTorque(glm::vec3 euler, float deltaTime) {
 	euler.x *= m_MaxPitchAccel;
 	euler.y *= m_MaxYawAccel;
 	euler.z *= m_MaxRollAccel;
-	euler.x = std::clamp(euler.x, -m_MaxPitchAccel, m_MaxPitchAccel);
+	/*euler.x = std::clamp(euler.x, -m_MaxPitchAccel, m_MaxPitchAccel);
 	euler.y = std::clamp(euler.y, -m_MaxYawAccel, m_MaxYawAccel);
-	euler.z = std::clamp(euler.z, m_MaxRollAccel, m_MaxRollAccel);
-	m_Rotation += euler * deltaTime;
+	euler.z = std::clamp(euler.z, -m_MaxRollAccel, m_MaxRollAccel);*/
+
+	//euler *= deltaTime;
+
+	//std::cout << "Setting rotation: " << euler.x << ", " << euler.y << ", " << euler.z << std::endl;
+
+	euler = glm::clamp(euler, glm::vec3(-m_MaxPitch, -m_MaxYaw, -m_MaxRoll), glm::vec3(m_MaxPitch, m_MaxYaw, m_MaxRoll));
+
+	m_Rotation = euler;
 }
 
 
@@ -31,16 +38,22 @@ void MovementComponent::CrashStop(float deltaTime) {
 }
 
 void MovementComponent::FullStop(float deltaTime) {
-	glm::vec3 accel = -m_dVelocity;
-	accel.x = std::clamp(accel.x, -m_MaxStrafeAccel, m_MaxStrafeAccel);
-	accel.y = std::clamp(accel.y, -m_MaxVerticalAccel, m_MaxVerticalAccel);
-	accel.z = std::clamp(accel.z, m_MaxDecel, m_MaxAccel);
+	glm::vec3 accel = glm::vec3(-m_MaxStrafeAccel, -m_MaxVerticalAccel, -m_MaxDecel);
+
+	if(m_dVelocity.x < 0) {
+		accel.x = m_MaxStrafeAccel;
+	}
+	if(m_dVelocity.y < 0) {
+		accel.y = m_MaxVerticalAccel;
+	}
+	if(m_dVelocity.z < 0) {
+		accel.z = m_MaxAccel;
+	}
+
 	m_dVelocity += accel * deltaTime;
 
 	glm::vec3 euler = -m_Rotation;
-	euler.x = std::clamp(euler.x, -m_MaxPitchAccel, m_MaxPitchAccel);
-	euler.y = std::clamp(euler.y, -m_MaxYawAccel, m_MaxYawAccel);
-	euler.z = std::clamp(euler.z, m_MaxRollAccel, m_MaxRollAccel);
+	
 	m_Rotation += euler * deltaTime;
 
 }

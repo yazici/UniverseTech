@@ -41,6 +41,7 @@ public:
 		AxisRoll,
 		AxisYaw,
 		AxisThrust,
+		AxisReverse,
 		AxisStrafe,
 		AxisAscend
 	};

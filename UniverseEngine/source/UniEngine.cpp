@@ -568,7 +568,7 @@ void UniEngine::loadAssets() {
 	auto armor = m_CurrentScene->Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
 	armor->GetTransform()->SetPosition(glm::vec3( 0.0f, 0.0f, 10.0f ));
 	armor->GetTransform()->SetYaw(180.f);
-	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5.0), glm::vec3(0, -90.f, 0));
+	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 0), glm::vec3(0, 0, 0));
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
 
@@ -1361,6 +1361,12 @@ void UniEngine::SetupInput() {
 	m_InputManager->OnRelease(UniInput::ButtonPause, [this]() { paused = !paused; });
 
 	m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisYaw, newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisThrust, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisReverse, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, -newValue }); });
+	m_InputManager->RegisterBoolCallback(UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRightClick, newValue ? 1.f : 0.f }); });
+
+	m_CurrentScene->GetCameraObject()->AddComponent<MovementComponent>();
+	m_CurrentScene->GetCameraObject()->AddComponent<PlayerControlComponent>();
 }
 
 void UniEngine::handleWMMessages(MSG& msg) {

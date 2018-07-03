@@ -16,18 +16,18 @@ struct MovementComponent {
 	glm::vec3 m_Rotation; 
 
 	/** @brief units per second */
-	float m_MaxSpeed = 0.0f; 
+	float m_MaxSpeed = 20.0f; 
 	 /** @brief units per second */
-	float m_MaxReverse = 0.0f;
+	float m_MaxReverse = 3.0f;
 	/** @brief units per second */
 	float m_MaxStrafe = 0.0f; 
 	/** @brief units per second */
 	float m_MaxVertical = 0.0f; 
 
 	/** @brief units per second, per second */
-	float m_MaxAccel = 0.0f; 
+	float m_MaxAccel = 5.0f; 
 	/** @brief units per second, per second */
-	float m_MaxDecel = 0.0f; 
+	float m_MaxDecel = 20.0f; 
 	/** @brief units per second, per second */
 	float m_MaxStrafeAccel = 0.0f; 
 	/** @brief units per second, per second */
@@ -36,18 +36,18 @@ struct MovementComponent {
 	float m_Drag = 0.0f; 
 
 	/** @brief degrees per second */
-	float m_MaxPitch = 0.0f; 
+	float m_MaxPitch = 180.0f; 
 	/** @brief degrees per second */
-	float m_MaxYaw = 0.0f; 
+	float m_MaxYaw = 90.0f; 
 	/** @brief degrees per second */
-	float m_MaxRoll = 0.0f; 
+	float m_MaxRoll = 90.0f; 
 
 	/** @brief degrees per second per second */
-	float m_MaxPitchAccel = 0.f;
+	float m_MaxPitchAccel = 720.f;
 	/** @brief degrees per second per second */
-	float m_MaxYawAccel = 0.f;
+	float m_MaxYawAccel = 360.f;
 	/** @brief degrees per second per second */
-	float m_MaxRollAccel = 0.f;
+	float m_MaxRollAccel = 720.f;
 	/** @brief degrees per second per second */
 	float m_RotationalDrag = 0.0f;
 

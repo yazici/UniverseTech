@@ -50,8 +50,8 @@ void UniInput::Initialize(int height, int width) {
 	m_InputMap->MapFloat(PointerX, mouseId, gainput::MouseAxisX);
 	m_InputMap->MapFloat(PointerY, mouseId, gainput::MouseAxisY);
 
-	m_InputMap->MapFloat(AxisThrust, padId, gainput::PadButtonR2, 0.f, 1.f);
-	m_InputMap->MapFloat(AxisThrust, padId, gainput::PadButtonL2, 0.f, 1.f, gainput::InvertSymmetricInput);
+	m_InputMap->MapFloat(AxisThrust, padId, gainput::PadButtonAxis5, 0.f, 1.f);
+	m_InputMap->MapFloat(AxisReverse, padId, gainput::PadButtonAxis4, 0.f, 1.f);
 	m_InputMap->MapFloat(AxisStrafe, padId, gainput::PadButtonRight, 0.f, 1.f);
 	m_InputMap->MapFloat(AxisStrafe, padId, gainput::PadButtonLeft, 0.f, 1.f, gainput::InvertSymmetricInput);
 
@@ -163,7 +163,7 @@ void UniInput::HandleBoolCallback(gainput::UserButtonId button, bool oldValue, b
 void UniInput::HandleFloatCallback(gainput::UserButtonId button, float oldValue, float newValue) {
 	auto callbacks = m_FloatButtonCallbacks[static_cast<Button>(button)];
 	for(const auto& cb : callbacks) {
-		std::cout << "Handling callback for button: " << button << ", new value: " << newValue << std::endl;
+		//std::cout << "Handling callback for button: " << button << ", new value: " << newValue << std::endl;
 		cb(oldValue, newValue);
 	}
 }
