@@ -564,28 +564,8 @@ void UniEngine::buildCommandBuffers() {
 }
 
 void UniEngine::loadAssets() {
-	
-	auto armor = m_CurrentScene->Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
-	armor->GetTransform()->SetPosition(glm::vec3( 0.0f, 0.0f, 10.0f ));
-	armor->GetTransform()->SetYaw(180.f);
-	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5), glm::vec3(0, 90, 0));
-	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
-	armor->Load(vertexLayout, vulkanDevice, queue, true);
 
-	auto camObj = GetScene()->GetCameraObject();
-	camObj->SetParent(armor);
-	camObj->GetTransform()->SetPosition(1.f, 3.5f, -4.f);
-	GetScene()->GetCameraComponent()->CalculateView(camObj->GetTransform());
-
-	/*
-	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "");
-	vgr->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, -1.0f));
-	vgr->Load(vertexLayout, vulkanDevice, queue, true);
-	*/
-
-	auto floor = m_CurrentScene->Make<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
-	floor->SetCreateInfo(glm::vec3(0.0f, -2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
-	floor->Load(vertexLayout, vulkanDevice, queue, true);
+	m_CurrentScene->Load();
 
 }
 
@@ -1095,7 +1075,7 @@ void UniEngine::preparePipelines() {
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanet));
 
 	rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
-	rasterizationState.lineWidth = 2.0f;
+	rasterizationState.lineWidth = 1.0f;
 
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanetWireframe));
 
@@ -1365,9 +1345,7 @@ void UniEngine::SetupInput() {
 	m_InputManager->RegisterFloatCallback(UniInput::AxisReverse, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, -newValue }); });
 	m_InputManager->RegisterBoolCallback(UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRightClick, newValue ? 1.f : 0.f }); });
 
-	m_CurrentScene->GetCameraObject()->AddComponent<MovementComponent>();
-	m_CurrentScene->GetCameraObject()->AddComponent<PlayerControlComponent>();
-	m_CurrentScene->GetCameraObject()->m_Entity->get<PlayerControlComponent>()->SetTarget(glm::vec3(0, 0, 0));
+	
 }
 
 void UniEngine::handleWMMessages(MSG& msg) {

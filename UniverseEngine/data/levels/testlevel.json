@@ -1,0 +1,39 @@
+{
+    "level": {
+        "name": "Test Level",
+        "origin": [ 0, 0, 0 ],
+        "sceneObjects": [
+            {
+                "model": {
+                    "name": "Armor",
+                    "mesh": "models/armor/armor.dae",
+                    "texture": "models/armor/color",
+                    "normal": "models/armor/normal",
+                    "position": [ 0.0, 0.0, 0.0 ],
+                    "rotation": [ 0.0, 180.0, 0 ],
+                    "createScale": [ 1, 1, 1 ],
+                    "createUVScale": [ 1, 1 ],
+                    "components": {
+                        "movement": {
+                            "velocity": [ 0, 0, 5 ],
+                            "rotation": [ 0, -90, 0 ]
+
+                        }
+                    }
+                }
+            },
+            {
+                "model": {
+                    "name": "Floor",
+                    "mesh": "models/openbox.dae",
+                    "texture": "textures/stonefloor02_color",
+                    "normal": "textures/stonefloor02_normal",
+                    "position": [ 0.0, -2.3, 0.0 ],
+                    "rotation": [ 0, 0, 0 ],
+                    "createScale": [ 15, 15, 15 ],
+                    "createUVScale": [ 8, 8 ],
+                }
+            }
+        ]
+    }
+}
