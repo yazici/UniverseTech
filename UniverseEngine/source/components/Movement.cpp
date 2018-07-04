@@ -68,4 +68,9 @@ void MovementComponent::ApplyDrag(float deltaTime) {
 	m_Rotation += euler * deltaTime;
 }
 
+void MovementComponent::SetTarget(glm::vec3 target) {
+	m_Target = target;
+	m_HasTarget = true;
+}
+
 

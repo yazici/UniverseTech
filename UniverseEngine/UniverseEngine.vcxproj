@@ -179,6 +179,7 @@
     <ClInclude Include="source\ECS.h" />
     <ClCompile Include="source\components\Movement.cpp" />
     <ClCompile Include="source\components\PlayerControlSystem.cpp" />
+    <ClCompile Include="source\components\PlayerMovement.cpp" />
     <ClCompile Include="source\components\Transform.cpp" />
     <ClCompile Include="source\UniFrustum.cpp" />
     <ClInclude Include="source\UniFrustum.hpp" />

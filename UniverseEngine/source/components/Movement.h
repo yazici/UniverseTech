@@ -59,5 +59,13 @@ struct MovementComponent {
 	void CrashStop(float deltaTime = 0.f);
 	void FullStop(float deltaTime);
 	void ApplyDrag(float deltaTime);
+	
+	/** @brief set a target specified in world space */
+	void SetTarget(glm::vec3 target);
+	glm::vec3 GetTarget() { return m_Target; }
+	bool HasTarget() { return m_HasTarget; }
+private:
+	glm::vec3 m_Target;
+	bool m_HasTarget = false;
 };
 

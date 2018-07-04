@@ -29,15 +29,27 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 
 void PlayerControlSystem::tick(ECS::World* world, float deltaTime) {
 	world->each<PlayerControlComponent>([&](ECS::Entity* entity, ECS::ComponentHandle<PlayerControlComponent> player) {
+
+
 		auto movement = entity->get<MovementComponent>();
 		glm::vec3 direction = inputDirection;
-		glm::vec3 rotation = inputRotation;
+		
+		if(!player->HasTarget()) {
+			glm::vec3 rotation = inputRotation;
 
-		if(!isFullStop) {
-			movement->ApplyTorque(rotation, deltaTime);
-			movement->ApplyAcceleration(direction, deltaTime);
+			if(!isFullStop) {
+				movement->ApplyTorque(rotation, deltaTime);
+				movement->ApplyAcceleration(direction, deltaTime);
+			} else {
+				movement->FullStop(deltaTime);
+			}
 		} else {
-			movement->FullStop(deltaTime);
+			if(!isFullStop) {
+				movement->SetTarget(player->GetTargetPos());
+				movement->ApplyAcceleration(direction, deltaTime);
+			} else {
+				movement->FullStop(deltaTime);
+			}
 		}
 	});
 

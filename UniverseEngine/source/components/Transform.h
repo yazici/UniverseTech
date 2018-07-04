@@ -44,6 +44,8 @@ struct TransformComponent {
 
 	glm::vec3 TransformWSToLocal(glm::vec3 wsPos);
 
+	glm::vec3 TransformWSToObject(glm::vec3 wsPos);
+
 	void SetPosition(const glm::dvec3 &pos);
 
 	void SetPosition(float x, float y, float z);
@@ -62,6 +64,8 @@ struct TransformComponent {
 
 	void Rotate(glm::vec3 euler);
 
+	void RotateToTarget(glm::vec3 target);
+
 	void MoveForward(double distance);
 
 	void MoveForward(float distance);
@@ -69,5 +73,7 @@ struct TransformComponent {
 	void MoveRelative(glm::dvec3 velocity);
 
 	glm::mat4 GetModelMat();
+
+	glm::mat4 GetObjectMat();
 
 };

@@ -5,8 +5,12 @@
 
 void MovementSystem::tick(ECS::World* world, float deltaTime) {
 	world->each<TransformComponent, MovementComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<MovementComponent> movement) {
-		
-		transform->Rotate(movement->m_Rotation * deltaTime);
+		if(!movement->HasTarget()) {
+			transform->Rotate(movement->m_Rotation * deltaTime);
+		}
+		else {
+			transform->RotateToTarget(movement->GetTarget());
+		}
 		transform->MoveRelative(movement->m_dVelocity * (double)deltaTime);
 		
 	});

@@ -239,6 +239,9 @@
     <ClCompile Include="source\components\Movement.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
+    <ClCompile Include="source\components\PlayerMovement.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UniverseEngine.rc">

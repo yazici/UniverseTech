@@ -17,6 +17,10 @@ glm::vec3 TransformComponent::TransformWSToLocal(glm::vec3 wsPos) {
 	return glm::vec3(glm::inverse(GetModelMat()) * glm::vec4(wsPos, 1.0));
 }
 
+glm::vec3 TransformComponent::TransformWSToObject(glm::vec3 wsPos) {
+	return glm::vec3(glm::inverse(GetObjectMat()) * glm::vec4(wsPos, 1.0));
+}
+
 void TransformComponent::SetPosition(const glm::dvec3 &pos) {
 	SetPosition(pos.x, pos.y, pos.z);
 }
@@ -75,6 +79,17 @@ void TransformComponent::Rotate(glm::vec3 euler) {
 
 }
 
+void TransformComponent::RotateToTarget(glm::vec3 target) {
+	glm::vec3 lsTarget = TransformWSToObject(target);
+	glm::vec3 newForward = glm::normalize(lsTarget);
+	//newForward.y = m_Forward.y;
+	std::cout << "rotating to face: " << newForward.x << ", " << newForward.y << ", " << newForward.z << std::endl;
+	auto rotQ = glm::rotation(glm::normalize(m_Forward), glm::normalize(newForward));
+	m_Forward = rotQ * m_Forward;
+	m_Up = rotQ * m_Up;
+	m_Right = rotQ * m_Right;
+}
+
 void TransformComponent::MoveForward(double distance) {
 	m_dPos += (glm::dvec3)glm::normalize(m_Forward) * distance;
 }
@@ -101,4 +116,16 @@ glm::mat4 TransformComponent::GetModelMat() {
 	}
 
 	return mat;
+}
+
+glm::mat4 TransformComponent::GetObjectMat() {
+
+	glm::dmat4 mat = glm::dmat4(1.0);
+
+	if(m_Parent) {
+		mat = glm::dmat4(m_Parent->GetTransform()->GetModelMat()) * mat;
+	}
+
+	return mat;
+
 }
