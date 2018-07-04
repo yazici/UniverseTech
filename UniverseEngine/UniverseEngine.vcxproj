@@ -78,7 +78,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\external;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="data/";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -90,8 +90,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\vulkan;C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\libs\gainput;..\libs\vulkan;..\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -122,7 +122,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\external;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\gainput;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="data/";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -132,8 +132,8 @@
       </EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\vulkan;C:\Users\seb\Documents\Visual Studio 2017\Projects\UniverseTech\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\libs\vulkan;..\libs\assimp;..\libs\gainput;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -173,8 +173,13 @@
     <ClInclude Include="source\Components.h" />
     <ClInclude Include="source\components\Camera.h" />
     <ClInclude Include="source\components\Movement.h" />
+    <ClInclude Include="source\components\PlayerControlSystem.h" />
+    <ClInclude Include="source\components\PlayerMovement.h" />
     <ClInclude Include="source\components\Transform.h" />
     <ClInclude Include="source\ECS.h" />
+    <ClCompile Include="source\components\Movement.cpp" />
+    <ClCompile Include="source\components\PlayerControlSystem.cpp" />
+    <ClCompile Include="source\components\PlayerMovement.cpp" />
     <ClCompile Include="source\components\Transform.cpp" />
     <ClCompile Include="source\UniFrustum.cpp" />
     <ClInclude Include="source\UniFrustum.hpp" />
@@ -184,6 +189,7 @@
     <ClInclude Include="source\Triangulator.hpp" />
     <ClInclude Include="source\UniBody.h" />
     <ClInclude Include="source\UniEngine.h" />
+    <ClInclude Include="source\UniInput.h" />
     <ClInclude Include="source\UniModel.h" />
     <ClInclude Include="source\UniScene.h" />
     <ClInclude Include="source\UniSceneObject.h" />
@@ -216,6 +222,7 @@
     <ClCompile Include="source\Triangulator.cpp" />
     <ClCompile Include="source\UniBody.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
+    <ClCompile Include="source\UniInput.cpp" />
     <ClCompile Include="source\UniModel.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
     <ClCompile Include="source\UniSceneObject.cpp" />

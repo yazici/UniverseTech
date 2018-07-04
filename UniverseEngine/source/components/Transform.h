@@ -18,7 +18,6 @@ struct TransformComponent {
 
 	TransformComponent() :
 		m_dPos(glm::dvec3(0.0)),
-		m_Rot(glm::vec3(0.f)),
 		m_Scale(glm::vec3(1.f)),
 		m_Forward(glm::vec3(0, 0, 1.f)),
 		m_Up(glm::vec3(0, -1.f, 0)),
@@ -33,7 +32,6 @@ struct TransformComponent {
 	glm::vec3 m_Forward;
 	glm::vec3 m_Up;
 	glm::vec3 m_Right;
-	glm::vec3 m_Rot; // vec3 euler angles, used to rotate pitch, roll, yaw
 	glm::vec3 m_Scale;
 
 	std::shared_ptr<UniSceneObject> m_Parent;
@@ -45,6 +43,8 @@ struct TransformComponent {
 	glm::vec3 TransformLocalToWS(glm::vec3 localPos);
 
 	glm::vec3 TransformWSToLocal(glm::vec3 wsPos);
+
+	glm::vec3 TransformWSToObject(glm::vec3 wsPos);
 
 	void SetPosition(const glm::dvec3 &pos);
 
@@ -62,6 +62,10 @@ struct TransformComponent {
 
 	void Rotate(glm::vec3 axis, float degrees);
 
+	void Rotate(glm::vec3 euler);
+
+	void RotateToTarget(glm::vec3 target);
+
 	void MoveForward(double distance);
 
 	void MoveForward(float distance);
@@ -69,5 +73,7 @@ struct TransformComponent {
 	void MoveRelative(glm::dvec3 velocity);
 
 	glm::mat4 GetModelMat();
+
+	glm::mat4 GetObjectMat();
 
 };

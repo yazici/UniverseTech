@@ -54,7 +54,7 @@
 
 class VulkanExampleBase
 {
-private:	
+protected:	
 	// fps timer (one second interval)
 	float fpsTimer = 0.0f;
 	// Get window title with example name, device, et.
@@ -69,7 +69,7 @@ private:
 	// Called if the window is resized and some resources have to be recreatesd
 	void windowResize();
 	void handleMouseMove(int32_t x, int32_t y);
-protected:
+
 	// Frame counter to display fps
 	uint32_t frameCounter = 0;
 	uint32_t lastFPS = 0;
@@ -257,6 +257,9 @@ public:
 	void setupDPIAwareness();
 	HWND setupWindow(HINSTANCE hinstance, WNDPROC wndproc);
 	void handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	/** @brief (Virtual) Called when Windows checks the MSG queue, passes msg to engine for, e.g., Input Manager */
+	virtual void handleWMMessages(MSG& msg);
+
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 	static int32_t handleAppInput(struct android_app* app, AInputEvent* event);
 	static void handleAppCommand(android_app* app, int32_t cmd);
@@ -387,7 +390,7 @@ public:
 	// Render one frame of a render loop on platforms that sync rendering
 	void renderFrame();
 
-	void updateOverlay();
+	virtual void updateOverlay();
 
 	// Prepare the frame for workload submission
 	// - Acquires the next image from the swap chain 
@@ -401,6 +404,9 @@ public:
 	virtual void OnSetupUIOverlay(vks::UIOverlayCreateInfo &createInfo);
 	/** @brief (Virtual) Called when the UI overlay is updating, can be used to add custom elements to the overlay */
 	virtual void OnUpdateUIOverlay(vks::UIOverlay *overlay);
+
+protected:
+	bool m_QuitMessageReceived;
 };
 
 // OS specific macros for the example main entry points

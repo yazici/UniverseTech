@@ -259,3 +259,6 @@ paket-files/
 __pycache__/
 *.pyc
 /UniverseEngine/*.rdc
+/libs/gainput/gainput.exp
+/UniverseEngine/out.txt
+/UniverseEngine/imgui.ini

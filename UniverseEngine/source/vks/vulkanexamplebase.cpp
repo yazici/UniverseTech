@@ -286,15 +286,16 @@ void VulkanExampleBase::renderLoop()
 	destHeight = height;
 #if defined(_WIN32)
 	MSG msg;
-	bool quitMessageReceived = false;
-	while (!quitMessageReceived) {
-		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+	m_QuitMessageReceived = false;
+	while (!m_QuitMessageReceived) {
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 			if (msg.message == WM_QUIT) {
-				quitMessageReceived = true;
+				m_QuitMessageReceived = true;
 				break;
 			}
+			handleWMMessages(msg);
 		}
 		renderFrame();
 	}
@@ -1100,61 +1101,6 @@ void VulkanExampleBase::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 	case WM_PAINT:
 		ValidateRect(window, NULL);
 		break;
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case KEY_P:
-			paused = !paused;
-			break;
-		case KEY_F1:
-			if (settings.overlay) {
-				UIOverlay->visible = !UIOverlay->visible;
-			}
-			break;
-		case KEY_ESCAPE:
-			PostQuitMessage(0);
-			break;
-		}
-
-
-		keyPressed((uint32_t)wParam);
-		break;
-	case WM_KEYUP:
-		break;
-	case WM_LBUTTONDOWN:
-		mousePos = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
-		mouseButtons.left = true;
-		break;
-	case WM_RBUTTONDOWN:
-		mousePos = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
-		mouseButtons.right = true;
-		break;
-	case WM_MBUTTONDOWN:
-		mousePos = glm::vec2((float)LOWORD(lParam), (float)HIWORD(lParam));
-		mouseButtons.middle = true;
-		break;
-	case WM_LBUTTONUP:
-		mouseButtons.left = false;
-		break;
-	case WM_RBUTTONUP:
-		mouseButtons.right = false;
-		break;
-	case WM_MBUTTONUP:
-		mouseButtons.middle = false;
-		break;
-	case WM_MOUSEWHEEL:
-	{
-		short wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-		zoom += (float)wheelDelta * 0.005f * zoomSpeed;
-		
-		viewUpdated = true;
-		break;
-	}
-	case WM_MOUSEMOVE:
-	{
-		handleMouseMove(LOWORD(lParam), HIWORD(lParam));
-		break;
-	}
 	case WM_SIZE:
 		if ((prepared) && (wParam != SIZE_MINIMIZED))
 		{
@@ -1174,6 +1120,9 @@ void VulkanExampleBase::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 		break;
 	}
 }
+
+
+
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
 int32_t VulkanExampleBase::handleAppInput(struct android_app* app, AInputEvent* event)
 {
@@ -2102,3 +2051,11 @@ void VulkanExampleBase::setupSwapChain()
 
 void VulkanExampleBase::OnSetupUIOverlay(vks::UIOverlayCreateInfo &createInfo) {}
 void VulkanExampleBase::OnUpdateUIOverlay(vks::UIOverlay *overlay) {}
+
+
+#if defined(_WIN32)
+void VulkanExampleBase::handleWMMessages(MSG& msg)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+#endif

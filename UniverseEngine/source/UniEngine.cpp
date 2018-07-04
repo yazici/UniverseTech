@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "UniBody.h"
 #include <algorithm>
+#include "components/PlayerControlSystem.h"
 
 #define ENABLE_VALIDATION true
 
@@ -566,7 +567,8 @@ void UniEngine::loadAssets() {
 	
 	auto armor = m_CurrentScene->Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
 	armor->GetTransform()->SetPosition(glm::vec3( 0.0f, 0.0f, 10.0f ));
-	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5.0), glm::vec3(0, -1, 0), 90.f);
+	armor->GetTransform()->SetYaw(180.f);
+	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5), glm::vec3(0, 90, 0));
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(vertexLayout, vulkanDevice, queue, true);
 
@@ -1282,6 +1284,7 @@ void UniEngine::draw() {
 void UniEngine::prepare() {
 
 	m_CurrentScene->Initialize(this);
+	SetupInput();
 	VulkanExampleBase::prepare();
 	loadAssets();
 	setupVertexDescriptions();
@@ -1298,6 +1301,9 @@ void UniEngine::prepare() {
 }
 
 void UniEngine::render() {
+
+	m_InputManager->Tick();
+
 	buildDeferredCommandBuffer();
 	if(!prepared)
 		return;
@@ -1346,3 +1352,75 @@ void UniEngine::ToggleWireframe()
 	preparePipelines();
 }
 
+void UniEngine::SetupInput() {
+	m_CurrentScene->m_World->registerSystem(new PlayerControlSystem());
+	m_InputManager = std::make_shared<UniInput>();
+	m_InputManager->Initialize(height, width);
+
+	m_InputManager->OnPress(UniInput::ButtonQuit, [this](){ m_QuitMessageReceived = true; });
+	m_InputManager->OnRelease(UniInput::ButtonPause, [this]() { paused = !paused; });
+
+	m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisYaw, newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisThrust, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisReverse, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, -newValue }); });
+	m_InputManager->RegisterBoolCallback(UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRightClick, newValue ? 1.f : 0.f }); });
+
+	m_CurrentScene->GetCameraObject()->AddComponent<MovementComponent>();
+	m_CurrentScene->GetCameraObject()->AddComponent<PlayerControlComponent>();
+	m_CurrentScene->GetCameraObject()->m_Entity->get<PlayerControlComponent>()->SetTarget(glm::vec3(0, 0, 0));
+}
+
+void UniEngine::handleWMMessages(MSG& msg) {
+	m_InputManager->HandleWM(msg);
+}
+
+void UniEngine::updateOverlay() {
+
+	auto pos = m_InputManager->GetPointerXY();
+
+	//std::cout << "Pos: " << pos.X << ", " << pos.Y << std::endl;
+
+	if(!settings.overlay)
+		return;
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	io.DisplaySize = ImVec2((float)width, (float)height);
+	io.DeltaTime = frameTimer;
+
+	io.MousePos = ImVec2(pos.X, pos.Y);
+	io.MouseDown[0] = m_InputManager->GetButtonState(UniInput::ButtonClick);
+	io.MouseDown[1] = m_InputManager->GetButtonState(UniInput::ButtonRightClick);
+
+	ImGui::NewFrame();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
+	ImGui::SetNextWindowPos(ImVec2(10, 10));
+	ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiSetCond_FirstUseEver);
+	ImGui::Begin("Vulkan Example", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+	ImGui::TextUnformatted(title.c_str());
+	ImGui::TextUnformatted(deviceProperties.deviceName);
+	ImGui::Text("%.2f ms/frame (%.1d fps)", (1000.0f / lastFPS), lastFPS);
+
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 5.0f * UIOverlay->scale));
+#endif
+	ImGui::PushItemWidth(110.0f * UIOverlay->scale);
+	OnUpdateUIOverlay(UIOverlay);
+	ImGui::PopItemWidth();
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+	ImGui::PopStyleVar();
+#endif
+
+	ImGui::End();
+	ImGui::PopStyleVar();
+	ImGui::Render();
+
+	UIOverlay->update();
+
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+	if(mouseButtons.left) {
+		mouseButtons.left = false;
+	}
+#endif
+}
