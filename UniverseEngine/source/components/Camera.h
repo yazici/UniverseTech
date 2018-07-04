@@ -56,7 +56,7 @@ struct CameraComponent {
 		
 		m_Position = mat[3];
 		auto forward = transform->TransformLocalToWS(glm::vec3(0, 0, 1));
-		auto up = glm::mat3(mat) * glm::vec3(0, 1, 0);
+		auto up = glm::mat3(mat) * glm::vec3(0, -1, 0);
 
 		if(cameraType == CameraType::CAMERA_FIXED) {
 			target = forward;

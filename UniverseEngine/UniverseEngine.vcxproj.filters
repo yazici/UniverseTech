@@ -40,6 +40,12 @@
     <Filter Include="Header Files\components">
       <UniqueIdentifier>{a6138d90-99c8-41c6-958d-bcb0a5dbdad8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Content">
+      <UniqueIdentifier>{1ec31e9a-9908-4616-9538-191208e1aaaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content\levels">
+      <UniqueIdentifier>{37c707ef-4469-405b-ac8a-c176bea40af6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\vks\benchmark.hpp">
@@ -284,6 +290,9 @@
     </None>
     <None Include="data\shaders\planet.vert.spv">
       <Filter>shaders</Filter>
+    </None>
+    <None Include="data\levels\testlevel.json">
+      <Filter>Content\levels</Filter>
     </None>
   </ItemGroup>
 </Project>

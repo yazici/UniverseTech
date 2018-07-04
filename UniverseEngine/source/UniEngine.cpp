@@ -565,6 +565,7 @@ void UniEngine::buildCommandBuffers() {
 
 void UniEngine::loadAssets() {
 
+	m_CurrentScene->Load(getAssetPath() + "levels/testlevel.json");
 	m_CurrentScene->Load();
 
 }

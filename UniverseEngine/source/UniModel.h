@@ -3,8 +3,10 @@
 #include "vks/VulkanModel.hpp"
 #include "vks/VulkanTexture.hpp"
 #include "vulkan/vulkan_core.h"
-
 #include "UniSceneObject.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 
 class UniModel : public UniSceneObject{

@@ -18,6 +18,9 @@ public:
 
 	void Initialize(UniEngine* engine);
 	void Load();
+
+	void Load(std::string filename);
+
 	template <class T> std::shared_ptr<T> Make(std::shared_ptr<T> so);
 	template<class _Ty0, class... _Types> std::shared_ptr<_Ty0> Make(_Types&&... _Args);
 
@@ -34,8 +37,11 @@ public:
 	void AddSceneObject(std::shared_ptr<UniSceneObject> so);
 
 	std::shared_ptr<UniBody> m_BodyTest;
+
+	std::string GetName() { return m_Name; }
 private:
 	std::shared_ptr<UniSceneObject> m_CurrentCamera;
+	std::string m_Name;
 };
 
 
