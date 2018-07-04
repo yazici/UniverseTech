@@ -261,3 +261,4 @@ __pycache__/
 /UniverseEngine/*.rdc
 /libs/gainput/gainput.exp
 /UniverseEngine/out.txt
+/UniverseEngine/imgui.ini
