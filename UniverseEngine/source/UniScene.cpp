@@ -42,9 +42,6 @@ void UniScene::Load() {
 	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
 	armor->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);*/
 
-	auto camObj = GetCameraObject();
-	camObj->GetTransform()->SetPosition(1.f, -3.5f, -14.f);
-	GetCameraComponent()->CalculateView(camObj->GetTransform());
 
 	/*
 	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "");
@@ -56,9 +53,8 @@ void UniScene::Load() {
 	floor->SetCreateInfo(glm::vec3(0.0f, -2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
 	floor->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);*/
 
-	m_BodyTest = Make<UniBody>(7.0);
-	m_BodyTest->Initialize();
-
+	//m_BodyTest = Make<UniBody>(7.0);
+	//m_BodyTest->Initialize();
 
 }
 
@@ -74,10 +70,10 @@ void UniScene::Load(std::string filename) {
 	auto level = data["level"];
 	m_Name = level["name"];
 
-	for(const auto& so : level["sceneObjects"]) {
-		std::string soType = so["type"];
+	for(const auto& so : level.at("sceneObjects")) {
+		std::string soType = so.at("type");
 		if(soType == "model") {
-			std::cout << "Loading model: " << so["name"] << std::endl;
+			std::cout << "Loading model: " << so.at("name") << std::endl;
 			// TODO: Load UniModel from JSON data.
 			// 	m_Name = jsonData["name"];
 			auto modelPath = so.at("mesh");
@@ -105,20 +101,48 @@ void UniScene::Load(std::string filename) {
 				createOffset = { so.at("createOffset")[0], so.at("createOffset")[1], so.at("createOffset")[2] };
 			}
 
+			if(so.find("components") != so.end()) {
+				auto components = so.at("components");
+				if(components.find("movement") != components.end()) {
+					auto movement = components.at("movement");
+					auto vel = glm::vec3(0);
+					auto rot = glm::vec3(0);
 
-			//model->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5), glm::vec3(0, 90, 0));
+					if(movement.find("velocity") != movement.end()) {
+						auto velocity = movement.at("velocity");
+						vel = glm::vec3(velocity.at(0), velocity.at(1), velocity.at(2));
+					}
+
+					if(movement.find("rotation") != movement.end()) {
+						auto rotation = movement.at("rotation");
+						rot = glm::vec3(rotation.at(0), rotation.at(1), rotation.at(2));
+					}
+
+				model->AddComponent<MovementComponent>(vel, rot);
+					
+				}
+			}
 			
 			model->SetCreateInfo(createOffset, createScale, createUVScale);
 			model->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);
 		}
 	}
 
+	auto playerStart = level.at("playerStart");
+	auto playerPos = playerStart.at("position");
+	auto playerRot = playerStart.at("rotation");
+
+	auto camObj = GetCameraObject();
+	camObj->GetTransform()->SetPosition(glm::vec3(playerPos.at(0), playerPos.at(1), playerPos.at(2)));
+	GetCameraComponent()->CalculateView(camObj->GetTransform());
+
+
 	//std::cout << data.dump() << std::endl;
 }
 
 void UniScene::Tick(float deltaTime) {
 	m_World->tick(deltaTime);
-	m_BodyTest->Update();
+	//m_BodyTest->Update();
 }
 
 std::vector<std::shared_ptr<UniModel>> UniScene::GetModels() {

@@ -2,6 +2,10 @@
     "level": {
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
+        "playerStart": {
+            "position": [ 20, -3.5, -14 ],
+            "rotation": [0, 0, 0]
+        },
         "sceneObjects": [
             {
                 "type": "model",
