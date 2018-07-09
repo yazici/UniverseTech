@@ -1166,27 +1166,27 @@ void UniEngine::updateUniformBufferDeferredLights() {
 	// White
 	uboFragmentLights.lights[0].position = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
 	uboFragmentLights.lights[0].color = glm::vec3(1.5f);
-	uboFragmentLights.lights[0].radius = 1500.0f * 0.25f;
+	uboFragmentLights.lights[0].radius = 150.0f * 0.25f;
 	// Red
 	uboFragmentLights.lights[1].position = glm::vec4(10.0f, 0.0f, 10.0f, 0.0f);
 	uboFragmentLights.lights[1].color = glm::vec3(1.0f, 0.0f, 0.0f);
-	uboFragmentLights.lights[1].radius = 150.0f;
+	uboFragmentLights.lights[1].radius = 15.0f;
 	// Blue
 	uboFragmentLights.lights[2].position = glm::vec4(2.0f, -1.0f, 0.0f, 0.0f);
 	uboFragmentLights.lights[2].color = glm::vec3(0.0f, 0.0f, 2.5f);
-	uboFragmentLights.lights[2].radius = 50.0f;
+	uboFragmentLights.lights[2].radius = 5.0f;
 	// Yellow
 	uboFragmentLights.lights[3].position = glm::vec4(0.0f, -0.9f, 0.5f, 0.0f);
 	uboFragmentLights.lights[3].color = glm::vec3(1.0f, 1.0f, 0.0f);
-	uboFragmentLights.lights[3].radius = 20.0f;
+	uboFragmentLights.lights[3].radius = 2.0f;
 	// Green
 	uboFragmentLights.lights[4].position = glm::vec4(0.0f, -0.5f, 0.0f, 0.0f);
 	uboFragmentLights.lights[4].color = glm::vec3(0.0f, 1.0f, 0.2f);
-	uboFragmentLights.lights[4].radius = 50.0f;
+	uboFragmentLights.lights[4].radius = 5.0f;
 	// Yellow
 	uboFragmentLights.lights[5].position = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
 	uboFragmentLights.lights[5].color = glm::vec3(1.0f, 0.7f, 0.3f);
-	uboFragmentLights.lights[5].radius = 250.0f;
+	uboFragmentLights.lights[5].radius = 25.0f;
 
 	uboFragmentLights.lights[0].position.x = sin(glm::radians(360.0f * timer)) * 5.0f;
 	uboFragmentLights.lights[0].position.z = cos(glm::radians(360.0f * timer)) * 5.0f;

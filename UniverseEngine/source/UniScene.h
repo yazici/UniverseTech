@@ -31,9 +31,11 @@ public:
 	void Tick(float deltaTime);
 
 	std::vector<std::shared_ptr<UniSceneObject>> m_SceneObjects;
+	std::vector<std::shared_ptr<UniSceneObject>> m_RenderedObjectCache;
 	std::vector<std::shared_ptr<UniModel>> m_ModelCache;
 
 	std::vector<std::shared_ptr<UniModel>> GetModels();
+	std::vector<std::shared_ptr<UniSceneObject>> GetRenderedObjects();
 	void AddSceneObject(std::shared_ptr<UniSceneObject> so);
 
 	std::shared_ptr<UniBody> m_BodyTest;

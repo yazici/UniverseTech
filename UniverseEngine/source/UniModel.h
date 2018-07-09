@@ -30,5 +30,8 @@ public:
 	vks::Texture2D m_NormalMap;
 	VkDescriptorSet m_DescriptorSet;
 	vks::ModelCreateInfo m_ModelCreateInfo;
+
+protected:
+	bool m_IsRendered = true;
 };
 

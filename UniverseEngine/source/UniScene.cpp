@@ -162,10 +162,29 @@ std::vector<std::shared_ptr<UniModel>> UniScene::GetModels() {
 	return models;
 }
 
+std::vector<std::shared_ptr<UniSceneObject>> UniScene::GetRenderedObjects() {
+
+	if(!m_RenderedObjectCache.empty()) {
+		return m_RenderedObjectCache;
+	}
+
+	std::vector<std::shared_ptr<UniSceneObject>> objects;
+	for_each(m_SceneObjects.begin(), m_SceneObjects.end(), [&objects](std::shared_ptr<UniSceneObject> so) {
+		if(so->IsRendered()) {
+			objects.push_back(so);
+		}
+	});
+
+	return objects;
+}
+
+
+
 void UniScene::AddSceneObject(std::shared_ptr<UniSceneObject> so)
 {
 	m_SceneObjects.push_back(so);
 	m_ModelCache.clear();
+	m_RenderedObjectCache.clear();
 	m_ModelCache = GetModels();
 }
 
