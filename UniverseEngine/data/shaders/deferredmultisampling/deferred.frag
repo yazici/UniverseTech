@@ -19,14 +19,13 @@ struct Light {
 
 layout (binding = 4) uniform UBO 
 {
-	Light lights[6];
+	Light lights[256];
 	vec4 viewPos;
-	ivec2 windowSize;
+	int numLights;
 } ubo;
 
 layout (constant_id = 0) const int NUM_SAMPLES = 8;
 
-#define NUM_LIGHTS 6
 
 // Manual resolve for MSAA samples 
 vec4 resolve(sampler2DMS tex, ivec2 uv)
@@ -45,7 +44,7 @@ vec3 calculateLighting(vec3 pos, vec3 normal, vec4 albedo)
 {
 	vec3 result = vec3(0.0);
 
-	for(int i = 0; i < NUM_LIGHTS; ++i)
+	for(int i = 0; i < ubo.numLights; ++i)
 	{
 		// Vector to light
 		vec3 L = ubo.lights[i].position.xyz - pos;

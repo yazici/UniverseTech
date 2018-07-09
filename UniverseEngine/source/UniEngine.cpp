@@ -12,6 +12,7 @@
 #include "UniBody.h"
 #include <algorithm>
 #include "components/PlayerControlSystem.h"
+#include "components/LightComponent.h"
 
 #define ENABLE_VALIDATION true
 
@@ -413,29 +414,29 @@ void UniEngine::buildDeferredCommandBuffer() {
 		index++;
 	});
 
-	auto body = m_CurrentScene->m_BodyTest;
-	if(body->m_pPatch->m_NumInstances > 0) {
+	//auto body = m_CurrentScene->m_BodyTest;
+	//if(body->m_pPatch->m_NumInstances > 0) {
 
-		VkDeviceSize offsets[1] = { 0 };
-		// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
-		
-		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-		if (m_useWireframe) {
-			vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
-		}
-		else {
-			vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
-		}
-		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
-		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
-		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+	//	VkDeviceSize offsets[1] = { 0 };
+	//	// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
+	//	
+	//	vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
+	//	if (m_useWireframe) {
+	//		vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
+	//	}
+	//	else {
+	//		vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
+	//	}
+	//	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
+	//	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
+	//	vkCmdBindIndexBuffer(m_offScreenCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
 
-		//// Render instances
-		//std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
-		//std::cout << "Buffer bytes - vertex: " << body->m_pPatch->vertexBuffer.size << ", instance: " << body->m_pPatch->m_instanceBuffer.size << ", index: " << body->m_pPatch->indexBuffer.size << std::endl;
-		vkCmdDrawIndexed(m_offScreenCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
-	}
+	//	//// Render instances
+	//	//std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
+	//	//std::cout << "Buffer bytes - vertex: " << body->m_pPatch->vertexBuffer.size << ", instance: " << body->m_pPatch->m_instanceBuffer.size << ", index: " << body->m_pPatch->indexBuffer.size << std::endl;
+	//	vkCmdDrawIndexed(m_offScreenCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
+	//}
 
 	vkCmdEndRenderPass(m_offScreenCmdBuffer);
 
@@ -472,38 +473,38 @@ void UniEngine::buildPlanetCommandBuffer() {
 	//renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 	//renderPassBeginInfo.pClearValues = clearValues.data();
 
-	VK_CHECK_RESULT(vkBeginCommandBuffer(m_planetCmdBuffer, &cmdBufInfo));
+	//VK_CHECK_RESULT(vkBeginCommandBuffer(m_planetCmdBuffer, &cmdBufInfo));
 
-	vkCmdBeginRenderPass(m_planetCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	//vkCmdBeginRenderPass(m_planetCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	VkViewport viewport = vks::initializers::viewport((float)offScreenFrameBuf.width, (float)offScreenFrameBuf.height, 0.0f, 1.0f);
-	vkCmdSetViewport(m_planetCmdBuffer, 0, 1, &viewport);
+	//VkViewport viewport = vks::initializers::viewport((float)offScreenFrameBuf.width, (float)offScreenFrameBuf.height, 0.0f, 1.0f);
+	//vkCmdSetViewport(m_planetCmdBuffer, 0, 1, &viewport);
 
-	VkRect2D scissor = vks::initializers::rect2D(offScreenFrameBuf.width, offScreenFrameBuf.height, 0, 0);
-	vkCmdSetScissor(m_planetCmdBuffer, 0, 1, &scissor);
+	//VkRect2D scissor = vks::initializers::rect2D(offScreenFrameBuf.width, offScreenFrameBuf.height, 0, 0);
+	//vkCmdSetScissor(m_planetCmdBuffer, 0, 1, &scissor);
 
-	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_useSampleShading ? pipelines.offscreenSampleShading : pipelines.offscreen);
+	//vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_useSampleShading ? pipelines.offscreenSampleShading : pipelines.offscreen);
 
-	VkDeviceSize offsets[1] = { 0 };
-	auto body = m_CurrentScene->m_BodyTest;
-	vkCmdBindDescriptorSets(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-	if (m_useWireframe) {
-		vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
-	}
-	else {
-		vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
-	}
-	vkCmdBindVertexBuffers(m_planetCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
-	vkCmdBindVertexBuffers(m_planetCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
-	vkCmdBindIndexBuffer(m_planetCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+	//VkDeviceSize offsets[1] = { 0 };
+	//auto body = m_CurrentScene->m_BodyTest;
+	//vkCmdBindDescriptorSets(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
+	//if (m_useWireframe) {
+	//	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
+	//}
+	//else {
+	//	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
+	//}
+	//vkCmdBindVertexBuffers(m_planetCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
+	//vkCmdBindVertexBuffers(m_planetCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
+	//vkCmdBindIndexBuffer(m_planetCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-	//// Render instances
-	std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
-	vkCmdDrawIndexed(m_planetCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
+	////// Render instances
+	//std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
+	//vkCmdDrawIndexed(m_planetCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
 
-	vkCmdEndRenderPass(m_planetCmdBuffer);
+	//vkCmdEndRenderPass(m_planetCmdBuffer);
 
-	VK_CHECK_RESULT(vkEndCommandBuffer(m_planetCmdBuffer));
+	//VK_CHECK_RESULT(vkEndCommandBuffer(m_planetCmdBuffer));
 }
 
 void UniEngine::buildCommandBuffers() {
@@ -564,28 +565,8 @@ void UniEngine::buildCommandBuffers() {
 }
 
 void UniEngine::loadAssets() {
-	
-	auto armor = m_CurrentScene->Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
-	armor->GetTransform()->SetPosition(glm::vec3( 0.0f, 0.0f, 10.0f ));
-	armor->GetTransform()->SetYaw(180.f);
-	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5), glm::vec3(0, 90, 0));
-	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
-	armor->Load(vertexLayout, vulkanDevice, queue, true);
 
-	auto camObj = GetScene()->GetCameraObject();
-	camObj->SetParent(armor);
-	camObj->GetTransform()->SetPosition(1.f, 3.5f, -4.f);
-	GetScene()->GetCameraComponent()->CalculateView(camObj->GetTransform());
-
-	/*
-	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "");
-	vgr->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, -1.0f));
-	vgr->Load(vertexLayout, vulkanDevice, queue, true);
-	*/
-
-	auto floor = m_CurrentScene->Make<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
-	floor->SetCreateInfo(glm::vec3(0.0f, -2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
-	floor->Load(vertexLayout, vulkanDevice, queue, true);
+	m_CurrentScene->Load(getAssetPath() + "levels/testlevel.json");
 
 }
 
@@ -891,59 +872,59 @@ void UniEngine::setupDescriptorSets() {
 
 	// offscreen planets
 
-	allocInfo =
-		vks::initializers::descriptorSetAllocateInfo(
-			descriptorPool,
-			&m_descriptorSetLayoutPlanet,
-			1);
+	//allocInfo =
+	//	vks::initializers::descriptorSetAllocateInfo(
+	//		descriptorPool,
+	//		&m_descriptorSetLayoutPlanet,
+	//		1);
 
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_CurrentScene->m_BodyTest->m_pPatch->m_DescriptorSet));
+	//VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_CurrentScene->m_BodyTest->m_pPatch->m_DescriptorSet));
 
-	auto body = m_CurrentScene->m_BodyTest;
+	//auto body = m_CurrentScene->m_BodyTest;
 
-	writeDescriptorSets = {
-		// Binding 0 : Vertex shader uniform buffer
-		vks::initializers::writeDescriptorSet(
-			body->m_pPatch->m_DescriptorSet,
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			0,
-			&body->m_pPatch->uniformBuffer.descriptor),
-		// Binding 1: Diffuse
-		vks::initializers::writeDescriptorSet(
-			body->m_pPatch->m_DescriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			1,
-			&body->m_Texture.descriptor),
-		// Binding 2: Height
-		vks::initializers::writeDescriptorSet(
-			body->m_pPatch->m_DescriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			2,
-			&body->m_HeightMap.descriptor),
-		// Binding 3: height detail
-		vks::initializers::writeDescriptorSet(
-			body->m_pPatch->m_DescriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			3,
-			&body->m_HeightDetail.descriptor),
+	//writeDescriptorSets = {
+	//	// Binding 0 : Vertex shader uniform buffer
+	//	vks::initializers::writeDescriptorSet(
+	//		body->m_pPatch->m_DescriptorSet,
+	//		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+	//		0,
+	//		&body->m_pPatch->uniformBuffer.descriptor),
+	//	// Binding 1: Diffuse
+	//	vks::initializers::writeDescriptorSet(
+	//		body->m_pPatch->m_DescriptorSet,
+	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+	//		1,
+	//		&body->m_Texture.descriptor),
+	//	// Binding 2: Height
+	//	vks::initializers::writeDescriptorSet(
+	//		body->m_pPatch->m_DescriptorSet,
+	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+	//		2,
+	//		&body->m_HeightMap.descriptor),
+	//	// Binding 3: height detail
+	//	vks::initializers::writeDescriptorSet(
+	//		body->m_pPatch->m_DescriptorSet,
+	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+	//		3,
+	//		&body->m_HeightDetail.descriptor),
 
-		// Binding 4: texture detail
-		vks::initializers::writeDescriptorSet(
-			body->m_pPatch->m_DescriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			4,
-			&body->m_Detail1.descriptor),
+	//	// Binding 4: texture detail
+	//	vks::initializers::writeDescriptorSet(
+	//		body->m_pPatch->m_DescriptorSet,
+	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+	//		4,
+	//		&body->m_Detail1.descriptor),
 
-		// Binding 5: texture detail 2
-		vks::initializers::writeDescriptorSet(
-			body->m_pPatch->m_DescriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			5,
-			&body->m_Detail2.descriptor),
+	//	// Binding 5: texture detail 2
+	//	vks::initializers::writeDescriptorSet(
+	//		body->m_pPatch->m_DescriptorSet,
+	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+	//		5,
+	//		&body->m_Detail2.descriptor),
 
-	};
+	//};
 
-	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+	//vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 
 
 }
@@ -1084,20 +1065,20 @@ void UniEngine::preparePipelines() {
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offscreenSampleShading));
 
 
-	// planet offscreen pipeline
+	//// planet offscreen pipeline
 
-	pipelineCreateInfo.layout = pipelineLayouts.planetOffscreen;
+	//pipelineCreateInfo.layout = pipelineLayouts.planetOffscreen;
 
-	pipelineCreateInfo.pVertexInputState = &m_CurrentScene->m_BodyTest->m_pPatch->vertexDescription.inputState;
-	shaderStages[0] = loadShader(getAssetPath() + "shaders/planet.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-	shaderStages[1] = loadShader(getAssetPath() + "shaders/planet.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+	//pipelineCreateInfo.pVertexInputState = &m_CurrentScene->m_BodyTest->m_pPatch->vertexDescription.inputState;
+	//shaderStages[0] = loadShader(getAssetPath() + "shaders/planet.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+	//shaderStages[1] = loadShader(getAssetPath() + "shaders/planet.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
-	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanet));
+	//VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanet));
 
-	rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
-	rasterizationState.lineWidth = 2.0f;
+	//rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
+	//rasterizationState.lineWidth = 1.0f;
 
-	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanetWireframe));
+	//VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanetWireframe));
 
 
 }
@@ -1183,48 +1164,30 @@ void UniEngine::updateUniformBufferDeferredMatrices() {
 
 // Update fragment shader light position uniform block
 void UniEngine::updateUniformBufferDeferredLights() {
-	// White
-	uboFragmentLights.lights[0].position = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-	uboFragmentLights.lights[0].color = glm::vec3(1.5f);
-	uboFragmentLights.lights[0].radius = 1500.0f * 0.25f;
-	// Red
-	uboFragmentLights.lights[1].position = glm::vec4(10.0f, 0.0f, 10.0f, 0.0f);
-	uboFragmentLights.lights[1].color = glm::vec3(1.0f, 0.0f, 0.0f);
-	uboFragmentLights.lights[1].radius = 150.0f;
-	// Blue
-	uboFragmentLights.lights[2].position = glm::vec4(2.0f, -1.0f, 0.0f, 0.0f);
-	uboFragmentLights.lights[2].color = glm::vec3(0.0f, 0.0f, 2.5f);
-	uboFragmentLights.lights[2].radius = 50.0f;
-	// Yellow
-	uboFragmentLights.lights[3].position = glm::vec4(0.0f, -0.9f, 0.5f, 0.0f);
-	uboFragmentLights.lights[3].color = glm::vec3(1.0f, 1.0f, 0.0f);
-	uboFragmentLights.lights[3].radius = 20.0f;
-	// Green
-	uboFragmentLights.lights[4].position = glm::vec4(0.0f, -0.5f, 0.0f, 0.0f);
-	uboFragmentLights.lights[4].color = glm::vec3(0.0f, 1.0f, 0.2f);
-	uboFragmentLights.lights[4].radius = 50.0f;
-	// Yellow
-	uboFragmentLights.lights[5].position = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
-	uboFragmentLights.lights[5].color = glm::vec3(1.0f, 0.7f, 0.3f);
-	uboFragmentLights.lights[5].radius = 250.0f;
+	
+	// each scene light into uboFragmentLights.lights
+	uint32_t lightCount = 0;
+	GetScene()->m_World->each<TransformComponent, LightComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<LightComponent> light) {
+		//std::cout << "Found a light! " << lightCount;
+		if(light->enabled && lightCount < 256) {
+			auto lPos = glm::vec4(transform->TransformLocalToWS(transform->m_dPos), 0);
+			auto lCol = light->color;
+			uboFragmentLights.lights[lightCount].color = lCol;
+			uboFragmentLights.lights[lightCount].radius = light->radius;
+			uboFragmentLights.lights[lightCount].position = lPos;
+			lightCount++;
+			//std::cout << ", radius: " << light->radius;
+			//std::cout << ", pos: " << lPos.x << ", " << lPos.y << ", " << lPos.z << ". ";
+			//std::cout << ", col: " << lCol.r << ", " << lCol.g << ", " << lCol.b << ", " << lCol.a << ". " << std::endl;
+		} else {
+			std::cout << "Light is disabled!" << std::endl;
+		}
+	});
 
-	uboFragmentLights.lights[0].position.x = sin(glm::radians(360.0f * timer)) * 5.0f;
-	uboFragmentLights.lights[0].position.z = cos(glm::radians(360.0f * timer)) * 5.0f;
-
-	//uboFragmentLights.lights[1].position.x = -4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f;
-	//uboFragmentLights.lights[1].position.z = 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f;
-
-	uboFragmentLights.lights[2].position.x = 4.0f + sin(glm::radians(360.0f * timer)) * 2.0f;
-	uboFragmentLights.lights[2].position.z = 0.0f + cos(glm::radians(360.0f * timer)) * 2.0f;
-
-	uboFragmentLights.lights[4].position.x = 0.0f + sin(glm::radians(360.0f * timer + 90.0f)) * 5.0f;
-	uboFragmentLights.lights[4].position.z = 0.0f - cos(glm::radians(360.0f * timer + 45.0f)) * 5.0f;
-
-	uboFragmentLights.lights[5].position.x = 0.0f + sin(glm::radians(-360.0f * timer + 135.0f)) * 10.0f;
-	uboFragmentLights.lights[5].position.z = 0.0f - cos(glm::radians(-360.0f * timer - 45.0f)) * 10.0f;
-
-	// Current view position
 	uboFragmentLights.viewPos = glm::vec4(GetScene()->GetCameraComponent()->GetPosition(), 0.0f) * glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
+	uboFragmentLights.numLights = lightCount;
+
+	//std::cout << "Enabled lights: " << lightCount << std::endl;
 
 	memcpy(uniformBuffers.fsLights.mapped, &uboFragmentLights, sizeof(uboFragmentLights));
 }
@@ -1316,7 +1279,6 @@ void UniEngine::render() {
 
 void UniEngine::viewChanged() {
 	updateUniformBufferDeferredMatrices();
-	uboFragmentLights.windowSize = glm::ivec2(width, height);
 }
 
 void UniEngine::windowResized() {
@@ -1365,9 +1327,7 @@ void UniEngine::SetupInput() {
 	m_InputManager->RegisterFloatCallback(UniInput::AxisReverse, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, -newValue }); });
 	m_InputManager->RegisterBoolCallback(UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRightClick, newValue ? 1.f : 0.f }); });
 
-	m_CurrentScene->GetCameraObject()->AddComponent<MovementComponent>();
-	m_CurrentScene->GetCameraObject()->AddComponent<PlayerControlComponent>();
-	m_CurrentScene->GetCameraObject()->m_Entity->get<PlayerControlComponent>()->SetTarget(glm::vec3(0, 0, 0));
+	
 }
 
 void UniEngine::handleWMMessages(MSG& msg) {

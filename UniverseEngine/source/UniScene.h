@@ -17,6 +17,10 @@ public:
 	ECS::ComponentHandle<CameraComponent> GetCameraComponent() { return m_CurrentCamera->m_Entity->get<CameraComponent>(); }
 
 	void Initialize(UniEngine* engine);
+	void Load();
+
+	void Load(std::string filename);
+
 	template <class T> std::shared_ptr<T> Make(std::shared_ptr<T> so);
 	template<class _Ty0, class... _Types> std::shared_ptr<_Ty0> Make(_Types&&... _Args);
 
@@ -27,14 +31,21 @@ public:
 	void Tick(float deltaTime);
 
 	std::vector<std::shared_ptr<UniSceneObject>> m_SceneObjects;
+	std::vector<std::shared_ptr<UniSceneObject>> m_RenderedObjectCache;
 	std::vector<std::shared_ptr<UniModel>> m_ModelCache;
 
 	std::vector<std::shared_ptr<UniModel>> GetModels();
+	std::vector<std::shared_ptr<UniSceneObject>> GetRenderedObjects();
 	void AddSceneObject(std::shared_ptr<UniSceneObject> so);
 
+	template <class T> std::vector<std::shared_ptr<T>> GetObjectsOfClass();
+
 	std::shared_ptr<UniBody> m_BodyTest;
+
+	std::string GetName() { return m_Name; }
 private:
 	std::shared_ptr<UniSceneObject> m_CurrentCamera;
+	std::string m_Name;
 };
 
 
@@ -53,4 +64,18 @@ std::shared_ptr<T> UniScene::Make(_Types&&... _Args) {
 	so->SetEntity(m_World->create());
 	AddSceneObject(so);
 	return so;
+}
+
+template <class T> std::vector<std::shared_ptr<T>> UniScene::GetObjectsOfClass() {
+
+	std::vector<std::shared_ptr<T>> objects;
+
+	for_each(m_SceneObjects.begin(), m_SceneObjects.end(), [&objects](std::shared_ptr<UniSceneObject> so) {
+		auto object = std::dynamic_pointer_cast<T>(so);
+		if(object) {
+			objects.push_back(object);
+		}
+	});
+
+	return objects;
 }

@@ -77,9 +77,9 @@ public:
 	};
 
 	struct {
-		Light lights[6];
+		Light lights[256];
 		glm::vec4 viewPos;
-		glm::ivec2 windowSize;
+		uint32_t numLights;
 	} uboFragmentLights;
 
 	struct {

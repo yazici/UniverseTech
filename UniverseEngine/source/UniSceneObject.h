@@ -26,8 +26,15 @@ public:
 	template<class T, class... _Types>
 	void AddComponent(_Types&&... _Args);
 
-private:
+	std::string GetName() { return m_Name; }
+	void SetName(std::string name) { m_Name = name; }
+
+	bool IsRendered() { return m_IsRendered; }
+
+protected:
 	UniScene * m_Scene;
+	std::string m_Name = "object";
+	bool m_IsRendered = false;
 };
 
 template<class T, class... _Types>

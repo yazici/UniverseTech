@@ -3,8 +3,10 @@
 #include "vks/VulkanModel.hpp"
 #include "vks/VulkanTexture.hpp"
 #include "vulkan/vulkan_core.h"
-
 #include "UniSceneObject.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 
 class UniModel : public UniSceneObject{
@@ -28,5 +30,8 @@ public:
 	vks::Texture2D m_NormalMap;
 	VkDescriptorSet m_DescriptorSet;
 	vks::ModelCreateInfo m_ModelCreateInfo;
+
+protected:
+	bool m_IsRendered = true;
 };
 
