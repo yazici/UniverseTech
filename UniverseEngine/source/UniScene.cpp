@@ -4,8 +4,10 @@
 #include "UniBody.h"
 #include "UniEngine.h"
 #include "components/PlayerMovement.h"
+#include "components/LightComponent.h"
 #include <nlohmann/json.hpp>
 #include <iosfwd>
+
 
 using json = nlohmann::json;
 
@@ -125,6 +127,53 @@ void UniScene::Load(std::string filename) {
 			
 			model->SetCreateInfo(createOffset, createScale, createUVScale);
 			model->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);
+		}
+
+		if(soType == "light") {
+			std::cout << "Loading light: " << so.at("name") << std::endl;
+
+			auto light = Make<UniSceneObject>();
+
+			if(so.find("position") != so.end()) {
+				auto pos = so.at("position");
+				light->GetTransform()->SetPosition(glm::vec3(pos[0], pos[1], pos[2]));
+			}
+			if(so.find("rotation") != so.end()) {
+				auto rot = so.at("rotation");
+				light->GetTransform()->SetPitch(rot[0]);
+				light->GetTransform()->SetYaw(rot[1]);
+				light->GetTransform()->SetRoll(rot[2]);
+			}
+
+			auto radius = so.at("radius");
+			auto colarray = so.at("color");
+			auto color = glm::vec4(colarray[0], colarray[1], colarray[2], colarray[3]);
+			auto enabled = so.at("on");
+			light->AddComponent<LightComponent>(radius, color, enabled);
+
+
+			if(so.find("components") != so.end()) {
+				auto components = so.at("components");
+				if(components.find("movement") != components.end()) {
+					auto movement = components.at("movement");
+					auto vel = glm::vec3(0);
+					auto rot = glm::vec3(0);
+
+					if(movement.find("velocity") != movement.end()) {
+						auto velocity = movement.at("velocity");
+						vel = glm::vec3(velocity.at(0), velocity.at(1), velocity.at(2));
+					}
+
+					if(movement.find("rotation") != movement.end()) {
+						auto rotation = movement.at("rotation");
+						rot = glm::vec3(rotation.at(0), rotation.at(1), rotation.at(2));
+					}
+
+					light->AddComponent<MovementComponent>(vel, rot);
+
+				}
+			}
+
 		}
 	}
 
