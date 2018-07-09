@@ -172,6 +172,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\Components.h" />
     <ClInclude Include="source\components\Camera.h" />
+    <ClInclude Include="source\components\LightComponent.h" />
     <ClInclude Include="source\components\Movement.h" />
     <ClInclude Include="source\components\PlayerControlSystem.h" />
     <ClInclude Include="source\components\PlayerMovement.h" />

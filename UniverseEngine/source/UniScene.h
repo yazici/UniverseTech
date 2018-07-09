@@ -38,6 +38,8 @@ public:
 	std::vector<std::shared_ptr<UniSceneObject>> GetRenderedObjects();
 	void AddSceneObject(std::shared_ptr<UniSceneObject> so);
 
+	template <class T> std::vector<std::shared_ptr<T>> GetObjectsOfClass();
+
 	std::shared_ptr<UniBody> m_BodyTest;
 
 	std::string GetName() { return m_Name; }
@@ -62,4 +64,18 @@ std::shared_ptr<T> UniScene::Make(_Types&&... _Args) {
 	so->SetEntity(m_World->create());
 	AddSceneObject(so);
 	return so;
+}
+
+template <class T> std::vector<std::shared_ptr<T>> UniScene::GetObjectsOfClass() {
+
+	std::vector<std::shared_ptr<T>> objects;
+
+	for_each(m_SceneObjects.begin(), m_SceneObjects.end(), [&objects](std::shared_ptr<UniSceneObject> so) {
+		auto object = std::dynamic_pointer_cast<T>(so);
+		if(object) {
+			objects.push_back(object);
+		}
+	});
+
+	return objects;
 }

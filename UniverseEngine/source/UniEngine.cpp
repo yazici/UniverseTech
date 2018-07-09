@@ -12,6 +12,7 @@
 #include "UniBody.h"
 #include <algorithm>
 #include "components/PlayerControlSystem.h"
+#include "components/LightComponent.h"
 
 #define ENABLE_VALIDATION true
 
@@ -1163,48 +1164,30 @@ void UniEngine::updateUniformBufferDeferredMatrices() {
 
 // Update fragment shader light position uniform block
 void UniEngine::updateUniformBufferDeferredLights() {
-	// White
-	uboFragmentLights.lights[0].position = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-	uboFragmentLights.lights[0].color = glm::vec3(1.5f);
-	uboFragmentLights.lights[0].radius = 150.0f * 0.25f;
-	// Red
-	uboFragmentLights.lights[1].position = glm::vec4(10.0f, 0.0f, 10.0f, 0.0f);
-	uboFragmentLights.lights[1].color = glm::vec3(1.0f, 0.0f, 0.0f);
-	uboFragmentLights.lights[1].radius = 15.0f;
-	// Blue
-	uboFragmentLights.lights[2].position = glm::vec4(2.0f, -1.0f, 0.0f, 0.0f);
-	uboFragmentLights.lights[2].color = glm::vec3(0.0f, 0.0f, 2.5f);
-	uboFragmentLights.lights[2].radius = 5.0f;
-	// Yellow
-	uboFragmentLights.lights[3].position = glm::vec4(0.0f, -0.9f, 0.5f, 0.0f);
-	uboFragmentLights.lights[3].color = glm::vec3(1.0f, 1.0f, 0.0f);
-	uboFragmentLights.lights[3].radius = 2.0f;
-	// Green
-	uboFragmentLights.lights[4].position = glm::vec4(0.0f, -0.5f, 0.0f, 0.0f);
-	uboFragmentLights.lights[4].color = glm::vec3(0.0f, 1.0f, 0.2f);
-	uboFragmentLights.lights[4].radius = 5.0f;
-	// Yellow
-	uboFragmentLights.lights[5].position = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
-	uboFragmentLights.lights[5].color = glm::vec3(1.0f, 0.7f, 0.3f);
-	uboFragmentLights.lights[5].radius = 25.0f;
+	
+	// each scene light into uboFragmentLights.lights
+	uint32_t lightCount = 0;
+	GetScene()->m_World->each<TransformComponent, LightComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<LightComponent> light) {
+		//std::cout << "Found a light! " << lightCount;
+		if(light->enabled && lightCount < 256) {
+			auto lPos = glm::vec4(transform->TransformLocalToWS(transform->m_dPos), 0);
+			auto lCol = light->color;
+			uboFragmentLights.lights[lightCount].color = lCol;
+			uboFragmentLights.lights[lightCount].radius = light->radius;
+			uboFragmentLights.lights[lightCount].position = lPos;
+			lightCount++;
+			//std::cout << ", radius: " << light->radius;
+			//std::cout << ", pos: " << lPos.x << ", " << lPos.y << ", " << lPos.z << ". ";
+			//std::cout << ", col: " << lCol.r << ", " << lCol.g << ", " << lCol.b << ", " << lCol.a << ". " << std::endl;
+		} else {
+			std::cout << "Light is disabled!" << std::endl;
+		}
+	});
 
-	uboFragmentLights.lights[0].position.x = sin(glm::radians(360.0f * timer)) * 5.0f;
-	uboFragmentLights.lights[0].position.z = cos(glm::radians(360.0f * timer)) * 5.0f;
-
-	//uboFragmentLights.lights[1].position.x = -4.0f + sin(glm::radians(360.0f * timer) + 45.0f) * 2.0f;
-	//uboFragmentLights.lights[1].position.z = 0.0f + cos(glm::radians(360.0f * timer) + 45.0f) * 2.0f;
-
-	uboFragmentLights.lights[2].position.x = 4.0f + sin(glm::radians(360.0f * timer)) * 2.0f;
-	uboFragmentLights.lights[2].position.z = 0.0f + cos(glm::radians(360.0f * timer)) * 2.0f;
-
-	uboFragmentLights.lights[4].position.x = 0.0f + sin(glm::radians(360.0f * timer + 90.0f)) * 5.0f;
-	uboFragmentLights.lights[4].position.z = 0.0f - cos(glm::radians(360.0f * timer + 45.0f)) * 5.0f;
-
-	uboFragmentLights.lights[5].position.x = 0.0f + sin(glm::radians(-360.0f * timer + 135.0f)) * 10.0f;
-	uboFragmentLights.lights[5].position.z = 0.0f - cos(glm::radians(-360.0f * timer - 45.0f)) * 10.0f;
-
-	// Current view position
 	uboFragmentLights.viewPos = glm::vec4(GetScene()->GetCameraComponent()->GetPosition(), 0.0f) * glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
+	uboFragmentLights.numLights = lightCount;
+
+	//std::cout << "Enabled lights: " << lightCount << std::endl;
 
 	memcpy(uniformBuffers.fsLights.mapped, &uboFragmentLights, sizeof(uboFragmentLights));
 }
@@ -1296,7 +1279,6 @@ void UniEngine::render() {
 
 void UniEngine::viewChanged() {
 	updateUniformBufferDeferredMatrices();
-	uboFragmentLights.windowSize = glm::ivec2(width, height);
 }
 
 void UniEngine::windowResized() {

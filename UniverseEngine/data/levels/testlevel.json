@@ -35,6 +35,30 @@
                 "rotation": [ 0, 0, 0 ],
                 "createScale": [ 15, 15, 15 ],
                 "createUVScale": [ 8, 8 ]
+            },
+            {
+                "type": "light",
+                "name": "light-white",
+                "position": [ 0.0, 0.0, 1.0 ],
+                "radius": 37.5,
+                "color": [ 1.5, 1.5, 1.5, 1.5 ],
+                "on": true
+            },
+            {
+                "type": "light",
+                "name": "light-red",
+                "position": [ 4.0, 0.0, 4.0 ],
+                "radius": 15,
+                "color": [ 1, 0, 0, 1 ],
+                "on": true
+            },
+            {
+                "type": "light",
+                "name": "light-blue",
+                "position": [ 2.0, -1.0, 0.0 ],
+                "radius": 5,
+                "color": [ 0, 0, 2.5, 1 ],
+                "on": true
             }
         ]
     }
