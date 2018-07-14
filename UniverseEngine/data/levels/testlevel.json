@@ -3,8 +3,8 @@
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
-            "position": [ 20, -3.5, -14 ],
-            "rotation": [0, 0, 0]
+            "position": [ 0, -3.5, -14 ],
+            "rotation": [0, 90, 0]
         },
         "sceneObjects": [
             {
@@ -35,6 +35,17 @@
                 "rotation": [ 0, 0, 0 ],
                 "createScale": [ 15, 15, 15 ],
                 "createUVScale": [ 8, 8 ]
+            },
+            {
+                "type": "model",
+                "name": "Venus",
+                "mesh": "models/venus.fbx",
+                "texture": "",
+                "normal": "",
+                "position": [ 0.0, 2, -3.0 ],
+                "rotation": [ 0, 0, 0 ],
+                "createScale": [ 0.25, 0.25, 0.25 ],
+                "createUVScale": [ 1, 1 ]
             },
             {
                 "type": "light",
