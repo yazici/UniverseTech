@@ -6,7 +6,6 @@
 #include "UniModel.h"
 
 
-class UniBody;
 class UniEngine;
 
 class UniScene {
@@ -40,7 +39,6 @@ public:
 
 	template <class T> std::vector<std::shared_ptr<T>> GetObjectsOfClass();
 
-	std::shared_ptr<UniBody> m_BodyTest;
 
 	std::string GetName() { return m_Name; }
 private:

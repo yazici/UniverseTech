@@ -4,7 +4,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "glm/glm.hpp"
 #include "ECS.h"
-#include "Components.h"
+#include "components/Components.h"
 
 class UniScene;
 
@@ -26,6 +26,9 @@ public:
 	template<class T, class... _Types>
 	void AddComponent(_Types&&... _Args);
 
+	template<class T>
+	T GetComponent();
+
 	std::string GetName() { return m_Name; }
 	void SetName(std::string name) { m_Name = name; }
 
@@ -40,5 +43,10 @@ protected:
 template<class T, class... _Types>
 void UniSceneObject::AddComponent(_Types&&... _Args) {
 	m_Entity->assign<T>(_Args...);
+}
+
+template<class T>
+T UniSceneObject::GetComponent() {
+	return m_Entity->get<T>();
 }
 

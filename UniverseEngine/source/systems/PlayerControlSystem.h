@@ -2,7 +2,7 @@
 #include "../ECS.h"
 #include <iostream>
 #include <glm/glm.hpp>
-#include "PlayerMovement.h"
+#include "../components/PlayerMovement.h"
 
 struct InputEvent {
 	int axis;

@@ -56,15 +56,23 @@ void UniModel::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue
 		vks::tools::exitFatal("Device does not support any compressed texture format!", VK_ERROR_FEATURE_NOT_PRESENT);
 	}
 
-	if(!m_TexturePath.empty())
+	if(!m_TexturePath.empty()) {
 		m_Texture.loadFromFile(getAssetPath() + m_TexturePath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
+	} else {
+		std::vector<glm::vec4> buffer(4 * 4);
+		for(auto & i : buffer) {
+			i = glm::vec4(.6f, .6f, .6f, 1.f);
+		}
+		m_Texture.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec4), VK_FORMAT_R32G32B32A32_SFLOAT, 4, 4, device, copyQueue, VK_FILTER_LINEAR);
+	}
 
-	if(!m_NormalMapPath.empty())
+	if(!m_NormalMapPath.empty()){
 		m_NormalMap.loadFromFile(getAssetPath() + m_NormalMapPath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
+	}
 	else {
 		std::vector<glm::vec4> buffer(4 * 4);
-		for(int32_t i = 0; i < buffer.size(); i++) {
-			buffer[i] = glm::vec4(0.f, 0.f, 1.f, 0.f);
+		for(auto & i : buffer) {
+			i = glm::vec4(0.f, 0.f, 1.f, 0.f);
 		}
 		m_NormalMap.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec4), VK_FORMAT_R32G32B32A32_SFLOAT, 4, 4, device, copyQueue, VK_FILTER_LINEAR);
 	}

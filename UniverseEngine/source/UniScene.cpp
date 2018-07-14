@@ -1,12 +1,14 @@
 #include "UniScene.h"
 #include <memory>
-#include "Systems.h"
-#include "UniBody.h"
+#include "systems/Systems.h"
 #include "UniEngine.h"
+#include "components/UniPlanet.h"
 #include "components/PlayerMovement.h"
 #include "components/LightComponent.h"
 #include <nlohmann/json.hpp>
 #include <iosfwd>
+#include "systems/PlanetRenderSystem.h"
+#include "systems/PlayerControlSystem.h"
 
 
 using json = nlohmann::json;
@@ -21,6 +23,9 @@ void UniScene::Initialize(UniEngine* engine) {
 	m_World = ECS::World::createWorld();
 	m_World->registerSystem(new MovementSystem());
 	m_World->registerSystem(new CameraSystem());
+	m_World->registerSystem(new PlanetRenderSystem());
+	m_World->registerSystem(new PlayerControlSystem());
+	
 
 	m_CurrentCamera = Make<UniSceneObject>();
 	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 0.1f, 1000.0f);
@@ -54,9 +59,7 @@ void UniScene::Load() {
 	/*auto floor = Make<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
 	floor->SetCreateInfo(glm::vec3(0.0f, -2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
 	floor->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);*/
-
-	//m_BodyTest = Make<UniBody>(7.0);
-	//m_BodyTest->Initialize();
+	
 
 }
 
@@ -185,6 +188,9 @@ void UniScene::Load(std::string filename) {
 	camObj->GetTransform()->SetPosition(glm::vec3(playerPos.at(0), playerPos.at(1), playerPos.at(2)));
 	GetCameraComponent()->CalculateView(camObj->GetTransform());
 
+
+	auto planetTest = Make<UniSceneObject>();
+	planetTest->AddComponent<UniPlanet>();	
 
 	//std::cout << data.dump() << std::endl;
 }

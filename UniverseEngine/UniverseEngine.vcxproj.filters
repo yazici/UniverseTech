@@ -46,6 +46,12 @@
     <Filter Include="Content\levels">
       <UniqueIdentifier>{37c707ef-4469-405b-ac8a-c176bea40af6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\systems">
+      <UniqueIdentifier>{ce565bba-9282-4a62-8692-ef86a0e87878}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems">
+      <UniqueIdentifier>{7c3c5419-900b-4e3b-a86d-2b8633169aa7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\vks\benchmark.hpp">
@@ -135,21 +141,6 @@
     <ClInclude Include="source\ECS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Components.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Systems.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\UniBody.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Triangulator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Patch.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\Geometry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -174,11 +165,20 @@
     <ClInclude Include="source\components\PlayerMovement.h">
       <Filter>Header Files\components</Filter>
     </ClInclude>
-    <ClInclude Include="source\components\PlayerControlSystem.h">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="source\components\LightComponent.h">
       <Filter>Header Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\UniPlanet.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\Systems.h">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\PlayerControlSystem.h">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\PlanetRenderSystem.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -221,18 +221,6 @@
     <ClCompile Include="source\UniEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Systems.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniBody.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Triangulator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Patch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\UniFrustum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -242,14 +230,23 @@
     <ClCompile Include="source\UniInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\components\PlayerControlSystem.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="source\components\Movement.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
     <ClCompile Include="source\components\PlayerMovement.cpp">
       <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\UniPlanet.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\Systems.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\PlayerControlSystem.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\PlanetRenderSystem.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

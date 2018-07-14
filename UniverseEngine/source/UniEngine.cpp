@@ -9,9 +9,8 @@
 #include "UniEngine.h"
 #include "vks/VulkanTools.h"
 #include <assert.h>
-#include "UniBody.h"
 #include <algorithm>
-#include "components/PlayerControlSystem.h"
+#include "systems/PlayerControlSystem.h"
 #include "components/LightComponent.h"
 
 #define ENABLE_VALIDATION true
@@ -1315,7 +1314,7 @@ void UniEngine::ToggleWireframe()
 }
 
 void UniEngine::SetupInput() {
-	m_CurrentScene->m_World->registerSystem(new PlayerControlSystem());
+	
 	m_InputManager = std::make_shared<UniInput>();
 	m_InputManager->Initialize(height, width);
 
