@@ -177,8 +177,11 @@
     <ClInclude Include="source\systems\PlayerControlSystem.h">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
+    <ClInclude Include="source\components\UniRenderable.h">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
     <ClInclude Include="source\systems\PlanetRenderSystem.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -245,8 +248,11 @@
     <ClCompile Include="source\systems\PlayerControlSystem.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
+    <ClCompile Include="source\components\UniRenderable.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
     <ClCompile Include="source\systems\PlanetRenderSystem.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -293,6 +299,12 @@
     </None>
     <None Include="data\levels\testlevel.json">
       <Filter>Content\levels</Filter>
+    </None>
+    <None Include="data\shaders\uniplanet.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\uniplanet.vert">
+      <Filter>shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -17,6 +17,9 @@ void PlanetRenderSystem::tick(ECS::World* world, float deltaTime) {
 		auto camPos = transform->TransformWSToObject(cam->GetPosition());
 		planet->SetCameraPosition(camPos);
 		auto modelMat = transform->GetModelMat();
+
+		planet->UpdateMesh();
+		planet->UpdateBuffers();
 		planet->UpdateUniformBuffers(modelMat);
 	});
 }

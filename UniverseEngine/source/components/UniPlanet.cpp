@@ -4,7 +4,9 @@
 #include <iostream>
 
 
-UniPlanet::~UniPlanet() {}
+UniPlanet::~UniPlanet() {
+	DestroyBuffers();
+}
 
 void UniPlanet::Initialize() {
 
@@ -36,8 +38,6 @@ void UniPlanet::Initialize() {
 			VK_FORMAT_R32G32B32_SFLOAT,
 			offset);
 
-
-
 	m_VertexDescription.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
 	m_VertexDescription.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(m_VertexDescription.attributeDescriptions.size());
 	m_VertexDescription.inputState.pVertexAttributeDescriptions = m_VertexDescription.attributeDescriptions.data();
@@ -48,6 +48,7 @@ void UniPlanet::Initialize() {
 	CreateGrid();
 	CreateTriangles();
 	UpdateMesh();
+	CreateBuffers();
 	UpdateBuffers();
 
 	auto modelMat = glm::mat4();
@@ -167,21 +168,6 @@ void UniPlanet::UpdateBuffers() {
 		indexBufferSize,
 		m_Triangles.data()));
 
-	// Create device local target buffers
-	// Vertex buffer
-	VK_CHECK_RESULT(device->createBuffer(
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		&m_VertexBuffer,
-		vertexBufferSize));
-
-	// Index buffer
-	VK_CHECK_RESULT(device->createBuffer(
-		VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		&m_IndexBuffer,
-		indexBufferSize));
-
 	// Copy from staging buffers
 	VkCommandBuffer copyCmd = device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
@@ -244,4 +230,35 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	vkDestroyBuffer(device->logicalDevice, uniformStaging.buffer, nullptr);
 	vkFreeMemory(device->logicalDevice, uniformStaging.memory, nullptr);
 
+}
+
+void UniPlanet::CreateBuffers() {
+
+	uint32_t vertexBufferSize = static_cast<uint32_t>(m_MeshVerts.size() * sizeof(glm::vec3));
+	uint32_t indexBufferSize = static_cast<uint32_t>(m_Triangles.size() * sizeof(uint32_t));
+
+	auto device = UniEngine::GetInstance().vulkanDevice;
+
+	// Create device local target buffers
+	// Vertex buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&m_VertexBuffer,
+		vertexBufferSize));
+
+	// Index buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&m_IndexBuffer,
+		indexBufferSize));
+
+
+}
+
+void UniPlanet::DestroyBuffers() {
+	m_IndexBuffer.destroy();
+	m_VertexBuffer.destroy();
+	m_UniformBuffer.destroy();
 }

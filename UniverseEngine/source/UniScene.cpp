@@ -190,7 +190,7 @@ void UniScene::Load(std::string filename) {
 
 
 	auto planetTest = Make<UniSceneObject>();
-	planetTest->AddComponent<UniPlanet>();	
+	planetTest->AddComponent<UniPlanet>();
 
 	//std::cout << data.dump() << std::endl;
 }

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "systems/PlayerControlSystem.h"
 #include "components/LightComponent.h"
+#include "components/UniPlanet.h"
 
 #define ENABLE_VALIDATION true
 
@@ -733,6 +734,26 @@ void UniEngine::setupDescriptorSets() {
 	});
 
 
+	// Models
+	GetScene()->m_World->each<UniPlanet>([&](ECS::Entity* entity, ECS::ComponentHandle<UniPlanet> planet) {
+
+		VkResult res = (vkAllocateDescriptorSets(device, &allocInfo, &planet->m_DescriptorSet));
+		if(res != VK_SUCCESS) {
+			std::cout << "Fatal : VkResult is \"" << vks::tools::errorString(res) << "\" in " << __FILE__ << " at line " << __LINE__ << std::endl;
+			assert(res == VK_SUCCESS);
+		}
+
+		std::vector<VkWriteDescriptorSet> planetWriteDescriptorSets =
+		{
+			// Binding 0: Vertex shader uniform buffer
+			vks::initializers::writeDescriptorSet(
+				planet->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				0,
+				&planet->m_UniformBuffer.descriptor)
+		};
+		vkUpdateDescriptorSets(device, static_cast<uint32_t>(planetWriteDescriptorSets.size()), planetWriteDescriptorSets.data(), 0, nullptr);
+	});
 
 
 }
@@ -872,6 +893,10 @@ void UniEngine::preparePipelines() {
 	multisampleState.minSampleShading = 0.25f;
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offscreenSampleShading));
 
+	// UNIPLANET rendering pipeline
+	pipelineCreateInfo.pVertexInputState = &vertices.inputState;
+	shaderStages[0] = loadShader(getAssetPath() + "shaders/uniplanet.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+	shaderStages[1] = loadShader(getAssetPath() + "shaders/uniplanet.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
 
 

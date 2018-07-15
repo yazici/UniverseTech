@@ -2,10 +2,8 @@
 #include <glm/glm.hpp>
 #include "../vks/VulkanBuffer.hpp"
 
-class UniPlanet {
+class UniPlanet{
 public:
-
-
 
 	struct UniformBufferData {
 		glm::mat4 modelMat;
@@ -47,6 +45,9 @@ public:
 	void UpdateMesh();
 	void UpdateBuffers();
 	void UpdateUniformBuffers(glm::mat4& modelMat);
+
+	
+
 private:
 
 	double m_Radius = 1.0;
@@ -62,5 +63,7 @@ private:
 
 	glm::vec3 m_CurrentCameraPos = glm::vec3(0, 0, 10);
 
+	void CreateBuffers();
+	void DestroyBuffers();
 };
 
