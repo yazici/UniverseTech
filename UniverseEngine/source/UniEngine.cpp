@@ -71,20 +71,16 @@ void UniEngine::Shutdown() {
 	vkDestroyPipeline(device, pipelines.offscreen, nullptr);
 	vkDestroyPipeline(device, pipelines.offscreenSampleShading, nullptr);
 	vkDestroyPipeline(device, pipelines.debug, nullptr);
-	vkDestroyPipeline(device, pipelines.offScreenPlanet, nullptr);
+
 	if (deviceFeatures.fillModeNonSolid)
 	{
-		vkDestroyPipeline(device, pipelines.offScreenPlanetWireframe, nullptr);
 	}
 
 	vkDestroyPipelineLayout(device, pipelineLayouts.deferred, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayouts.offscreen, nullptr);
-	vkDestroyPipelineLayout(device, pipelineLayouts.planetOffscreen, nullptr);
 
 
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
-	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayoutDynamic, nullptr);
-	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayoutPlanet, nullptr);
 
 	// Meshes
 	auto models = m_CurrentScene->GetModels();
@@ -101,7 +97,7 @@ void UniEngine::Shutdown() {
 	uniformBuffers.fsLights.destroy();
 
 	vkFreeCommandBuffers(device, cmdPool, 1, &m_offScreenCmdBuffer);
-	/*vkFreeCommandBuffers(device, cmdPool, 1, &m_planetCmdBuffer);*/
+
 
 	vkDestroyRenderPass(device, offScreenFrameBuf.renderPass, nullptr);
 
@@ -413,98 +409,12 @@ void UniEngine::buildDeferredCommandBuffer() {
 		index++;
 	});
 
-	//auto body = m_CurrentScene->m_BodyTest;
-	//if(body->m_pPatch->m_NumInstances > 0) {
-
-	//	VkDeviceSize offsets[1] = { 0 };
-	//	// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
-	//	
-	//	vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-	//	if (m_useWireframe) {
-	//		vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
-	//	}
-	//	else {
-	//		vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
-	//	}
-	//	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
-	//	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
-	//	vkCmdBindIndexBuffer(m_offScreenCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-
-
-	//	//// Render instances
-	//	//std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
-	//	//std::cout << "Buffer bytes - vertex: " << body->m_pPatch->vertexBuffer.size << ", instance: " << body->m_pPatch->m_instanceBuffer.size << ", index: " << body->m_pPatch->indexBuffer.size << std::endl;
-	//	vkCmdDrawIndexed(m_offScreenCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
-	//}
 
 	vkCmdEndRenderPass(m_offScreenCmdBuffer);
 
 	VK_CHECK_RESULT(vkEndCommandBuffer(m_offScreenCmdBuffer));
 }
 
-// Build command buffer for rendering the scene to the offscreen frame buffer attachments
-void UniEngine::buildPlanetCommandBuffer() {
-	if(m_planetCmdBuffer == VK_NULL_HANDLE) {
-		m_planetCmdBuffer = VulkanExampleBase::createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
-	}
-
-	// Create a semaphore used to synchronize offscreen rendering and usage
-	if(m_offscreenSemaphore == VK_NULL_HANDLE) {
-		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-		VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &m_offscreenSemaphore));
-	}
-
-	VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-
-	// Clear values for all attachments written in the fragment sahder
-	std::array<VkClearValue, 4> clearValues;
-	clearValues[0].color = clearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	clearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	clearValues[3].depthStencil = { 1.0f, 0 };
-
-	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-	renderPassBeginInfo.renderPass = offScreenFrameBuf.renderPass;
-	renderPassBeginInfo.framebuffer = offScreenFrameBuf.frameBuffer;
-	renderPassBeginInfo.renderArea.extent.width = offScreenFrameBuf.width;
-	renderPassBeginInfo.renderArea.extent.height = offScreenFrameBuf.height;
-	renderPassBeginInfo.clearValueCount = 0;
-	renderPassBeginInfo.pClearValues = nullptr;
-	//renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-	//renderPassBeginInfo.pClearValues = clearValues.data();
-
-	//VK_CHECK_RESULT(vkBeginCommandBuffer(m_planetCmdBuffer, &cmdBufInfo));
-
-	//vkCmdBeginRenderPass(m_planetCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	//VkViewport viewport = vks::initializers::viewport((float)offScreenFrameBuf.width, (float)offScreenFrameBuf.height, 0.0f, 1.0f);
-	//vkCmdSetViewport(m_planetCmdBuffer, 0, 1, &viewport);
-
-	//VkRect2D scissor = vks::initializers::rect2D(offScreenFrameBuf.width, offScreenFrameBuf.height, 0, 0);
-	//vkCmdSetScissor(m_planetCmdBuffer, 0, 1, &scissor);
-
-	//vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_useSampleShading ? pipelines.offscreenSampleShading : pipelines.offscreen);
-
-	//VkDeviceSize offsets[1] = { 0 };
-	//auto body = m_CurrentScene->m_BodyTest;
-	//vkCmdBindDescriptorSets(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-	//if (m_useWireframe) {
-	//	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
-	//}
-	//else {
-	//	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
-	//}
-	//vkCmdBindVertexBuffers(m_planetCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
-	//vkCmdBindVertexBuffers(m_planetCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
-	//vkCmdBindIndexBuffer(m_planetCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-
-	////// Render instances
-	//std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
-	//vkCmdDrawIndexed(m_planetCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
-
-	//vkCmdEndRenderPass(m_planetCmdBuffer);
-
-	//VK_CHECK_RESULT(vkEndCommandBuffer(m_planetCmdBuffer));
-}
 
 void UniEngine::buildCommandBuffers() {
 	VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
@@ -697,53 +607,7 @@ void UniEngine::setupDescriptorSetLayout() {
 	// Offscreen (scene) rendering pipeline layout
 	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayouts.offscreen));
 
-	setLayoutBindings =
-	{
-		// Binding 0 : Uniform buffer for all thingies
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-			0),
-		// Binding 1 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			1),
-		// Binding 2 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			2),
-		// Binding 3 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			3),
-		// Binding 4 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			4),
-		// Binding 5 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			5),
-	};
 
-	descriptorLayout =
-		vks::initializers::descriptorSetLayoutCreateInfo(
-			setLayoutBindings.data(),
-			static_cast<uint32_t>(setLayoutBindings.size()));
-
-	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &m_descriptorSetLayoutPlanet));
-
-	pPipelineLayoutCreateInfo =
-		vks::initializers::pipelineLayoutCreateInfo(
-			&m_descriptorSetLayoutPlanet,
-			1);
-
-	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayouts.planetOffscreen));
 
 }
 
@@ -869,61 +733,6 @@ void UniEngine::setupDescriptorSets() {
 	});
 
 
-	// offscreen planets
-
-	//allocInfo =
-	//	vks::initializers::descriptorSetAllocateInfo(
-	//		descriptorPool,
-	//		&m_descriptorSetLayoutPlanet,
-	//		1);
-
-	//VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_CurrentScene->m_BodyTest->m_pPatch->m_DescriptorSet));
-
-	//auto body = m_CurrentScene->m_BodyTest;
-
-	//writeDescriptorSets = {
-	//	// Binding 0 : Vertex shader uniform buffer
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-	//		0,
-	//		&body->m_pPatch->uniformBuffer.descriptor),
-	//	// Binding 1: Diffuse
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		1,
-	//		&body->m_Texture.descriptor),
-	//	// Binding 2: Height
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		2,
-	//		&body->m_HeightMap.descriptor),
-	//	// Binding 3: height detail
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		3,
-	//		&body->m_HeightDetail.descriptor),
-
-	//	// Binding 4: texture detail
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		4,
-	//		&body->m_Detail1.descriptor),
-
-	//	// Binding 5: texture detail 2
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		5,
-	//		&body->m_Detail2.descriptor),
-
-	//};
-
-	//vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 
 
 }
@@ -1064,20 +873,6 @@ void UniEngine::preparePipelines() {
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offscreenSampleShading));
 
 
-	//// planet offscreen pipeline
-
-	//pipelineCreateInfo.layout = pipelineLayouts.planetOffscreen;
-
-	//pipelineCreateInfo.pVertexInputState = &m_CurrentScene->m_BodyTest->m_pPatch->vertexDescription.inputState;
-	//shaderStages[0] = loadShader(getAssetPath() + "shaders/planet.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-	//shaderStages[1] = loadShader(getAssetPath() + "shaders/planet.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-
-	//VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanet));
-
-	//rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
-	//rasterizationState.lineWidth = 1.0f;
-
-	//VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanetWireframe));
 
 
 }
@@ -1221,7 +1016,7 @@ void UniEngine::draw() {
 	submitInfo.pSignalSemaphores = &m_offscreenSemaphore;
 
 	std::array<VkCommandBuffer, 1> commandBuffers = {
-		m_offScreenCmdBuffer, //m_planetCmdBuffer
+		m_offScreenCmdBuffer,
 	};
 
 	// Submit work
@@ -1258,7 +1053,6 @@ void UniEngine::prepare() {
 	setupDescriptorSets();
 	buildCommandBuffers();
 	buildDeferredCommandBuffer();
-	//buildPlanetCommandBuffer();
 	prepared = true;
 }
 
@@ -1301,7 +1095,7 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 			}
 		}
 		if (vulkanDevice->features.fillModeNonSolid) {
-			if (overlay->checkBox("Wireframe Planet", &m_useWireframe)) {
+			if (overlay->checkBox("Wireframe", &m_useWireframe)) {
 				//buildDeferredCommandBuffer();
 			}
 		}

@@ -95,20 +95,16 @@ public:
 		VkPipeline offscreen;				// (Offscreen) scene rendering (fill G-Buffers)
 		VkPipeline offscreenSampleShading;	// (Offscreen) scene rendering (fill G-Buffers) with sample shading rate enabled
 		VkPipeline debug;					// G-Buffers debug display
-		VkPipeline offScreenPlanet;
-		VkPipeline offScreenPlanetWireframe;
 	} pipelines;
 
 	struct {
 		VkPipelineLayout deferred;
 		VkPipelineLayout offscreen;
-		VkPipelineLayout planetOffscreen;
 	} pipelineLayouts;
 
 	VkDescriptorSet m_descriptorSet;
 	VkDescriptorSet m_descriptorSetDynamic;
 	VkDescriptorSetLayout m_descriptorSetLayout;
-	VkDescriptorSetLayout m_descriptorSetLayoutPlanet;
 	VkDescriptorSetLayout m_descriptorSetLayoutDynamic;
 
 	// Framebuffer for offscreen rendering
@@ -154,7 +150,6 @@ public:
 	VkDevice GetDevice() { return device; }
 	VkQueue GetQueue() { return queue; }
 	void Shutdown();
-	void buildPlanetCommandBuffer();
 	bool m_debugDisplay = false;
 	bool m_useMSAA = true;
 	bool m_useSampleShading = true;
@@ -164,7 +159,6 @@ public:
 	VkSampler m_colorSampler;
 
 	VkCommandBuffer m_offScreenCmdBuffer = VK_NULL_HANDLE;
-	VkCommandBuffer m_planetCmdBuffer = VK_NULL_HANDLE;
 
 	// Semaphore used to synchronize between offscreen and final scene rendering
 	VkSemaphore m_offscreenSemaphore = VK_NULL_HANDLE;
