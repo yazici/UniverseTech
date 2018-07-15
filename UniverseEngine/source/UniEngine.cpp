@@ -703,11 +703,6 @@ void UniEngine::preparePipelines() {
 	multisampleState.minSampleShading = 0.25f;
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offscreenSampleShading));
 
-	// UNIPLANET rendering pipeline
-	pipelineCreateInfo.pVertexInputState = &vertices.inputState;
-	shaderStages[0] = loadShader(getAssetPath() + "shaders/uniplanet.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-	shaderStages[1] = loadShader(getAssetPath() + "shaders/uniplanet.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-
 
 
 }
@@ -798,17 +793,6 @@ void UniEngine::setupDescriptorSets() {
 
 	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 
-
-	// Offscreen (scene)
-
-	// Textured quad descriptor set
-	VkDescriptorSetAllocateInfo allocInfoDynamic =
-		vks::initializers::descriptorSetAllocateInfo(
-			descriptorPool,
-			&m_descriptorSetLayoutDynamic,
-			1);
-
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSetDynamic));
 
 
 	// Models

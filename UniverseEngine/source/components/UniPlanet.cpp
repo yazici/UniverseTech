@@ -10,6 +10,9 @@ UniPlanet::~UniPlanet() {
 
 void UniPlanet::Initialize() {
 
+
+	m_Material = std::unique_ptr<PlanetMaterial>(static_cast<PlanetMaterial*>(MaterialFactory::create("planet", "testworld").release()));
+
 	auto device = UniEngine::GetInstance().vulkanDevice;
 	uint32_t ubSize = static_cast<uint32_t>(sizeof(UniPlanet::UniformBufferData));
 

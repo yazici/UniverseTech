@@ -189,8 +189,8 @@ void UniScene::Load(std::string filename) {
 	GetCameraComponent()->CalculateView(camObj->GetTransform());
 
 
-	auto planetTest = Make<UniSceneObject>();
-	planetTest->AddComponent<UniPlanet>();
+	//auto planetTest = Make<UniSceneObject>();
+	//planetTest->AddComponent<UniPlanet>();
 
 	//std::cout << data.dump() << std::endl;
 }

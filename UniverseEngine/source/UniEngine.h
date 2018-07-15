@@ -103,9 +103,7 @@ public:
 	} pipelineLayouts;
 
 	VkDescriptorSet m_descriptorSet;
-	VkDescriptorSet m_descriptorSetDynamic;
 	VkDescriptorSetLayout m_descriptorSetLayout;
-	VkDescriptorSetLayout m_descriptorSetLayoutDynamic;
 
 	// Framebuffer for offscreen rendering
 	struct FrameBufferAttachment {
@@ -149,6 +147,7 @@ public:
 
 	VkDevice GetDevice() { return device; }
 	VkQueue GetQueue() { return queue; }
+	VkPipelineCache GetPipelineCache() { return pipelineCache; }
 	void Shutdown();
 	bool m_debugDisplay = false;
 	bool m_useMSAA = true;

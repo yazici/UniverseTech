@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "../vks/VulkanBuffer.hpp"
+#include "../UniMaterial.h"
 
 class UniPlanet{
 public:
@@ -46,7 +47,7 @@ public:
 	void UpdateBuffers();
 	void UpdateUniformBuffers(glm::mat4& modelMat);
 
-	
+	std::unique_ptr<PlanetMaterial> m_Material;
 
 private:
 

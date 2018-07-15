@@ -177,11 +177,14 @@
     <ClInclude Include="source\systems\PlayerControlSystem.h">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
-    <ClInclude Include="source\components\UniRenderable.h">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="source\systems\PlanetRenderSystem.h">
       <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UniMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\factory.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -248,11 +251,11 @@
     <ClCompile Include="source\systems\PlayerControlSystem.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
-    <ClCompile Include="source\components\UniRenderable.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="source\systems\PlanetRenderSystem.cpp">
       <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniMaterial.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
