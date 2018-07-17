@@ -309,5 +309,8 @@
     <None Include="data\shaders\uniplanet.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="data\levels\testlevel2.json">
+      <Filter>Content\levels</Filter>
+    </None>
   </ItemGroup>
 </Project>

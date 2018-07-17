@@ -33,17 +33,19 @@ void main()
 {
 	//initial position
 	vec3 TriPos = pos;
+	TriPos *= vec3(1, -1, 1);
 	
 	Normal = normalize(pos);
 	mat3 mNormal = transpose(inverse(mat3(ubo.model)));
 	Normal = mNormal * Normal;
 	
-	gl_Position = ubo.proj * ubo.view * ubo.model * vec4(TriPos, 1.0f);
 
 	outWorldPos = (ubo.model * vec4(TriPos, 1.f)).xyz;
 	outWorldPos.y = -outWorldPos.y;
 
 	outColor = vec3(1.0);  
+
+	gl_Position = ubo.proj * ubo.view * vec4(outWorldPos, 1);
 	
 }
 

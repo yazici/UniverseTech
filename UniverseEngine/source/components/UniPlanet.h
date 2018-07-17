@@ -12,8 +12,8 @@ public:
 		glm::mat4 projMat;
 		glm::vec4 camPos;
 		double radius;
-		double minDepth;
 		double maxHeight;
+		double minDepth;
 	} m_UniformBufferData;
 
 	vks::Buffer m_VertexBuffer;
@@ -23,18 +23,11 @@ public:
 	uint32_t m_IndexCount;
 	VkDescriptorSet m_DescriptorSet;
 
-	struct VertexDescriptionData{
-		VkPipelineVertexInputStateCreateInfo inputState;
-		std::vector<VkVertexInputBindingDescription> bindingDescriptions;
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-	} m_VertexDescription;
 
+	UniPlanet(double radius = 1.0, double maxHeightOffset = 0.1, double maxDepthOffset = 0.1, uint16_t gridSize = 10);
 
-	UniPlanet(double radius = 1.0, double maxHeightOffset = 0.1, double maxDepthOffset = 0.1, uint16_t gridSize = 10) :
-		m_Radius(radius), m_MaxHeightOffset(maxHeightOffset), m_MaxDepthOffset(maxDepthOffset), m_GridSize(gridSize) {
-		Initialize();
-	}
-	~UniPlanet();
+	void Destroy();
+	virtual ~UniPlanet() = default;
 
 	void Initialize();
 	void CreateGrid();
@@ -47,7 +40,7 @@ public:
 	void UpdateBuffers();
 	void UpdateUniformBuffers(glm::mat4& modelMat);
 
-	std::unique_ptr<PlanetMaterial> m_Material;
+	std::shared_ptr<PlanetMaterial> m_Material;
 
 private:
 

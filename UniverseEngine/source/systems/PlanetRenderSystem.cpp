@@ -2,6 +2,7 @@
 #include "../components/UniPlanet.h"
 #include "../components/Transform.h"
 #include "../UniEngine.h"
+#include "../UniScene.h"
 
 
 PlanetRenderSystem::PlanetRenderSystem() {}

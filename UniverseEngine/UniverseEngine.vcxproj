@@ -238,6 +238,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\levels\testlevel.json" />
+    <None Include="data\levels\testlevel2.json" />
     <None Include="data\shaders\deferredmultisampling\debug.frag" />
     <None Include="data\shaders\deferredmultisampling\debug.vert" />
     <None Include="data\shaders\deferredmultisampling\deferred.frag" />

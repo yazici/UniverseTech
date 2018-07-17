@@ -16,7 +16,7 @@ public:
 	std::shared_ptr<UniSceneObject> m_Parent;
 
 	void SetScene(UniScene *scene);
-	void SetEntity(ECS::Entity* ent);
+	void SetEntity(ECS::Entity* ent, glm::vec3 pos);
 	void SetParent(std::shared_ptr<UniSceneObject> parent);
 
 	ECS::Entity* m_Entity = nullptr;

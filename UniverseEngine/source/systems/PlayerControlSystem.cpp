@@ -1,19 +1,24 @@
 #include "PlayerControlSystem.h"
 #include "../UniEngine.h"
+#include "../UniInput.h"
 
 void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
-	std::cout << "Got an input event!" << std::endl;
+	//std::cout << "Got an input event!" << std::endl;
 
 	auto input = UniEngine::GetInstance().GetInputManager();
 
 	switch (event.axis)
 	{
 	case UniInput::AxisThrust:
-		std::cout << "Setting THRUST: " << event.value << std::endl;
 		inputDirection.z = event.value;
 		break;
 	case UniInput::AxisStrafe:
+		std::cout << "Strafing: " << event.value << std::endl;
 		inputDirection.x = event.value;
+		break;
+	case UniInput::AxisAscend:
+		std::cout << "Ascending: " << event.value << std::endl;
+		inputDirection.y = event.value;
 		break;
 	case UniInput::AxisPitch:
 		inputRotation.x = event.value;

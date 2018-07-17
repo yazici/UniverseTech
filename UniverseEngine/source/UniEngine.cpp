@@ -13,6 +13,11 @@
 #include "systems/PlayerControlSystem.h"
 #include "components/LightComponent.h"
 #include "components/UniPlanet.h"
+#include "UniModel.h"
+#include "UniScene.h"
+#include "UniInput.h"
+#include "UniMaterial.h"
+
 
 #define ENABLE_VALIDATION true
 
@@ -113,11 +118,10 @@ UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
 
 	m_CurrentScene = std::make_shared<UniScene>();
 
-	title = "Multi sampled deferred shading";
+	title = "Universe Tech Test";
 	paused = true;
 	settings.overlay = true;
 }
-
 
 UniEngine& UniEngine::GetInstance() {
 	static UniEngine instance;
@@ -163,7 +167,6 @@ size_t UniEngine::getDynamicAlignment() {
 
 	return dynamicAlignment;
 }
-
 
 // Create a frame buffer attachment
 void UniEngine::createAttachment(VkFormat format, VkImageUsageFlagBits usage, FrameBufferAttachment *attachment) {
@@ -221,20 +224,49 @@ void UniEngine::createAttachment(VkFormat format, VkImageUsageFlagBits usage, Fr
 
 void UniEngine::prepare() {
 
+	std::cout << "Initialize engine..." << std::endl;
+	
+	std::cout << "Initialize scenegraph..." << std::endl;
 	m_CurrentScene->Initialize(this);
+	
+	std::cout << "Initialize input manager..." << std::endl;
 	SetupInput();
+	
+	std::cout << "Initialize base engine..." << std::endl;
 	VulkanExampleBase::prepare();
+	
+	std::cout << "initialize scene assets..." << std::endl;
 	loadAssets();
+	
+	std::cout << "Initialize vertex descriptions..." << std::endl;
 	setupVertexDescriptions();
+	
+	std::cout << "Initialize offscreen framebuffer..." << std::endl;
 	prepareOffscreenFramebuffer();
+	
+	std::cout << "Initialize uniform buffers..." << std::endl;
 	prepareUniformBuffers();
+	
+	std::cout << "Initialize descriptor set layouts..." << std::endl;
 	setupDescriptorSetLayout();
+	
+	std::cout << "Initialize pipelines..." << std::endl;
 	preparePipelines();
+	
+	std::cout << "Initialize descriptor pool..." << std::endl;
 	setupDescriptorPool();
+	
+	std::cout << "Initialize descriptor sets..." << std::endl;
 	setupDescriptorSets();
+	
+	std::cout << "Initialize command buffers..." << std::endl;
 	buildCommandBuffers();
+	
+	std::cout << "Initialize deferred command buffers..." << std::endl;
 	buildDeferredCommandBuffer();
+	
 	prepared = true;
+	std::cout << "Initialization complete." << std::endl;
 }
 
 void UniEngine::SetupInput() {
@@ -246,8 +278,11 @@ void UniEngine::SetupInput() {
 	m_InputManager->OnRelease(UniInput::ButtonPause, [this]() { paused = !paused; });
 
 	m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisYaw, newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisPitch, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisPitch, newValue }); });
 	m_InputManager->RegisterFloatCallback(UniInput::AxisThrust, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, newValue }); });
 	m_InputManager->RegisterFloatCallback(UniInput::AxisReverse, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, -newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisStrafe, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisStrafe, -newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisAscend, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisAscend, -newValue }); });
 	m_InputManager->RegisterBoolCallback(UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRightClick, newValue ? 1.f : 0.f }); });
 
 	
@@ -703,6 +738,9 @@ void UniEngine::preparePipelines() {
 	multisampleState.minSampleShading = 0.25f;
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offscreenSampleShading));
 
+	for(auto& material : m_MaterialInstances) {
+		material->SetupMaterial(pipelineCreateInfo);
+	}
 
 
 }
@@ -713,15 +751,15 @@ void UniEngine::setupDescriptorPool() {
 	std::vector<VkDescriptorPoolSize> poolSizes =
 	{
 		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 3 * modelCount + 1),
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2 * modelCount),
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5 * modelCount + 5)
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2 * modelCount + 1),
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5 * modelCount + 5 + 5)
 	};
 
 	VkDescriptorPoolCreateInfo descriptorPoolInfo =
 		vks::initializers::descriptorPoolCreateInfo(
 			static_cast<uint32_t>(poolSizes.size()),
 			poolSizes.data(),
-			static_cast<uint32_t>(modelCount / 2 + 4));
+			static_cast<uint32_t>(modelCount / 2 + 5));
 
 	VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
 }
@@ -793,8 +831,6 @@ void UniEngine::setupDescriptorSets() {
 
 	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 
-
-
 	// Models
 	auto models = m_CurrentScene->GetModels();
 	for_each(models.begin(), models.end(), [allocInfo, this](std::shared_ptr<UniModel> model) {
@@ -835,29 +871,6 @@ void UniEngine::setupDescriptorSets() {
 		};
 		vkUpdateDescriptorSets(device, static_cast<uint32_t>(modelWriteDescriptorSets.size()), modelWriteDescriptorSets.data(), 0, nullptr);
 	});
-
-
-	// Models
-	GetScene()->m_World->each<UniPlanet>([&](ECS::Entity* entity, ECS::ComponentHandle<UniPlanet> planet) {
-
-		VkResult res = (vkAllocateDescriptorSets(device, &allocInfo, &planet->m_DescriptorSet));
-		if(res != VK_SUCCESS) {
-			std::cout << "Fatal : VkResult is \"" << vks::tools::errorString(res) << "\" in " << __FILE__ << " at line " << __LINE__ << std::endl;
-			assert(res == VK_SUCCESS);
-		}
-
-		std::vector<VkWriteDescriptorSet> planetWriteDescriptorSets =
-		{
-			// Binding 0: Vertex shader uniform buffer
-			vks::initializers::writeDescriptorSet(
-				planet->m_DescriptorSet,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				0,
-				&planet->m_UniformBuffer.descriptor)
-		};
-		vkUpdateDescriptorSets(device, static_cast<uint32_t>(planetWriteDescriptorSets.size()), planetWriteDescriptorSets.data(), 0, nullptr);
-	});
-
 
 }
 
@@ -973,6 +986,10 @@ void UniEngine::buildDeferredCommandBuffer() {
 		vkCmdDrawIndexed(m_offScreenCmdBuffer, model->m_Model.indexCount, 1, 0, 0, 0);
 		index++;
 	});
+
+	for(const auto& material : m_MaterialInstances) {
+		material->AddToCommandBuffer(m_offScreenCmdBuffer);
+	}
 
 
 	vkCmdEndRenderPass(m_offScreenCmdBuffer);
@@ -1185,4 +1202,19 @@ void UniEngine::updateOverlay() {
 		mouseButtons.left = false;
 	}
 #endif
+}
+
+void UniEngine::RegisterMaterial(std::shared_ptr<UniMaterial> mat) {
+	m_MaterialInstances.push_back(mat);
+}
+
+void UniEngine::UnRegisterMaterial(std::shared_ptr<UniMaterial> mat) {
+	int i = 0;
+	while(i < m_MaterialInstances.size()) {
+		if(m_MaterialInstances[i] == mat) {
+			m_MaterialInstances.erase(m_MaterialInstances.begin() + i);
+			i = 0;
+		}
+		i++;
+	}
 }

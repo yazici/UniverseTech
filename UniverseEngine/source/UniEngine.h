@@ -17,15 +17,19 @@
 #include "vks/VulkanTexture.hpp"
 #include "vks/VulkanModel.hpp"
 
-#include "UniModel.h"
-#include "UniScene.h"
-#include "UniInput.h"
 
 #define VERTEX_BUFFER_BIND_ID 0
 #define INSTANCE_BUFFER_BIND_ID 1
 #define ENABLE_VALIDATION false
 // todo: check if hardware supports sample number (or select max. supported)
 #define SAMPLE_COUNT VK_SAMPLE_COUNT_8_BIT
+
+
+// forward declarations
+class UniMaterial;
+class UniModel;
+class UniScene;
+class UniInput;
 
 class UniEngine final : public VulkanExampleBase {
 
@@ -145,6 +149,9 @@ public:
 	void OnUpdateUIOverlay(vks::UIOverlay *overlay) override;
 	void ToggleWireframe();
 
+	void RegisterMaterial(std::shared_ptr<UniMaterial> mat);
+	void UnRegisterMaterial(std::shared_ptr<UniMaterial> mat);
+
 	VkDevice GetDevice() { return device; }
 	VkQueue GetQueue() { return queue; }
 	VkPipelineCache GetPipelineCache() { return pipelineCache; }
@@ -165,6 +172,8 @@ public:
 private:
 	std::shared_ptr<UniScene> m_CurrentScene;
 	std::shared_ptr<UniInput> m_InputManager;
+
+	std::vector<std::shared_ptr<UniMaterial>> m_MaterialInstances;
 
 public:
 	std::shared_ptr<UniScene> GetScene() { return m_CurrentScene; }

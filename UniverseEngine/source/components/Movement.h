@@ -20,20 +20,20 @@ struct MovementComponent {
 	 /** @brief units per second */
 	float m_MaxReverse = 3.0f;
 	/** @brief units per second */
-	float m_MaxStrafe = 0.0f; 
+	float m_MaxStrafe = 6.0f; 
 	/** @brief units per second */
-	float m_MaxVertical = 0.0f; 
+	float m_MaxVertical = 6.0f; 
 
 	/** @brief units per second, per second */
 	float m_MaxAccel = 5.0f; 
 	/** @brief units per second, per second */
 	float m_MaxDecel = 20.0f; 
 	/** @brief units per second, per second */
-	float m_MaxStrafeAccel = 0.0f; 
+	float m_MaxStrafeAccel = 5.0f; 
 	/** @brief units per second, per second */
-	float m_MaxVerticalAccel = 0.0f; 
+	float m_MaxVerticalAccel = 5.0f; 
 	/** @brief units per second, per second */
-	float m_Drag = 0.0f; 
+	float m_Drag = 0.5f; 
 
 	/** @brief degrees per second */
 	float m_MaxPitch = 180.0f; 

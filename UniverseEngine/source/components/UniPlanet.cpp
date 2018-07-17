@@ -1,60 +1,41 @@
 #include "UniPlanet.h"
 #include "../UniEngine.h"
+#include "../UniScene.h"
 #include <assert.h>
 #include <iostream>
+#include "glm/gtx/quaternion.hpp"
 
 
-UniPlanet::~UniPlanet() {
+UniPlanet::UniPlanet(double radius /*= 1.0*/, double maxHeightOffset /*= 0.1*/, double maxDepthOffset /*= 0.1*/, uint16_t gridSize /*= 10*/):
+	m_Radius(radius), m_MaxHeightOffset(maxHeightOffset), m_MaxDepthOffset(maxDepthOffset), m_GridSize(gridSize) {
+
+	std::cout << "Initializing planet..." << std::endl;
+	Initialize();
+	std::cout << "Initializing planet complete." << std::endl;
+}
+
+void UniPlanet::Destroy() {
+	auto& engine = UniEngine::GetInstance();
+	engine.UnRegisterMaterial(m_Material);
+	m_Material.reset();
 	DestroyBuffers();
 }
 
 void UniPlanet::Initialize() {
 
+	auto& engine = UniEngine::GetInstance();
+	
+	m_Material = std::static_pointer_cast<PlanetMaterial>(MaterialFactory::create("planet", "testworld"));
 
-	m_Material = std::unique_ptr<PlanetMaterial>(static_cast<PlanetMaterial*>(MaterialFactory::create("planet", "testworld").release()));
-
-	auto device = UniEngine::GetInstance().vulkanDevice;
-	uint32_t ubSize = static_cast<uint32_t>(sizeof(UniPlanet::UniformBufferData));
-
-	VK_CHECK_RESULT(device->createBuffer(
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		&m_UniformBuffer, ubSize));
-
-	m_VertexDescription.bindingDescriptions.resize(1);
-	m_VertexDescription.bindingDescriptions = {
-		// Binding point 0: Mesh vertex layout description at per-vertex rate
-		vks::initializers::vertexInputBindingDescription(VERTEX_BUFFER_BIND_ID, sizeof(glm::vec3), VK_VERTEX_INPUT_RATE_VERTEX),
-	};
-
-
-	// PER VERTEX
-
-	// Attribute descriptions
-	m_VertexDescription.attributeDescriptions.resize(1);
-	uint32_t offset = 0;
-	// Location 0: Pos
-	m_VertexDescription.attributeDescriptions[0] =
-		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
-			0,
-			VK_FORMAT_R32G32B32_SFLOAT,
-			offset);
-
-	m_VertexDescription.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
-	m_VertexDescription.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(m_VertexDescription.attributeDescriptions.size());
-	m_VertexDescription.inputState.pVertexAttributeDescriptions = m_VertexDescription.attributeDescriptions.data();
-	m_VertexDescription.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(m_VertexDescription.bindingDescriptions.size());
-	m_VertexDescription.inputState.pVertexBindingDescriptions = m_VertexDescription.bindingDescriptions.data();
-
-
+	engine.RegisterMaterial(m_Material);
+	
 	CreateGrid();
 	CreateTriangles();
 	UpdateMesh();
 	CreateBuffers();
 	UpdateBuffers();
 
-	auto modelMat = glm::mat4();
+	auto modelMat = glm::mat4(1.0);
 	UpdateUniformBuffers(modelMat);
 	
 	std::cout << "Created planet grid with " << m_GridPoints.size() << " points and " << m_Triangles.size() << " tris." << std::endl;
@@ -63,38 +44,40 @@ void UniPlanet::Initialize() {
 void UniPlanet::CreateGrid() {
 
 	m_GridPoints.clear();
-	double increment = 2.0 / m_GridSize;
-	for(double y = -1.0; y <= 1.0; y+= increment) {
-		for (double x = -1.0; x <= 1.0; x+= increment){
-			double z = (1.0 - pow(x, 4.0)) * (1.0 - pow(y, 4.0));
-			m_GridPoints.emplace_back(x, y, z);
+	float increment = 2.0f / m_GridSize;
+	for(float y = -1.0f; y <= 1.0f; y+= increment) {
+		for (float x = -1.0f; x <= 1.0f; x+= increment){
+			float z = (1.0f - pow(x, 4.0f)) * (1.0f - pow(y, 4.0f));
+			m_GridPoints.emplace_back(x, y, -z);
 		}
 	}
+
 
 	assert(m_GridPoints.size() == (m_GridSize + 1) * (m_GridSize + 1));
 }
 
 void UniPlanet::CreateTriangles() {
 	m_Triangles.clear();
-	for(int y = 0; y <= m_GridSize; y++) {
-		for(int x = 0; x <= m_GridSize; x++) {
+	for(int y = 0; y < m_GridSize; y++) {
+		for(int x = 0; x < m_GridSize; x++) {
 			m_Triangles.push_back(y * (m_GridSize + 1) + x);
-			m_Triangles.push_back(y * (m_GridSize + 1) + x + 1);
 			m_Triangles.push_back((y + 1) * (m_GridSize + 1) + x);
+			m_Triangles.push_back(y * (m_GridSize + 1) + x + 1);
 
 			m_Triangles.push_back(y * (m_GridSize + 1) + x + 1);
-			m_Triangles.push_back((y + 1) * (m_GridSize + 1) + x + 1);
 			m_Triangles.push_back((y + 1) * (m_GridSize + 1) + x);
+			m_Triangles.push_back((y + 1) * (m_GridSize + 1) + x + 1);
+
 		}
 	}
 
-	assert(m_Triangles.size() == (m_GridSize + 1) * (m_GridSize + 1) * 6);
+	assert(m_Triangles.size() == m_GridSize * m_GridSize * 6);
 }
 
 std::vector<glm::vec3> UniPlanet::RotateGridToCamera()
 {
 
-	glm::quat rot = glm::rotation(glm::vec3(0, 0, 1), m_CurrentCameraPos);
+	glm::quat rot = glm::rotation(glm::vec3(0.f, 0.f, 1.f), m_CurrentCameraPos);
 
 	std::vector<glm::vec3> rotatedPoints;
 
@@ -119,7 +102,7 @@ double UniPlanet::CalculateZOffset() {
 
 	auto z = (R2 + d2 - pow(h + s, 2.0)) / ((2 * r) * (h + s));
 
-	return z;
+	return 0;
 
 }
 
@@ -147,6 +130,8 @@ void UniPlanet::UpdateMesh() {
 void UniPlanet::UpdateBuffers() {
 	m_IndexCount = static_cast<uint32_t>(m_Triangles.size());
 	m_VertexCount = static_cast<uint32_t>(m_MeshVerts.size());
+
+	m_Material->SetIndexCount(m_IndexCount);
 
 	uint32_t vertexBufferSize = static_cast<uint32_t>(m_MeshVerts.size() * sizeof(glm::vec3));
 	uint32_t indexBufferSize = static_cast<uint32_t>(m_Triangles.size() * sizeof(uint32_t));
@@ -194,7 +179,8 @@ void UniPlanet::UpdateBuffers() {
 
 
 void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
-	auto camera = UniEngine::GetInstance().GetScene()->GetCameraComponent();
+	auto& engine = UniEngine::GetInstance();
+	auto camera = engine.GetScene()->GetCameraComponent();
 
 	//// Pass transformations to the shader
 	m_UniformBufferData.modelMat = modelMat;
@@ -257,6 +243,17 @@ void UniPlanet::CreateBuffers() {
 		&m_IndexBuffer,
 		indexBufferSize));
 
+	uint32_t ubSize = static_cast<uint32_t>(sizeof(UniPlanet::UniformBufferData));
+
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&m_UniformBuffer, ubSize));
+
+
+	m_Material->SetBuffer("uniform", std::make_shared<vks::Buffer>(m_UniformBuffer));
+	m_Material->SetBuffer("vertex", std::make_shared<vks::Buffer>(m_VertexBuffer));
+	m_Material->SetBuffer("index", std::make_shared<vks::Buffer>(m_IndexBuffer));
 
 }
 

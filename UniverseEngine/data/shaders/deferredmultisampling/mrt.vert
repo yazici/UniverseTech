@@ -34,7 +34,7 @@ out gl_PerVertex
 
 void main() 
 {
-	gl_Position = ubo.projection * ubo.view * ubdo.model * inPos;
+	
 	
 	outUV = inUV;
 	outUV.t = 1.0 - outUV.t;
@@ -51,4 +51,6 @@ void main()
 	
 	// Currently just vertex color
 	outColor = inColor;
+
+	gl_Position = ubo.projection * ubo.view * vec4(outWorldPos, 1);
 }

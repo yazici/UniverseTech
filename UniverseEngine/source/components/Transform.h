@@ -20,12 +20,20 @@ struct TransformComponent {
 		m_dPos(glm::dvec3(0.0)),
 		m_Scale(glm::vec3(1.f)),
 		m_Forward(glm::vec3(0, 0, 1.f)),
-		m_Up(glm::vec3(0, -1.f, 0)),
-		m_Right(glm::vec3(1.f, 0, 0)) {}
+		m_Up(glm::vec3(0, 1.f, 0)),
+		m_Right(glm::vec3(1.f, 0, 0)) {
 
-	TransformComponent(glm::vec3 pos) {
-		TransformComponent();
-		m_dPos = glm::dvec3(pos);
+		m_Rotation = glm::quat(glm::mat3(m_Right, m_Up, m_Forward));
+	}
+
+	TransformComponent(glm::vec3 pos):
+		m_dPos(glm::dvec3(pos)),
+		m_Scale(glm::vec3(1.f)),
+		m_Forward(glm::vec3(0, 0, 1.f)),
+		m_Up(glm::vec3(0, 1.f, 0)),
+		m_Right(glm::vec3(1.f, 0, 0)) {
+
+		m_Rotation = glm::quat(glm::mat3(m_Right, m_Up, m_Forward)); 
 	}
 
 	glm::dvec3 m_dPos; // relative to parent, no parent == world space
@@ -33,6 +41,8 @@ struct TransformComponent {
 	glm::vec3 m_Up;
 	glm::vec3 m_Right;
 	glm::vec3 m_Scale;
+
+	glm::quat m_Rotation;
 
 	std::shared_ptr<UniSceneObject> m_Parent;
 

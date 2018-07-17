@@ -16,12 +16,11 @@ public:
 	ECS::ComponentHandle<CameraComponent> GetCameraComponent() { return m_CurrentCamera->m_Entity->get<CameraComponent>(); }
 
 	void Initialize(UniEngine* engine);
-	void Load();
 
 	void Load(std::string filename);
 
 	template <class T> std::shared_ptr<T> Make(std::shared_ptr<T> so);
-	template<class _Ty0, class... _Types> std::shared_ptr<_Ty0> Make(_Types&&... _Args);
+	template<class _Ty0, class... _Types> std::shared_ptr<_Ty0> Make(glm::vec3 pos, _Types&&... _Args);
 
 	std::shared_ptr<UniSceneObject> GetCameraObject() { return m_CurrentCamera; }
 
@@ -56,10 +55,10 @@ std::shared_ptr<T> UniScene::Make(std::shared_ptr<T> so) {
 }
 
 template<class T, class... _Types> 
-std::shared_ptr<T> UniScene::Make(_Types&&... _Args) {
+std::shared_ptr<T> UniScene::Make(glm::vec3 pos, _Types&&... _Args) {
 	std::shared_ptr<T> so = std::make_shared<T>(_Args...);
 	so->SetScene(this);
-	so->SetEntity(m_World->create());
+	so->SetEntity(m_World->create(), pos);
 	AddSceneObject(so);
 	return so;
 }

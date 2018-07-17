@@ -66,16 +66,27 @@ void TransformComponent::SetScale(const glm::vec3 &scale) {
 
 void TransformComponent::Rotate(glm::vec3 axis, float degrees) {
 	auto rotQ = glm::angleAxis(glm::radians(degrees), axis);
-	m_Forward = rotQ * m_Forward;
-	m_Up = rotQ * m_Up;
-	m_Right = rotQ * m_Right;
+	
+	m_Rotation = m_Rotation * rotQ;
+
+	glm::mat3 m = glm::mat3(m_Rotation);
+
+	m_Right = m[0];
+	m_Up = m[1];
+	m_Forward = m[2];
+
 }
 
 void TransformComponent::Rotate(glm::vec3 euler) {
 	auto rotQ = glm::quat(glm::radians(euler));
-	m_Forward = rotQ * m_Forward;
-	m_Up = rotQ * m_Up;
-	m_Right = rotQ * m_Right;
+
+	m_Rotation = m_Rotation * rotQ;
+	
+	glm::mat3 m = glm::mat3(m_Rotation);
+
+	m_Right = m[0];
+	m_Up = m[1];
+	m_Forward = m[2];
 
 }
 
@@ -88,6 +99,8 @@ void TransformComponent::RotateToTarget(glm::vec3 target) {
 	m_Forward = rotQ * m_Forward;
 	m_Up = rotQ * m_Up;
 	m_Right = rotQ * m_Right;
+
+	m_Rotation = glm::quat(glm::mat3(m_Right, m_Up, m_Forward));
 }
 
 void TransformComponent::MoveForward(double distance) {
