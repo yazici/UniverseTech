@@ -10,3 +10,6 @@
 [submodule "external/fastnoise"]
 	path = external/fastnoise
 	url = https://github.com/Auburns/FastNoise
+[submodule "external/stb"]
+	path = external/stb
+	url = https://github.com/nothings/stb
