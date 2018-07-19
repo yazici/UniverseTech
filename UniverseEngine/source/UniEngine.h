@@ -174,7 +174,8 @@ private:
 	std::shared_ptr<UniInput> m_InputManager;
 
 	std::vector<std::shared_ptr<UniMaterial>> m_MaterialInstances;
-
+	bool m_CamPaused = false;
+	float m_PlanetZOffset = 0;
 public:
 	std::shared_ptr<UniScene> GetScene() { return m_CurrentScene; }
 	void windowResized() override;

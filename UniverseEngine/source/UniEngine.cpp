@@ -10,14 +10,14 @@
 #include "vks/VulkanTools.h"
 #include <assert.h>
 #include <algorithm>
-#include "systems/PlayerControlSystem.h"
+#include "systems/events.h"
 #include "components/LightComponent.h"
 #include "components/UniPlanet.h"
 #include "UniModel.h"
 #include "UniScene.h"
 #include "UniInput.h"
 #include "UniMaterial.h"
-
+#include "components/PlayerMovement.h"
 
 #define ENABLE_VALIDATION true
 
@@ -119,7 +119,7 @@ UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
 	m_CurrentScene = std::make_shared<UniScene>();
 
 	title = "Universe Tech Test";
-	paused = true;
+	paused = false;
 	settings.overlay = true;
 }
 
@@ -276,6 +276,8 @@ void UniEngine::SetupInput() {
 
 	m_InputManager->OnPress(UniInput::ButtonQuit, [this](){ m_QuitMessageReceived = true; });
 	m_InputManager->OnRelease(UniInput::ButtonPause, [this]() { paused = !paused; });
+	m_InputManager->OnRelease(UniInput::ButtonBoostUp, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonBoostUp, 1.0f }); });
+	m_InputManager->OnRelease(UniInput::ButtonBoostDown, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonBoostDown, 1.0f }); });
 
 	m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisYaw, newValue }); });
 	m_InputManager->RegisterFloatCallback(UniInput::AxisPitch, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisPitch, newValue }); });
@@ -284,6 +286,7 @@ void UniEngine::SetupInput() {
 	m_InputManager->RegisterFloatCallback(UniInput::AxisStrafe, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisStrafe, -newValue }); });
 	m_InputManager->RegisterFloatCallback(UniInput::AxisAscend, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisAscend, -newValue }); });
 	m_InputManager->RegisterBoolCallback(UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRightClick, newValue ? 1.f : 0.f }); });
+
 
 	
 }
@@ -613,7 +616,7 @@ void UniEngine::preparePipelines() {
 	VkPipelineRasterizationStateCreateInfo rasterizationState =
 		vks::initializers::pipelineRasterizationStateCreateInfo(
 			VK_POLYGON_MODE_FILL,
-			VK_CULL_MODE_BACK_BIT,
+			VK_CULL_MODE_NONE, // TODO: debug for backface culling!
 			VK_FRONT_FACE_CLOCKWISE,
 			0);
 
@@ -1136,11 +1139,18 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 				buildDeferredCommandBuffer();
 			}
 		}
-		if (vulkanDevice->features.fillModeNonSolid) {
-			if (overlay->checkBox("Wireframe", &m_useWireframe)) {
-				//buildDeferredCommandBuffer();
-			}
+		
+		if(overlay->checkBox("Pause camera position", &m_CamPaused)) {
+			GetScene()->m_World->emit<CameraPauseEvent>({ m_CamPaused });
 		}
+
+		if(overlay->sliderFloat("Planet Z offset", &m_PlanetZOffset, -1, 50)){
+			GetScene()->m_World->emit<PlanetZEvent>({ m_PlanetZOffset });
+		}
+		GetScene()->m_World->each<PlayerControlComponent, MovementComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<PlayerControlComponent> player, ECS::ComponentHandle<MovementComponent> movement) {
+			overlay->text("Boost: %2.f", movement->m_BoostFactor);
+		});
+		
 	}
 }
 

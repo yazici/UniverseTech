@@ -3,18 +3,15 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include "../components/PlayerMovement.h"
-
-struct InputEvent {
-	int axis;
-	float value;
-};
+#include "events.h"
 
 class PlayerControlSystem : public ECS::EntitySystem, public ECS::EventSubscriber<InputEvent> {
 
 public:
 
-	glm::vec3 inputDirection = glm::vec3(0);
-	glm::vec3 inputRotation = glm::vec3(0);
+	glm::vec3 m_InputDirection = glm::vec3(0);
+	glm::vec3 m_InputRotation = glm::vec3(0);
+	float m_BoostFactor = 1.0;
 
 	bool isCrashStop = false;
 	bool isFullStop = false;

@@ -9,9 +9,11 @@ void MovementComponent::ApplyAcceleration(glm::vec3 accel, float deltaTime) {
 	else
 		accel.z *= m_MaxDecel;
 
+	accel *= m_BoostFactor;
+
 	m_dVelocity += accel * deltaTime;
 
-	m_dVelocity = glm::clamp(m_dVelocity, glm::dvec3(-m_MaxStrafe, -m_MaxVertical, -m_MaxReverse), glm::dvec3(m_MaxStrafe, m_MaxVertical, m_MaxSpeed));
+	//m_dVelocity = glm::clamp(m_dVelocity, glm::dvec3(-m_MaxStrafe, -m_MaxVertical, -m_MaxReverse), glm::dvec3(m_MaxStrafe, m_MaxVertical, m_MaxSpeed));
 }
 
 void MovementComponent::ApplyTorque(glm::vec3 euler, float deltaTime) {
@@ -59,13 +61,8 @@ void MovementComponent::FullStop(float deltaTime) {
 }
 
 void MovementComponent::ApplyDrag(float deltaTime) {
-	glm::vec3 accel = -m_dVelocity;
-	accel *= m_Drag;
-	m_dVelocity += accel * deltaTime;
-
-	glm::vec3 euler = -m_Rotation;
-	euler *= m_RotationalDrag;
-	m_Rotation += euler * deltaTime;
+	m_dVelocity *= m_Drag * deltaTime;
+	m_Rotation *= m_RotationalDrag * deltaTime;
 }
 
 void MovementComponent::SetTarget(glm::vec3 target) {
@@ -73,4 +70,7 @@ void MovementComponent::SetTarget(glm::vec3 target) {
 	m_HasTarget = true;
 }
 
+void MovementComponent::SetBoost(float boost) {
+	m_BoostFactor = boost;
+}
 

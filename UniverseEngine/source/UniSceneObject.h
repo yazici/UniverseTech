@@ -42,7 +42,7 @@ protected:
 
 template<class T, class... _Types>
 void UniSceneObject::AddComponent(_Types&&... _Args) {
-	m_Entity->assign<T>(_Args...);
+	m_Entity->assign<T>(_Args...);	
 }
 
 template<class T>

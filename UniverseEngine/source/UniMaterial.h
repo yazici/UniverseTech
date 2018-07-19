@@ -3,6 +3,7 @@
 #include <map>
 #include "vks/VulkanBuffer.hpp"
 #include "factory.h"
+#include "vks/VulkanTexture.hpp"
 #include "vks/VulkanModel.hpp"
 
 
@@ -57,6 +58,7 @@ public:
 	std::shared_ptr<vks::Buffer> GetUniformBuffer() { return m_UniformBuffer; }
 	std::shared_ptr<vks::Buffer> GetVertexBuffer() { return m_VertexBuffer; }
 	std::shared_ptr<vks::Buffer> GetIndexBuffer() { return m_IndexBuffer; }
+	std::vector<std::shared_ptr<vks::Texture>> m_Textures;
 
 	void SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer);
 	

@@ -186,6 +186,12 @@
     <ClInclude Include="source\factory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\systems\events.h">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\FastNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -255,6 +261,9 @@
       <Filter>Source Files\systems</Filter>
     </ClCompile>
     <ClCompile Include="source\UniMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\FastNoise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

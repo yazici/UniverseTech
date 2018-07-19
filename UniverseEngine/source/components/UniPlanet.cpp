@@ -4,10 +4,16 @@
 #include <assert.h>
 #include <iostream>
 #include "glm/gtx/quaternion.hpp"
+#include "../FastNoise.h"
+#include <math.h>
 
 
-UniPlanet::UniPlanet(double radius /*= 1.0*/, double maxHeightOffset /*= 0.1*/, double maxDepthOffset /*= 0.1*/, uint16_t gridSize /*= 10*/):
-	m_Radius(radius), m_MaxHeightOffset(maxHeightOffset), m_MaxDepthOffset(maxDepthOffset), m_GridSize(gridSize) {
+UniPlanet::UniPlanet(double radius /*= 1.0*/, double maxHeightOffset /*= 0.1*/, double maxDepthOffset /*= 0.1*/, uint16_t gridSize /*= 10*/){
+
+	m_Radius = radius;
+	m_MaxHeightOffset = maxHeightOffset;
+	m_MaxDepthOffset = maxDepthOffset;
+	m_GridSize = gridSize;
 
 	std::cout << "Initializing planet..." << std::endl;
 	Initialize();
@@ -37,6 +43,8 @@ void UniPlanet::Initialize() {
 
 	auto modelMat = glm::mat4(1.0);
 	UpdateUniformBuffers(modelMat);
+
+	MakeContintentTexture();
 	
 	std::cout << "Created planet grid with " << m_GridPoints.size() << " points and " << m_Triangles.size() << " tris." << std::endl;
 }
@@ -74,40 +82,35 @@ void UniPlanet::CreateTriangles() {
 	assert(m_Triangles.size() == m_GridSize * m_GridSize * 6);
 }
 
-std::vector<glm::vec3> UniPlanet::RotateGridToCamera()
+glm::vec3 UniPlanet::RotatePointToCamera(glm::vec3 point)
 {
-
-	glm::quat rot = glm::rotation(glm::vec3(0.f, 0.f, 1.f), m_CurrentCameraPos);
-
-	std::vector<glm::vec3> rotatedPoints;
-
-	for(auto gp : m_GridPoints) {
-		rotatedPoints.push_back(gp);
-	}
-
-	return rotatedPoints;
+	glm::quat rot = glm::rotation(glm::vec3(0.f, 0.f, -1.f), m_CurrentCameraPos);
+	return rot * point;
 }
 
 double UniPlanet::CalculateZOffset() {
 	double d = glm::length(m_CurrentCameraPos);
+	std::cout << "Camera distance: " << d;
 	double d2 = pow(d, 2.0);
 	auto r = m_Radius;
 	double r2 = pow(r, 2.0);
 	
-	double R = r + m_MaxHeightOffset;
+	double R = r + (r * m_MaxHeightOffset);
 	double R2 = pow(R, 2.0);
 
 	auto h = sqrt(d2 - r2);
 	auto s = sqrt(R2 - r2);
 
-	auto z = (R2 + d2 - pow(h + s, 2.0)) / ((2 * r) * (h + s));
+	auto zs = R2 + d2 - pow(h + s, 2.0);
+	zs /= ((2 * r * h) + (2 * r * s));
 
-	return 0;
+	return zs;
 
 }
 
 void UniPlanet::SetCameraPosition(glm::vec3& cam) {
 	m_CurrentCameraPos = cam;
+	//std::cout << "Camera relative to planet: " << cam.x << ", " << cam.y << ", " << cam.z << std::endl;
 }
 
 double UniPlanet::GetPositionOffset(glm::vec3& pos) {
@@ -117,13 +120,26 @@ double UniPlanet::GetPositionOffset(glm::vec3& pos) {
 void UniPlanet::UpdateMesh() {
 	m_MeshVerts.clear();
 	auto zs = CalculateZOffset();
-	auto gridPoints = RotateGridToCamera();
-	for(auto gp : gridPoints) {
-		gp.z += (float)zs;
-		auto pos = glm::normalize(gp);
-		pos *= GetPositionOffset(gp);
-		m_MeshVerts.push_back(pos);
+	std::cout << ", planet Z offset: " << zs << std::endl;
+
+	auto rot = glm::lookAt({ 0, 0, 0 }, m_CurrentCameraPos, { 0, -1, 0 });
+
+	auto F = glm::normalize(m_CurrentCameraPos);
+	auto Z = F + glm::vec3(1.f, 0.f, 0.f);
+	auto U = glm::normalize(glm::cross(F, Z));
+	auto R = glm::cross(F, U);
+
+	//glm::mat3 rot(R, U, F);
+
+	for(auto gp : m_GridPoints) {
+		glm::vec3 point({ gp.x, gp.y, gp.z - zs });
+		point = glm::vec4(point, 1) * rot;
+		point = glm::normalize(point) * (float)m_Radius;
+		//pos *= GetPositionOffset(gp);
+		m_MeshVerts.push_back(point);
 	}
+
+	
 }
 
 
@@ -190,9 +206,9 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	////Set other uniforms here too!
 	auto camPos = glm::vec3(glm::inverse(modelMat) * glm::vec4(camera->GetPosition(), 1.f));
 	m_UniformBufferData.camPos = glm::vec4(camPos, 1.0);
-	m_UniformBufferData.radius = m_Radius;
-	m_UniformBufferData.maxHeight = m_MaxHeightOffset;
-	m_UniformBufferData.minDepth = m_MaxDepthOffset;
+	m_UniformBufferData.radius = (float)m_Radius;
+	m_UniformBufferData.maxHeight = (float)m_MaxHeightOffset;
+	m_UniformBufferData.minDepth = (float)m_MaxDepthOffset;
 
 	vks::Buffer uniformStaging;
 	auto device = UniEngine::GetInstance().vulkanDevice;
@@ -219,6 +235,10 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	vkDestroyBuffer(device->logicalDevice, uniformStaging.buffer, nullptr);
 	vkFreeMemory(device->logicalDevice, uniformStaging.memory, nullptr);
 
+}
+
+void UniPlanet::SetZOffset(float  value) {
+	m_ZOffset = value;
 }
 
 void UniPlanet::CreateBuffers() {
@@ -261,4 +281,33 @@ void UniPlanet::DestroyBuffers() {
 	m_IndexBuffer.destroy();
 	m_VertexBuffer.destroy();
 	m_UniformBuffer.destroy();
+}
+
+void UniPlanet::MakeContintentTexture() {
+
+	FastNoise noise;
+	noise.SetNoiseType(FastNoise::SimplexFractal);
+
+	auto& engine = UniEngine::GetInstance();
+
+	std::vector<glm::vec3> buffer;
+
+	for(float lat = 0.f; lat >= -180.f; lat -= 180.f / 1024) {
+		for(float lon = -180.f; lon <= 180.f; lon += 360.f / 1024) {
+			auto x = cos(glm::radians(lat)) * cos(glm::radians(lon));
+			auto y = cos(glm::radians(lat)) * sin(glm::radians(lon));
+			auto z = sin(glm::radians(lat));
+
+			auto nv = glm::normalize(glm::vec3(x, y, z)) * 100.366f;
+
+			float n = noise.GetNoise(nv.x, nv.y, nv.z) / 2.f + 0.5f;
+			buffer.emplace_back(n, n, n);
+		}
+	}
+
+	m_ContinentTexture.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec3), VK_FORMAT_R32G32B32_SFLOAT, 1024, 1024, engine.vulkanDevice, engine.GetQueue(), VK_FILTER_LINEAR);
+
+	auto t = make_shared<vks::Texture>(m_ContinentTexture);
+
+	m_Material->m_Textures.push_back(t);
 }

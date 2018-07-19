@@ -57,11 +57,16 @@ void UniInput::Initialize(int height, int width) {
 	m_InputMap->MapFloat(AxisPitch, padId, gainput::PadButtonLeftStickY);
 	m_InputMap->MapFloat(AxisStrafe, padId, gainput::PadButtonRightStickX);
 	m_InputMap->MapFloat(AxisAscend, padId, gainput::PadButtonRightStickY);
+
+	m_InputMap->MapBool(ButtonBoostUp, padId, gainput::PadButtonR1);
+	m_InputMap->MapBool(ButtonBoostDown, padId, gainput::PadButtonL1);
 	
 
 	m_Listener = std::make_unique<UniMappedButtonListener>(1, *this);
 	gainput::ListenerId buttonListenerId = m_InputMap->AddListener(m_Listener.get());
 
+	/*m_DeviceListener = std::make_unique<UniDeviceButtonListener>(m_InputManager, 0);
+	m_InputManager.AddListener(m_DeviceListener.get());*/
 }
 
 UniInput::PointerPos UniInput::GetPointerXY() {
@@ -175,4 +180,13 @@ bool UniMappedButtonListener::OnUserButtonBool(gainput::UserButtonId button, boo
 bool UniMappedButtonListener::OnUserButtonFloat(gainput::UserButtonId button, float oldValue, float newValue) {
 	m_InputManager.HandleFloatCallback(button, oldValue, newValue);
 	return true;
+}
+
+bool UniDeviceButtonListener::OnDeviceButtonBool(gainput::DeviceId deviceId, gainput::DeviceButtonId deviceButton, bool oldValue, bool newValue) {
+	const gainput::InputDevice* device = manager_.GetDevice(deviceId);
+	char buttonName[64] = "";
+	device->GetButtonName(deviceButton, buttonName, 64);
+	std::cout << "Got button press: " << buttonName << ", value: " << newValue << std::endl;
+
+	return false;
 }

@@ -90,7 +90,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\libs\gainput;..\libs\vulkan;..\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\vulkan;..\libs\assimp;..\libs\gainput;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -101,7 +101,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\fastnoise;..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="data/";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -145,7 +145,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\fastnoise;..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="data/";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -181,11 +181,14 @@
     <ClCompile Include="source\components\PlayerMovement.cpp" />
     <ClCompile Include="source\components\Transform.cpp" />
     <ClCompile Include="source\components\UniPlanet.cpp" />
+    <ClCompile Include="source\FastNoise.cpp" />
     <ClCompile Include="source\systems\PlanetRenderSystem.cpp" />
     <ClCompile Include="source\systems\PlayerControlSystem.cpp" />
     <ClCompile Include="source\systems\Systems.cpp" />
     <ClCompile Include="source\UniFrustum.cpp" />
     <ClInclude Include="source\factory.h" />
+    <ClInclude Include="source\FastNoise.h" />
+    <ClInclude Include="source\systems\events.h" />
     <ClInclude Include="source\systems\PlanetRenderSystem.h" />
     <ClInclude Include="source\systems\PlayerControlSystem.h" />
     <ClInclude Include="source\systems\Systems.h" />

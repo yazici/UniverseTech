@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "../vks/VulkanBuffer.hpp"
+#include "../vks/VulkanTexture.hpp"
 #include "../UniMaterial.h"
 
 class UniPlanet{
@@ -11,9 +12,9 @@ public:
 		glm::mat4 viewMat;
 		glm::mat4 projMat;
 		glm::vec4 camPos;
-		double radius;
-		double maxHeight;
-		double minDepth;
+		float radius;
+		float maxHeight;
+		float minDepth;
 	} m_UniformBufferData;
 
 	vks::Buffer m_VertexBuffer;
@@ -32,7 +33,7 @@ public:
 	void Initialize();
 	void CreateGrid();
 	void CreateTriangles();
-	std::vector<glm::vec3> RotateGridToCamera();
+	glm::vec3 RotatePointToCamera(glm::vec3 point);
 	double CalculateZOffset();
 	void SetCameraPosition(glm::vec3& cam);
 	double GetPositionOffset(glm::vec3& pos);
@@ -42,11 +43,12 @@ public:
 
 	std::shared_ptr<PlanetMaterial> m_Material;
 
+	void SetZOffset(float value);
 private:
 
 	double m_Radius = 1.0;
-	double m_MaxHeightOffset = 0.1;
-	double m_MaxDepthOffset = 0.1;
+	double m_MaxHeightOffset = 0.001;
+	double m_MaxDepthOffset = 0.001;
 
 	uint16_t m_GridSize = 10;
 	double m_GridZOffset = 0.0;
@@ -59,5 +61,9 @@ private:
 
 	void CreateBuffers();
 	void DestroyBuffers();
+	float m_ZOffset;
+	void MakeContintentTexture();
+
+	vks::Texture2D m_ContinentTexture;
 };
 

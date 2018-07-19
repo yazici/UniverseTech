@@ -28,7 +28,7 @@ void UniScene::Initialize(UniEngine* engine) {
 	
 
 	m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0));
-	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 0.1f, 1000.0f);
+	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 2.f, 30000.0f);
 
 	m_CurrentCamera->AddComponent<MovementComponent>();
 	m_CurrentCamera->AddComponent<PlayerControlComponent>();
@@ -165,11 +165,12 @@ void UniScene::Load(std::string filename) {
 
 	auto camObj = GetCameraObject();
 	camObj->GetTransform()->SetPosition(glm::vec3(playerPos.at(0), playerPos.at(1), playerPos.at(2)));
+	camObj->GetTransform()->SetYaw(playerRot.at(1));
 	GetCameraComponent()->CalculateView(camObj->GetTransform());
 
 
-	auto planetTest = Make<UniSceneObject>(glm::vec3(0, 0, -5));
-	planetTest->AddComponent<UniPlanet>(10.0);
+	auto planetTest = Make<UniSceneObject>(glm::vec3(0, 0, 0));
+	planetTest->AddComponent<UniPlanet>(5000.0, 0.1, 0.1, 100);
 
 
 	std::cout << "Scene fully loaded." << std::endl;

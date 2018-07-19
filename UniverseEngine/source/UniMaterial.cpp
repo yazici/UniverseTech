@@ -48,7 +48,12 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 		vks::initializers::descriptorSetLayoutBinding(
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			VK_SHADER_STAGE_VERTEX_BIT,
-			0)
+			0),
+		// Binding 1 : This is the continent noise texture
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+			1)
 	};
 
 	VkDescriptorSetLayoutCreateInfo descriptorLayout =
@@ -84,7 +89,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 	std::vector<VkDescriptorPoolSize> poolSizes =
 	{
 		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1),
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1),
 	};
 
 	VkDescriptorPoolCreateInfo descriptorPoolInfo =
@@ -113,6 +118,13 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			0,
 			&GetUniformBuffer()->descriptor),
+		// Binding 1: Continent texture map
+		vks::initializers::writeDescriptorSet(
+			m_DescriptorSet,
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			1,
+			&m_Textures[0]->descriptor),
+
 	};
 	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 

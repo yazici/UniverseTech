@@ -11,11 +11,12 @@ layout(binding = 0) uniform UBO {
 	mat4 proj;
 	//Morph calculation
 	vec3 camPos;
-	double radius;
-	double maxHeight;
-	double maxDepth;
+	float radius;
+	float maxHeight;
+	float maxDepth;
 } ubo;
-	
+
+layout (binding = 1) uniform sampler2D continentTexture;
 		
 layout (location = 0) out vec4 outPosition;
 layout (location = 1) out vec4 outNormal;
@@ -47,8 +48,14 @@ double height(vec2 uv, sampler2D tex)
 
 void main()
 {
-	//outAlbedo = vec4(dif, 1.0);
-	outAlbedo = vec4(vColor, 1.0);
+	vec3 n = normalize(vec3(TriPos));
+
+	float u = atan(n.z, n.x) / (2* 3.1415926) + 0.5;
+	float v = n.y * 0.5 + 0.5;
+	
+	vec2 uv = vec2(u, v);
+	
+	outAlbedo = vec4(texture(continentTexture, uv).xyz, 1.0);
 	outNormal = vec4(normalize(TriPos), 1.0);
 	outPosition = vec4(TriPos, 1.0);
 

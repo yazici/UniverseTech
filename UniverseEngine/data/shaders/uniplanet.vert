@@ -12,11 +12,13 @@ layout(binding = 0) uniform UBO {
 	mat4 view;
 	mat4 proj;
 	vec4 camPos;
-	double radius;
-	double maxHeight;
-	double maxDepth;
+	float radius;
+	float maxHeight;
+	float maxDepth;
 	
 } ubo;
+
+layout (binding = 1) uniform sampler2D continentTexture;
 
 //outputs
 layout(location = 0) out vec3 Normal;
@@ -33,7 +35,17 @@ void main()
 {
 	//initial position
 	vec3 TriPos = pos;
-	TriPos *= vec3(1, -1, 1);
+
+	vec3 n = normalize(vec3(TriPos));
+
+	float u = atan(n.z, n.x) / (2* 3.1415926) + 0.5;
+	float v = n.y * 0.5 + 0.5;
+	
+	vec2 uv = vec2(u, v);
+	
+	float offset = texture(continentTexture, uv).x;
+
+	TriPos = n * (ubo.radius + (ubo.radius * ubo.maxHeight) * offset);
 	
 	Normal = normalize(pos);
 	mat3 mNormal = transpose(inverse(mat3(ubo.model)));
