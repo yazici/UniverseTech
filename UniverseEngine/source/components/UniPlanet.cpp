@@ -6,6 +6,7 @@
 #include "glm/gtx/quaternion.hpp"
 #include "../FastNoise.h"
 #include <math.h>
+#include <stb_image.h>
 
 
 UniPlanet::UniPlanet(double radius /*= 1.0*/, double maxHeightOffset /*= 0.1*/, double maxDepthOffset /*= 0.1*/, uint16_t gridSize /*= 10*/){
@@ -44,6 +45,7 @@ void UniPlanet::Initialize() {
 	auto modelMat = glm::mat4(1.0);
 	UpdateUniformBuffers(modelMat);
 
+	MakeRampTexture();
 	MakeContintentTexture();
 	
 	std::cout << "Created planet grid with " << m_GridPoints.size() << " points and " << m_Triangles.size() << " tris." << std::endl;
@@ -308,6 +310,16 @@ void UniPlanet::MakeContintentTexture() {
 	m_ContinentTexture.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec3), VK_FORMAT_R32G32B32_SFLOAT, 1024, 1024, engine.vulkanDevice, engine.GetQueue(), VK_FILTER_LINEAR);
 
 	auto t = make_shared<vks::Texture>(m_ContinentTexture);
+
+	m_Material->m_Textures.push_back(t);
+}
+
+void UniPlanet::MakeRampTexture() {
+	auto& engine = UniEngine::GetInstance();
+	
+	m_RampTexture.loadFromFile(getAssetPath() + "textures/terrain-ramp.dds", VK_FORMAT_R32G32B32_SFLOAT, engine.vulkanDevice, engine.GetQueue());
+
+	auto t = make_shared<vks::Texture>(m_RampTexture);
 
 	m_Material->m_Textures.push_back(t);
 }

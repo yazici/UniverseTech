@@ -266,6 +266,10 @@
     <None Include="data\shaders\uniplanet.frag" />
     <None Include="data\shaders\uniplanet.vert" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="data\textures\terrain-ramp.dds" />
+    <Image Include="data\textures\terrain-ramp.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

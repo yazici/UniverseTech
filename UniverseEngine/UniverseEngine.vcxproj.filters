@@ -322,4 +322,12 @@
       <Filter>Content\levels</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="data\textures\terrain-ramp.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\textures\terrain-ramp.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

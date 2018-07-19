@@ -17,11 +17,18 @@ layout(binding = 0) uniform UBO {
 } ubo;
 
 layout (binding = 1) uniform sampler2D continentTexture;
+layout (binding = 2) uniform sampler2D terrainColorRamp;
 		
 layout (location = 0) out vec4 outPosition;
 layout (location = 1) out vec4 outNormal;
 layout (location = 2) out vec4 outAlbedo;
 
+vec3 lookupTerrainColor(float height)
+{
+	float mixValue = height / (ubo.radius + ubo.maxHeight - ubo.maxDepth);
+	vec3 color = texture(terrainColorRamp, vec2((mixValue * (512. - 1.) + .5) / 512., 0.5)).rgb;
+	return color;
+}
 	
 double height(vec2 uv, sampler2D tex)
 {
@@ -55,7 +62,7 @@ void main()
 	
 	vec2 uv = vec2(u, v);
 	
-	outAlbedo = vec4(texture(continentTexture, uv).xyz, 1.0);
+	outAlbedo = vec4(texture(continentTexture, uv).x * lookupTerrainColor(length(TriPos)), 1.0);
 	outNormal = vec4(normalize(TriPos), 1.0);
 	outPosition = vec4(TriPos, 1.0);
 

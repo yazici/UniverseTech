@@ -62,8 +62,11 @@ private:
 	void CreateBuffers();
 	void DestroyBuffers();
 	float m_ZOffset;
-	void MakeContintentTexture();
+	
 
 	vks::Texture2D m_ContinentTexture;
+	vks::Texture2D m_RampTexture;
+	void MakeRampTexture();
+	void MakeContintentTexture();
 };
 
