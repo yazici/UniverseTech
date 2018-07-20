@@ -16,6 +16,12 @@ using json = nlohmann::json;
 UniScene::UniScene() {}
 
 UniScene::~UniScene() {
+	std::cout << "Shutting down scene." << std::endl;
+
+	for(auto so : m_SceneObjects) {
+		so.reset();
+	}
+	m_SceneObjects.clear();
 	m_World->destroyWorld();
 }
 
@@ -175,7 +181,7 @@ void UniScene::Load(std::string filename) {
 
 	auto planetTest = Make<UniSceneObject>(glm::vec3(0, 0, 0));
 	planetTest->AddComponent<UniPlanet>(5000.0, 0.05, 0.05, 100);
-
+	planetTest->m_Entity->get<UniPlanet>()->Initialize();
 
 	std::cout << "Scene fully loaded." << std::endl;
 }

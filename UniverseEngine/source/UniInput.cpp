@@ -55,11 +55,13 @@ void UniInput::Initialize(int height, int width) {
 	
 	m_InputMap->MapFloat(AxisYaw, padId, gainput::PadButtonRightStickX);
 	m_InputMap->MapFloat(AxisPitch, padId, gainput::PadButtonRightStickY);
+	m_InputMap->MapBool(ButtonRollLeft, padId, gainput::PadButtonL1);
+	m_InputMap->MapBool(ButtonRollRight, padId, gainput::PadButtonR1);
 	m_InputMap->MapFloat(AxisStrafe, padId, gainput::PadButtonLeftStickX);
 	m_InputMap->MapFloat(AxisAscend, padId, gainput::PadButtonLeftStickY);
 
-	m_InputMap->MapBool(ButtonBoostUp, padId, gainput::PadButtonR1);
-	m_InputMap->MapBool(ButtonBoostDown, padId, gainput::PadButtonL1);
+	m_InputMap->MapBool(ButtonBoostUp, padId, gainput::PadButtonUp);
+	m_InputMap->MapBool(ButtonBoostDown, padId, gainput::PadButtonDown);
 	
 
 	m_Listener = std::make_unique<UniMappedButtonListener>(1, *this);

@@ -45,6 +45,18 @@ void alignedFree(void* data) {
 
 void UniEngine::Shutdown() {
 
+	std::cout << "Shutting down..." << std::endl;
+
+	// Meshes
+	auto models = m_CurrentScene->GetModels();
+	for_each(models.begin(), models.end(), [](std::shared_ptr<UniModel> model) {
+		model->m_Model.destroy();
+		model->m_Texture.destroy();
+		model->m_NormalMap.destroy();
+	});
+
+	m_CurrentScene.reset();
+
 	// Clean up used Vulkan resources 
 	// Note : Inherited destructor cleans up resources stored in base class
 
@@ -87,14 +99,6 @@ void UniEngine::Shutdown() {
 
 
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
-
-	// Meshes
-	auto models = m_CurrentScene->GetModels();
-	for_each(models.begin(), models.end(), [](std::shared_ptr<UniModel> model) {
-		model->m_Model.destroy();
-		model->m_Texture.destroy();
-		model->m_NormalMap.destroy();
-	});
 
 	// Uniform buffers
 	uniformBuffers.vsOffscreen.destroy();
@@ -278,6 +282,11 @@ void UniEngine::SetupInput() {
 	m_InputManager->OnRelease(UniInput::ButtonPause, [this]() { paused = !paused; });
 	m_InputManager->OnRelease(UniInput::ButtonBoostUp, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonBoostUp, 1.0f }); });
 	m_InputManager->OnRelease(UniInput::ButtonBoostDown, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonBoostDown, 1.0f }); });
+
+	m_InputManager->OnPress(UniInput::ButtonRollLeft, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRollLeft, 1.0f }); });
+	m_InputManager->OnRelease(UniInput::ButtonRollLeft, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRollLeft, 0.0f }); });
+	m_InputManager->OnPress(UniInput::ButtonRollRight, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRollRight, 1.0f }); });
+	m_InputManager->OnRelease(UniInput::ButtonRollRight, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRollRight, 0.0f }); });
 
 	m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisYaw, newValue }); });
 	m_InputManager->RegisterFloatCallback(UniInput::AxisPitch, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisPitch, newValue }); });

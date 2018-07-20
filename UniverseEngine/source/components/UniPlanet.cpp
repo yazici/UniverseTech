@@ -18,15 +18,17 @@ UniPlanet::UniPlanet(double radius /*= 1.0*/, double maxHeightOffset /*= 0.1*/, 
 	m_GridSize = gridSize;
 
 	std::cout << "Initializing planet..." << std::endl;
-	Initialize();
 	std::cout << "Initializing planet complete." << std::endl;
 }
 
 void UniPlanet::Destroy() {
+
+	std::cout << "Destroying planet..." << std::endl;
+
 	auto& engine = UniEngine::GetInstance();
 	engine.UnRegisterMaterial(m_Material);
 	m_Material.reset();
-	DestroyBuffers();
+	
 }
 
 void UniPlanet::Initialize() {
@@ -93,7 +95,7 @@ glm::vec3 UniPlanet::RotatePointToCamera(glm::vec3 point)
 
 double UniPlanet::CalculateZOffset() {
 	double d = glm::length(m_CurrentCameraPos);
-	std::cout << "Camera distance: " << d;
+	//std::cout << "Camera distance: " << d;
 	double d2 = pow(d, 2.0);
 	auto r = m_Radius;
 	double r2 = pow(r, 2.0);
@@ -123,9 +125,9 @@ double UniPlanet::GetPositionOffset(glm::vec3& pos) {
 void UniPlanet::UpdateMesh() {
 	m_MeshVerts.clear();
 	auto zs = CalculateZOffset();
-	std::cout << ", planet Z offset: " << zs << std::endl;
+	//std::cout << ", planet Z offset: " << zs << std::endl;
 
-	auto rot = glm::lookAt({ 0, 0, 0 }, m_CurrentCameraPos, { 0, 1, 0 });
+	auto rot = glm::lookAt({ 0, 0, 0 }, m_CurrentCameraPos * glm::vec3(1, -1, 1), { 0, 1, 0 });
 
 	auto F = glm::normalize(m_CurrentCameraPos);
 	auto Z = F + glm::vec3(1.f, 0.f, 0.f);
@@ -293,7 +295,7 @@ void UniPlanet::MakeContintentTexture() {
 
 	auto& engine = UniEngine::GetInstance();
 
-	std::vector<glm::vec3> buffer;
+	std::vector<glm::vec4> buffer;
 
 	glm::vec3 noiseOffset = { 2, 2, 2 };
 	float noiseScale = 100.3587f;
@@ -307,11 +309,11 @@ void UniPlanet::MakeContintentTexture() {
 			auto nv = (glm::normalize(glm::vec3(x, y, z)) + noiseOffset) * noiseScale;
 
 			float n = noise.GetNoise(nv.x, nv.y, nv.z) / 2.f + 0.5f;
-			buffer.emplace_back(n, n, n);
+			buffer.emplace_back(n, n, n, 1);
 		}
 	}
 
-	m_ContinentTexture.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec3), VK_FORMAT_R32G32B32_SFLOAT, 1024, 1024, engine.vulkanDevice, engine.GetQueue(), VK_FILTER_LINEAR);
+	m_ContinentTexture.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec4), VK_FORMAT_R32G32B32A32_SFLOAT, 1024, 1024, engine.vulkanDevice, engine.GetQueue(), VK_FILTER_LINEAR);
 
 	auto t = make_shared<vks::Texture>(m_ContinentTexture);
 
