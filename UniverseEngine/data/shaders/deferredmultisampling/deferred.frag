@@ -83,7 +83,7 @@ vec3 calculateLighting(vec3 pos, vec3 normal, vec4 albedo)
 	vec3 R = reflect(L, N);
 	vec3 diffuse = max(dot(N, L), 0.0) * albedo.rgb;
 	vec3 specular = pow(max(dot(R, V), 0.0), 16.0) * vec3(0.75);
-	result += diffuse;// + specular;
+	result += diffuse + specular;
 
 	return result;
 }

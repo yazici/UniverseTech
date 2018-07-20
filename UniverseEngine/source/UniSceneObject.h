@@ -33,6 +33,7 @@ public:
 	void SetName(std::string name) { m_Name = name; }
 
 	bool IsRendered() { return m_IsRendered; }
+	void SetRendered(bool render) { m_IsRendered = render; }
 
 protected:
 	UniScene * m_Scene;

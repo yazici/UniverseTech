@@ -106,6 +106,10 @@ void UniScene::Load(std::string filename) {
 			
 			model->SetCreateInfo(createOffset, createScale, createUVScale);
 			model->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);
+
+			if(so.find("enabled") != so.end()) {
+				model->SetRendered(so.at("enabled"));
+			}
 		}
 
 		if(soType == "light") {
@@ -190,7 +194,7 @@ std::vector<std::shared_ptr<UniModel>> UniScene::GetModels() {
 	std::vector<std::shared_ptr<UniModel>> models;
 	for_each(m_SceneObjects.begin(), m_SceneObjects.end(), [&models](std::shared_ptr<UniSceneObject> so) {
 		auto model = std::dynamic_pointer_cast<UniModel>(so);
-		if(model) {
+		if(model && model->IsRendered()) {
 			models.push_back(model);
 		}
 	});
