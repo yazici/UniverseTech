@@ -15,7 +15,9 @@ Currently built as a Visual Studio 2017 Win 10 x64 project, with AVX and multith
 Base engine capabilities in current version:
 
 - Arbitrary model loading with texture and normal maps. (Uses ASSIMP importer.)
-- Basic (single level) scene graph handling loaded models.
+- Scene graph handling loaded models.
+- JSON file format for level data.
+- Continuous level of detail procedural planet generator.
 - Entity Component System architecture for data-driven behaviour models.
 - Deferred shading and lighting model with MSAA.
 - GUI overlay with input handling.
