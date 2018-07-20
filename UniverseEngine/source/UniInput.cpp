@@ -53,10 +53,10 @@ void UniInput::Initialize(int height, int width) {
 	m_InputMap->MapFloat(AxisThrust, padId, gainput::PadButtonAxis5, 0.f, 1.f);
 	m_InputMap->MapFloat(AxisReverse, padId, gainput::PadButtonAxis4, 0.f, 1.f);
 	
-	m_InputMap->MapFloat(AxisYaw, padId, gainput::PadButtonLeftStickX);
-	m_InputMap->MapFloat(AxisPitch, padId, gainput::PadButtonLeftStickY);
-	m_InputMap->MapFloat(AxisStrafe, padId, gainput::PadButtonRightStickX);
-	m_InputMap->MapFloat(AxisAscend, padId, gainput::PadButtonRightStickY);
+	m_InputMap->MapFloat(AxisYaw, padId, gainput::PadButtonRightStickX);
+	m_InputMap->MapFloat(AxisPitch, padId, gainput::PadButtonRightStickY);
+	m_InputMap->MapFloat(AxisStrafe, padId, gainput::PadButtonLeftStickX);
+	m_InputMap->MapFloat(AxisAscend, padId, gainput::PadButtonLeftStickY);
 
 	m_InputMap->MapBool(ButtonBoostUp, padId, gainput::PadButtonR1);
 	m_InputMap->MapBool(ButtonBoostDown, padId, gainput::PadButtonL1);

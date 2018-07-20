@@ -170,7 +170,7 @@ void UniScene::Load(std::string filename) {
 
 
 	auto planetTest = Make<UniSceneObject>(glm::vec3(0, 0, 0));
-	planetTest->AddComponent<UniPlanet>(5000.0, 0.1, 0.1, 100);
+	planetTest->AddComponent<UniPlanet>(5000.0, 0.05, 0.05, 100);
 
 
 	std::cout << "Scene fully loaded." << std::endl;

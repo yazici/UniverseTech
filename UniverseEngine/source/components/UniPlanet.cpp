@@ -6,6 +6,7 @@
 #include "glm/gtx/quaternion.hpp"
 #include "../FastNoise.h"
 #include <math.h>
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 
@@ -45,8 +46,8 @@ void UniPlanet::Initialize() {
 	auto modelMat = glm::mat4(1.0);
 	UpdateUniformBuffers(modelMat);
 
-	MakeRampTexture();
 	MakeContintentTexture();
+	MakeRampTexture();
 	
 	std::cout << "Created planet grid with " << m_GridPoints.size() << " points and " << m_Triangles.size() << " tris." << std::endl;
 }
@@ -124,7 +125,7 @@ void UniPlanet::UpdateMesh() {
 	auto zs = CalculateZOffset();
 	std::cout << ", planet Z offset: " << zs << std::endl;
 
-	auto rot = glm::lookAt({ 0, 0, 0 }, m_CurrentCameraPos, { 0, -1, 0 });
+	auto rot = glm::lookAt({ 0, 0, 0 }, m_CurrentCameraPos, { 0, 1, 0 });
 
 	auto F = glm::normalize(m_CurrentCameraPos);
 	auto Z = F + glm::vec3(1.f, 0.f, 0.f);
@@ -135,7 +136,7 @@ void UniPlanet::UpdateMesh() {
 
 	for(auto gp : m_GridPoints) {
 		glm::vec3 point({ gp.x, gp.y, gp.z - zs });
-		point = glm::vec4(point, 1) * rot;
+		point = glm::vec4(point, 0) * rot;
 		point = glm::normalize(point) * (float)m_Radius;
 		//pos *= GetPositionOffset(gp);
 		m_MeshVerts.push_back(point);
@@ -294,13 +295,16 @@ void UniPlanet::MakeContintentTexture() {
 
 	std::vector<glm::vec3> buffer;
 
-	for(float lat = 0.f; lat >= -180.f; lat -= 180.f / 1024) {
-		for(float lon = -180.f; lon <= 180.f; lon += 360.f / 1024) {
+	glm::vec3 noiseOffset = { 2, 2, 2 };
+	float noiseScale = 100.3587f;
+
+	for(float lat = -90.f; lat < 90.f; lat += 180.f / 1024) {
+		for(float lon = 0; lon < 360.f; lon += 360.f / 1024) {
 			auto x = cos(glm::radians(lat)) * cos(glm::radians(lon));
 			auto y = cos(glm::radians(lat)) * sin(glm::radians(lon));
 			auto z = sin(glm::radians(lat));
 
-			auto nv = glm::normalize(glm::vec3(x, y, z)) * 100.366f;
+			auto nv = (glm::normalize(glm::vec3(x, y, z)) + noiseOffset) * noiseScale;
 
 			float n = noise.GetNoise(nv.x, nv.y, nv.z) / 2.f + 0.5f;
 			buffer.emplace_back(n, n, n);
@@ -316,8 +320,13 @@ void UniPlanet::MakeContintentTexture() {
 
 void UniPlanet::MakeRampTexture() {
 	auto& engine = UniEngine::GetInstance();
+	std::string path = getAssetPath() + "textures/terrain-ramp.png";
+	int texWidth, texHeight, texChannels;
+	stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+
+	VkDeviceSize imSize = texWidth * texHeight * 4;
 	
-	m_RampTexture.loadFromFile(getAssetPath() + "textures/terrain-ramp.dds", VK_FORMAT_R32G32B32_SFLOAT, engine.vulkanDevice, engine.GetQueue());
+	m_RampTexture.fromBuffer(pixels, imSize, VK_FORMAT_R8G8B8A8_UNORM, texWidth, texHeight, engine.vulkanDevice, engine.GetQueue(), VK_FILTER_LINEAR);
 
 	auto t = make_shared<vks::Texture>(m_RampTexture);
 

@@ -47,7 +47,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 		// Binding 0 : Vertex shader uniform buffer
 		vks::initializers::descriptorSetLayoutBinding(
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			VK_SHADER_STAGE_VERTEX_BIT,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 			0),
 		// Binding 1 : This is the continent noise texture
 		vks::initializers::descriptorSetLayoutBinding(
@@ -134,7 +134,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 		vks::initializers::writeDescriptorSet(
 			m_DescriptorSet,
 			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			1,
+			2,
 			&m_Textures[1]->descriptor),
 
 	};

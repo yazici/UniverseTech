@@ -24,12 +24,23 @@ layout (binding = 1) uniform sampler2D continentTexture;
 layout(location = 0) out vec3 Normal;
 layout(location = 1) out vec3 outWorldPos;
 layout(location = 2) out vec3 outColor;
+layout(location = 3) out vec3 localPos;
 
 out gl_PerVertex
 {
 	vec4 gl_Position;
 };
 	
+float height(vec2 uv, sampler2D tex){
+	float bump = texture(tex, uv).x;
+	bump = clamp(bump, 0.5, 1.0);
+	float offset = mix(0, ubo.maxHeight, bump);
+
+	//return ubo.radius;
+
+	return (ubo.radius + (ubo.radius * offset));
+}
+
 
 void main()
 {
@@ -42,10 +53,8 @@ void main()
 	float v = n.y * 0.5 + 0.5;
 	
 	vec2 uv = vec2(u, v);
-	
-	float offset = texture(continentTexture, uv).x;
 
-	TriPos = n * (ubo.radius + (ubo.radius * ubo.maxHeight) * offset);
+	TriPos = n * height(uv, continentTexture);
 	
 	Normal = normalize(pos);
 	mat3 mNormal = transpose(inverse(mat3(ubo.model)));
@@ -55,7 +64,8 @@ void main()
 	outWorldPos = (ubo.model * vec4(TriPos, 1.f)).xyz;
 	outWorldPos.y = -outWorldPos.y;
 
-	outColor = vec3(1.0);  
+	outColor = vec3(1.0);
+	localPos = TriPos;
 
 	gl_Position = ubo.proj * ubo.view * vec4(outWorldPos, 1);
 	

@@ -52,6 +52,9 @@
     <Filter Include="Source Files\systems">
       <UniqueIdentifier>{7c3c5419-900b-4e3b-a86d-2b8633169aa7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{4473a60b-eb18-4533-9fcf-764294a71281}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\vks\benchmark.hpp">
@@ -320,6 +323,9 @@
     </None>
     <None Include="data\levels\testlevel2.json">
       <Filter>Content\levels</Filter>
+    </None>
+    <None Include="data\shaders\compileshaders.py">
+      <Filter>Tools</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
