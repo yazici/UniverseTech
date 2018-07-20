@@ -9,10 +9,15 @@
 #include "UniEngine.h"
 #include "vks/VulkanTools.h"
 #include <assert.h>
-#include "UniBody.h"
 #include <algorithm>
-#include "components/PlayerControlSystem.h"
+#include "systems/events.h"
 #include "components/LightComponent.h"
+#include "components/UniPlanet.h"
+#include "UniModel.h"
+#include "UniScene.h"
+#include "UniInput.h"
+#include "UniMaterial.h"
+#include "components/PlayerMovement.h"
 
 #define ENABLE_VALIDATION true
 
@@ -72,20 +77,16 @@ void UniEngine::Shutdown() {
 	vkDestroyPipeline(device, pipelines.offscreen, nullptr);
 	vkDestroyPipeline(device, pipelines.offscreenSampleShading, nullptr);
 	vkDestroyPipeline(device, pipelines.debug, nullptr);
-	vkDestroyPipeline(device, pipelines.offScreenPlanet, nullptr);
+
 	if (deviceFeatures.fillModeNonSolid)
 	{
-		vkDestroyPipeline(device, pipelines.offScreenPlanetWireframe, nullptr);
 	}
 
 	vkDestroyPipelineLayout(device, pipelineLayouts.deferred, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayouts.offscreen, nullptr);
-	vkDestroyPipelineLayout(device, pipelineLayouts.planetOffscreen, nullptr);
 
 
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
-	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayoutDynamic, nullptr);
-	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayoutPlanet, nullptr);
 
 	// Meshes
 	auto models = m_CurrentScene->GetModels();
@@ -102,7 +103,7 @@ void UniEngine::Shutdown() {
 	uniformBuffers.fsLights.destroy();
 
 	vkFreeCommandBuffers(device, cmdPool, 1, &m_offScreenCmdBuffer);
-	/*vkFreeCommandBuffers(device, cmdPool, 1, &m_planetCmdBuffer);*/
+
 
 	vkDestroyRenderPass(device, offScreenFrameBuf.renderPass, nullptr);
 
@@ -117,11 +118,10 @@ UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
 
 	m_CurrentScene = std::make_shared<UniScene>();
 
-	title = "Multi sampled deferred shading";
-	paused = true;
+	title = "Universe Tech Test";
+	paused = false;
 	settings.overlay = true;
 }
-
 
 UniEngine& UniEngine::GetInstance() {
 	static UniEngine instance;
@@ -155,6 +155,17 @@ void UniEngine::getEnabledFeatures() {
 			enabledFeatures.wideLines = VK_TRUE;
 		}
 	};
+}
+
+size_t UniEngine::getDynamicAlignment() {
+	size_t minUboAlignment = vulkanDevice->properties.limits.minUniformBufferOffsetAlignment;
+
+	auto dynamicAlignment = sizeof(glm::mat4);
+	if(minUboAlignment > 0) {
+		dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
+	}
+
+	return dynamicAlignment;
 }
 
 // Create a frame buffer attachment
@@ -209,6 +220,135 @@ void UniEngine::createAttachment(VkFormat format, VkImageUsageFlagBits usage, Fr
 	imageView.subresourceRange.layerCount = 1;
 	imageView.image = attachment->image;
 	VK_CHECK_RESULT(vkCreateImageView(device, &imageView, nullptr, &attachment->view));
+}
+
+void UniEngine::prepare() {
+
+	std::cout << "Initialize engine..." << std::endl;
+	
+	std::cout << "Initialize scenegraph..." << std::endl;
+	m_CurrentScene->Initialize(this);
+	
+	std::cout << "Initialize input manager..." << std::endl;
+	SetupInput();
+	
+	std::cout << "Initialize base engine..." << std::endl;
+	VulkanExampleBase::prepare();
+	
+	std::cout << "initialize scene assets..." << std::endl;
+	loadAssets();
+	
+	std::cout << "Initialize vertex descriptions..." << std::endl;
+	setupVertexDescriptions();
+	
+	std::cout << "Initialize offscreen framebuffer..." << std::endl;
+	prepareOffscreenFramebuffer();
+	
+	std::cout << "Initialize uniform buffers..." << std::endl;
+	prepareUniformBuffers();
+	
+	std::cout << "Initialize descriptor set layouts..." << std::endl;
+	setupDescriptorSetLayout();
+	
+	std::cout << "Initialize pipelines..." << std::endl;
+	preparePipelines();
+	
+	std::cout << "Initialize descriptor pool..." << std::endl;
+	setupDescriptorPool();
+	
+	std::cout << "Initialize descriptor sets..." << std::endl;
+	setupDescriptorSets();
+	
+	std::cout << "Initialize command buffers..." << std::endl;
+	buildCommandBuffers();
+	
+	std::cout << "Initialize deferred command buffers..." << std::endl;
+	buildDeferredCommandBuffer();
+	
+	prepared = true;
+	std::cout << "Initialization complete." << std::endl;
+}
+
+void UniEngine::SetupInput() {
+	
+	m_InputManager = std::make_shared<UniInput>();
+	m_InputManager->Initialize(height, width);
+
+	m_InputManager->OnPress(UniInput::ButtonQuit, [this](){ m_QuitMessageReceived = true; });
+	m_InputManager->OnRelease(UniInput::ButtonPause, [this]() { paused = !paused; });
+	m_InputManager->OnRelease(UniInput::ButtonBoostUp, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonBoostUp, 1.0f }); });
+	m_InputManager->OnRelease(UniInput::ButtonBoostDown, [this]() { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonBoostDown, 1.0f }); });
+
+	m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisYaw, newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisPitch, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisPitch, newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisThrust, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisReverse, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, -newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisStrafe, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisStrafe, -newValue }); });
+	m_InputManager->RegisterFloatCallback(UniInput::AxisAscend, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisAscend, -newValue }); });
+	m_InputManager->RegisterBoolCallback(UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRightClick, newValue ? 1.f : 0.f }); });
+
+
+	
+}
+
+void UniEngine::loadAssets() {
+
+	m_CurrentScene->Load(getAssetPath() + "levels/testlevel.json");
+
+}
+
+void UniEngine::setupVertexDescriptions() {
+	// Binding description
+	vertices.bindingDescriptions.resize(1);
+	vertices.bindingDescriptions[0] =
+		vks::initializers::vertexInputBindingDescription(
+			VERTEX_BUFFER_BIND_ID,
+			vertexLayout.stride(),
+			VK_VERTEX_INPUT_RATE_VERTEX);
+
+	// Attribute descriptions
+	vertices.attributeDescriptions.resize(5);
+	// Location 0: Position
+	vertices.attributeDescriptions[0] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			0,
+			VK_FORMAT_R32G32B32_SFLOAT,
+			0);
+	// Location 1: Texture coordinates
+	vertices.attributeDescriptions[1] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			1,
+			VK_FORMAT_R32G32_SFLOAT,
+			sizeof(float) * 3);
+	// Location 2: Color
+	vertices.attributeDescriptions[2] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			2,
+			VK_FORMAT_R32G32B32_SFLOAT,
+			sizeof(float) * 5);
+	// Location 3: Normal
+	vertices.attributeDescriptions[3] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			3,
+			VK_FORMAT_R32G32B32_SFLOAT,
+			sizeof(float) * 8);
+	// Location 4: Tangent
+	vertices.attributeDescriptions[4] =
+		vks::initializers::vertexInputAttributeDescription(
+			VERTEX_BUFFER_BIND_ID,
+			4,
+			VK_FORMAT_R32G32B32_SFLOAT,
+			sizeof(float) * 11);
+
+	vertices.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
+	vertices.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertices.bindingDescriptions.size());
+	vertices.inputState.pVertexBindingDescriptions = vertices.bindingDescriptions.data();
+	vertices.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertices.attributeDescriptions.size());
+	vertices.inputState.pVertexAttributeDescriptions = vertices.attributeDescriptions.data();
 }
 
 // Prepare a new framebuffer for offscreen rendering
@@ -358,289 +498,53 @@ void UniEngine::prepareOffscreenFramebuffer() {
 	VK_CHECK_RESULT(vkCreateSampler(device, &sampler, nullptr, &m_colorSampler));
 }
 
-// Build command buffer for rendering the scene to the offscreen frame buffer attachments
-void UniEngine::buildDeferredCommandBuffer() {
-	if(m_offScreenCmdBuffer == VK_NULL_HANDLE) {
-		m_offScreenCmdBuffer = VulkanExampleBase::createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
-	}
+// Prepare and initialize uniform buffer containing shader uniforms
+void UniEngine::prepareUniformBuffers() {
+	// Fullscreen vertex shader
+	VK_CHECK_RESULT(vulkanDevice->createBuffer(
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&uniformBuffers.vsFullScreen,
+		sizeof(uboVS)));
 
-	// Create a semaphore used to synchronize offscreen rendering and usage
-	if(m_offscreenSemaphore == VK_NULL_HANDLE) {
-		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-		VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &m_offscreenSemaphore));
-	}
-
-	VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-
-	// Clear values for all attachments written in the fragment sahder
-	std::array<VkClearValue, 4> clearValues;
-	clearValues[0].color = clearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	clearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	clearValues[3].depthStencil = { 1.0f, 0 };
-
-	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-	renderPassBeginInfo.renderPass = offScreenFrameBuf.renderPass;
-	renderPassBeginInfo.framebuffer = offScreenFrameBuf.frameBuffer;
-	renderPassBeginInfo.renderArea.extent.width = offScreenFrameBuf.width;
-	renderPassBeginInfo.renderArea.extent.height = offScreenFrameBuf.height;
-	renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-	renderPassBeginInfo.pClearValues = clearValues.data();
-
-	VK_CHECK_RESULT(vkBeginCommandBuffer(m_offScreenCmdBuffer, &cmdBufInfo));
-
-	vkCmdBeginRenderPass(m_offScreenCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	VkViewport viewport = vks::initializers::viewport((float)offScreenFrameBuf.width, (float)offScreenFrameBuf.height, 0.0f, 1.0f);
-	vkCmdSetViewport(m_offScreenCmdBuffer, 0, 1, &viewport);
-
-	VkRect2D scissor = vks::initializers::rect2D(offScreenFrameBuf.width, offScreenFrameBuf.height, 0, 0);
-	vkCmdSetScissor(m_offScreenCmdBuffer, 0, 1, &scissor);
-
-	vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_useSampleShading ? pipelines.offscreenSampleShading : pipelines.offscreen);
-
-	// bind models
-
-	auto dynamicAlignment = getDynamicAlignment();
-	int index = 0;
+	// Deferred vertex shader
+	VK_CHECK_RESULT(vulkanDevice->createBuffer(
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&uniformBuffers.vsOffscreen,
+		sizeof(uboOffscreenVS)));
 
 	auto models = m_CurrentScene->GetModels();
-	for_each(models.begin(), models.end(), [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
-		VkDeviceSize offsets[1] = { 0 };
-		uint32_t dynamicOffset = index * static_cast<uint32_t>(dynamicAlignment);
-		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &model->m_DescriptorSet, 1, &dynamicOffset);
-		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &model->m_Model.vertices.buffer, offsets);
-		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, model->m_Model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(m_offScreenCmdBuffer, model->m_Model.indexCount, 1, 0, 0, 0);
-		index++;
-	});
+	auto dynamicAlignment = getDynamicAlignment();
+	size_t bufferSize = std::max(static_cast<int>(models.size()), 1) * dynamicAlignment;
+	uboModelMatDynamic.model = (glm::mat4 *)alignedAlloc(bufferSize, dynamicAlignment);
+	assert(uboModelMatDynamic.model);
 
-	//auto body = m_CurrentScene->m_BodyTest;
-	//if(body->m_pPatch->m_NumInstances > 0) {
-
-	//	VkDeviceSize offsets[1] = { 0 };
-	//	// TODO: Instanced rendering of patches. Bind correct buffers, setup new pipeline, create correct layouts, deal with offsets
-	//	
-	//	vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-	//	if (m_useWireframe) {
-	//		vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
-	//	}
-	//	else {
-	//		vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
-	//	}
-	//	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
-	//	vkCmdBindVertexBuffers(m_offScreenCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
-	//	vkCmdBindIndexBuffer(m_offScreenCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+	// Deferred vertex shader dynamic
+	VK_CHECK_RESULT(vulkanDevice->createBuffer(
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 
+		&uniformBuffers.modelViews, bufferSize));
 
 
-	//	//// Render instances
-	//	//std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
-	//	//std::cout << "Buffer bytes - vertex: " << body->m_pPatch->vertexBuffer.size << ", instance: " << body->m_pPatch->m_instanceBuffer.size << ", index: " << body->m_pPatch->indexBuffer.size << std::endl;
-	//	vkCmdDrawIndexed(m_offScreenCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
-	//}
+	// Deferred fragment shader
+	VK_CHECK_RESULT(vulkanDevice->createBuffer(
+		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&uniformBuffers.fsLights,
+		sizeof(uboFragmentLights)));
 
-	vkCmdEndRenderPass(m_offScreenCmdBuffer);
+	// Map persistent
+	VK_CHECK_RESULT(uniformBuffers.vsFullScreen.map());
+	VK_CHECK_RESULT(uniformBuffers.vsOffscreen.map());
+	VK_CHECK_RESULT(uniformBuffers.modelViews.map());
+	VK_CHECK_RESULT(uniformBuffers.fsLights.map());
 
-	VK_CHECK_RESULT(vkEndCommandBuffer(m_offScreenCmdBuffer));
-}
-
-// Build command buffer for rendering the scene to the offscreen frame buffer attachments
-void UniEngine::buildPlanetCommandBuffer() {
-	if(m_planetCmdBuffer == VK_NULL_HANDLE) {
-		m_planetCmdBuffer = VulkanExampleBase::createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
-	}
-
-	// Create a semaphore used to synchronize offscreen rendering and usage
-	if(m_offscreenSemaphore == VK_NULL_HANDLE) {
-		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-		VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &m_offscreenSemaphore));
-	}
-
-	VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-
-	// Clear values for all attachments written in the fragment sahder
-	std::array<VkClearValue, 4> clearValues;
-	clearValues[0].color = clearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	clearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	clearValues[3].depthStencil = { 1.0f, 0 };
-
-	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-	renderPassBeginInfo.renderPass = offScreenFrameBuf.renderPass;
-	renderPassBeginInfo.framebuffer = offScreenFrameBuf.frameBuffer;
-	renderPassBeginInfo.renderArea.extent.width = offScreenFrameBuf.width;
-	renderPassBeginInfo.renderArea.extent.height = offScreenFrameBuf.height;
-	renderPassBeginInfo.clearValueCount = 0;
-	renderPassBeginInfo.pClearValues = nullptr;
-	//renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-	//renderPassBeginInfo.pClearValues = clearValues.data();
-
-	//VK_CHECK_RESULT(vkBeginCommandBuffer(m_planetCmdBuffer, &cmdBufInfo));
-
-	//vkCmdBeginRenderPass(m_planetCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	//VkViewport viewport = vks::initializers::viewport((float)offScreenFrameBuf.width, (float)offScreenFrameBuf.height, 0.0f, 1.0f);
-	//vkCmdSetViewport(m_planetCmdBuffer, 0, 1, &viewport);
-
-	//VkRect2D scissor = vks::initializers::rect2D(offScreenFrameBuf.width, offScreenFrameBuf.height, 0, 0);
-	//vkCmdSetScissor(m_planetCmdBuffer, 0, 1, &scissor);
-
-	//vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_useSampleShading ? pipelines.offscreenSampleShading : pipelines.offscreen);
-
-	//VkDeviceSize offsets[1] = { 0 };
-	//auto body = m_CurrentScene->m_BodyTest;
-	//vkCmdBindDescriptorSets(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.planetOffscreen, 0, 1, &body->m_pPatch->m_DescriptorSet, 0, nullptr);
-	//if (m_useWireframe) {
-	//	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanetWireframe);
-	//}
-	//else {
-	//	vkCmdBindPipeline(m_planetCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offScreenPlanet);
-	//}
-	//vkCmdBindVertexBuffers(m_planetCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &body->m_pPatch->vertexBuffer.buffer, offsets);
-	//vkCmdBindVertexBuffers(m_planetCmdBuffer, INSTANCE_BUFFER_BIND_ID, 1, &body->m_pPatch->m_instanceBuffer.buffer, offsets);
-	//vkCmdBindIndexBuffer(m_planetCmdBuffer, body->m_pPatch->indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
-
-	////// Render instances
-	//std::cout << "Rendering " << body->m_pPatch->indexCount << "triangles on " << body->m_pPatch->m_NumInstances << " instances." << std::endl;
-	//vkCmdDrawIndexed(m_planetCmdBuffer, body->m_pPatch->indexCount, body->m_pPatch->m_NumInstances, 0, 0, 0);
-
-	//vkCmdEndRenderPass(m_planetCmdBuffer);
-
-	//VK_CHECK_RESULT(vkEndCommandBuffer(m_planetCmdBuffer));
-}
-
-void UniEngine::buildCommandBuffers() {
-	VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
-
-	VkClearValue clearValues[2];
-	clearValues[0].color = { { 1.0f, 1.0f, 1.0f, 0.0f } };
-	clearValues[1].depthStencil = { 1.0f, 0 };
-
-	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-	renderPassBeginInfo.renderPass = renderPass;
-	renderPassBeginInfo.renderArea.offset.x = 0;
-	renderPassBeginInfo.renderArea.offset.y = 0;
-	renderPassBeginInfo.renderArea.extent.width = width;
-	renderPassBeginInfo.renderArea.extent.height = height;
-	renderPassBeginInfo.clearValueCount = 2;
-	renderPassBeginInfo.pClearValues = clearValues;
-
-	for(int32_t i = 0; i < drawCmdBuffers.size(); ++i) {
-		// Set target frame buffer
-		renderPassBeginInfo.framebuffer = frameBuffers[i];
-
-		VK_CHECK_RESULT(vkBeginCommandBuffer(drawCmdBuffers[i], &cmdBufInfo));
-
-		vkCmdBeginRenderPass(drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
-		vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
-
-		VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
-		vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
-
-		uint32_t dummy = 0;
-		vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.deferred, 0, 1, &m_descriptorSet, 1, &dummy);
-
-		if(m_debugDisplay) {
-			vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.debug);
-			vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
-			// Move viewport to display final composition in lower right corner
-			viewport.x = viewport.width * 0.5f;
-			viewport.y = viewport.height * 0.5f;
-			viewport.width = (float)width * 0.5f;
-			viewport.height = (float)height * 0.5f;
-			vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
-		}
-
-		GetScene()->GetCameraComponent()->aspect = (float)viewport.width / (float)viewport.height;
-		GetScene()->GetCameraComponent()->CalculateProjection();
-
-		// Final composition as full screen quad
-		vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_useMSAA ? pipelines.deferred : pipelines.deferredNoMSAA);
-		vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
-
-		vkCmdEndRenderPass(drawCmdBuffers[i]);
-
-		VK_CHECK_RESULT(vkEndCommandBuffer(drawCmdBuffers[i]));
-	}
-}
-
-void UniEngine::loadAssets() {
-
-	m_CurrentScene->Load(getAssetPath() + "levels/testlevel.json");
-
-}
-
-void UniEngine::setupVertexDescriptions() {
-	// Binding description
-	vertices.bindingDescriptions.resize(1);
-	vertices.bindingDescriptions[0] =
-		vks::initializers::vertexInputBindingDescription(
-			VERTEX_BUFFER_BIND_ID,
-			vertexLayout.stride(),
-			VK_VERTEX_INPUT_RATE_VERTEX);
-
-	// Attribute descriptions
-	vertices.attributeDescriptions.resize(5);
-	// Location 0: Position
-	vertices.attributeDescriptions[0] =
-		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
-			0,
-			VK_FORMAT_R32G32B32_SFLOAT,
-			0);
-	// Location 1: Texture coordinates
-	vertices.attributeDescriptions[1] =
-		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
-			1,
-			VK_FORMAT_R32G32_SFLOAT,
-			sizeof(float) * 3);
-	// Location 2: Color
-	vertices.attributeDescriptions[2] =
-		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
-			2,
-			VK_FORMAT_R32G32B32_SFLOAT,
-			sizeof(float) * 5);
-	// Location 3: Normal
-	vertices.attributeDescriptions[3] =
-		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
-			3,
-			VK_FORMAT_R32G32B32_SFLOAT,
-			sizeof(float) * 8);
-	// Location 4: Tangent
-	vertices.attributeDescriptions[4] =
-		vks::initializers::vertexInputAttributeDescription(
-			VERTEX_BUFFER_BIND_ID,
-			4,
-			VK_FORMAT_R32G32B32_SFLOAT,
-			sizeof(float) * 11);
-
-	vertices.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
-	vertices.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertices.bindingDescriptions.size());
-	vertices.inputState.pVertexBindingDescriptions = vertices.bindingDescriptions.data();
-	vertices.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertices.attributeDescriptions.size());
-	vertices.inputState.pVertexAttributeDescriptions = vertices.attributeDescriptions.data();
-}
-
-void UniEngine::setupDescriptorPool() {
-	auto modelCount = static_cast<uint32_t>(std::max((int)m_CurrentScene->GetModels().size(), 1)) * 2;
-
-	std::vector<VkDescriptorPoolSize> poolSizes =
-	{
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 3 * modelCount + 1),
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2 * modelCount),
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5 * modelCount + 5)
-	};
-
-	VkDescriptorPoolCreateInfo descriptorPoolInfo =
-		vks::initializers::descriptorPoolCreateInfo(
-			static_cast<uint32_t>(poolSizes.size()),
-			poolSizes.data(),
-			static_cast<uint32_t>(modelCount / 2 + 4));
-
-	VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
+	// Update
+	updateUniformBuffersScreen();
+	updateUniformBufferDeferredMatrices();
+	updateUniformBufferDeferredLights();
+	updateDynamicUniformBuffers();
 }
 
 void UniEngine::setupDescriptorSetLayout() {
@@ -698,233 +602,6 @@ void UniEngine::setupDescriptorSetLayout() {
 	// Offscreen (scene) rendering pipeline layout
 	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayouts.offscreen));
 
-	setLayoutBindings =
-	{
-		// Binding 0 : Uniform buffer for all thingies
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-			0),
-		// Binding 1 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			1),
-		// Binding 2 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			2),
-		// Binding 3 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			3),
-		// Binding 4 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			4),
-		// Binding 5 : Position texture target / Scene colormap
-		vks::initializers::descriptorSetLayoutBinding(
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			5),
-	};
-
-	descriptorLayout =
-		vks::initializers::descriptorSetLayoutCreateInfo(
-			setLayoutBindings.data(),
-			static_cast<uint32_t>(setLayoutBindings.size()));
-
-	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &m_descriptorSetLayoutPlanet));
-
-	pPipelineLayoutCreateInfo =
-		vks::initializers::pipelineLayoutCreateInfo(
-			&m_descriptorSetLayoutPlanet,
-			1);
-
-	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &pipelineLayouts.planetOffscreen));
-
-}
-
-void UniEngine::setupDescriptorSets() {
-	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
-
-	// Textured quad descriptor set
-	VkDescriptorSetAllocateInfo allocInfo =
-		vks::initializers::descriptorSetAllocateInfo(
-			descriptorPool,
-			&m_descriptorSetLayout,
-			1);
-
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSet));
-
-
-	// Image descriptors for the offscreen color attachments
-	VkDescriptorImageInfo texDescriptorPosition =
-		vks::initializers::descriptorImageInfo(
-			m_colorSampler,
-			offScreenFrameBuf.position.view,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	VkDescriptorImageInfo texDescriptorNormal =
-		vks::initializers::descriptorImageInfo(
-			m_colorSampler,
-			offScreenFrameBuf.normal.view,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	VkDescriptorImageInfo texDescriptorAlbedo =
-		vks::initializers::descriptorImageInfo(
-			m_colorSampler,
-			offScreenFrameBuf.albedo.view,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	writeDescriptorSets = {
-		// Binding 0 : Vertex shader uniform buffer
-		vks::initializers::writeDescriptorSet(
-			m_descriptorSet,
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			0,
-			&uniformBuffers.vsFullScreen.descriptor),
-		// Binding 1 : Position texture target
-		vks::initializers::writeDescriptorSet(
-			m_descriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			1,
-			&texDescriptorPosition),
-		// Binding 2 : Normals texture target
-		vks::initializers::writeDescriptorSet(
-			m_descriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			2,
-			&texDescriptorNormal),
-		// Binding 3 : Albedo texture target
-		vks::initializers::writeDescriptorSet(
-			m_descriptorSet,
-			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			3,
-			&texDescriptorAlbedo),
-		// Binding 4 : Fragment shader uniform buffer
-		vks::initializers::writeDescriptorSet(
-			m_descriptorSet,
-			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			4,
-			&uniformBuffers.fsLights.descriptor),
-	};
-
-	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
-
-
-	// Offscreen (scene)
-
-	// Textured quad descriptor set
-	VkDescriptorSetAllocateInfo allocInfoDynamic =
-		vks::initializers::descriptorSetAllocateInfo(
-			descriptorPool,
-			&m_descriptorSetLayoutDynamic,
-			1);
-
-	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSetDynamic));
-
-
-	// Models
-	auto models = m_CurrentScene->GetModels();
-	for_each(models.begin(), models.end(), [allocInfo, this](std::shared_ptr<UniModel> model) {
-
-		VkResult res = (vkAllocateDescriptorSets(device, &allocInfo, &model->m_DescriptorSet));
-		if(res != VK_SUCCESS)
-		{
-			std::cout << "Fatal : VkResult is \"" << vks::tools::errorString(res) << "\" in " << __FILE__ << " at line " << __LINE__ << std::endl;
-			assert(res == VK_SUCCESS);
-		}
-
-		std::vector<VkWriteDescriptorSet> modelWriteDescriptorSets =
-		{
-			// Binding 0: Vertex shader uniform buffer
-			vks::initializers::writeDescriptorSet(
-				model->m_DescriptorSet,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-				0,
-				&uniformBuffers.vsOffscreen.descriptor),
-			// Binding 1: Color map
-			vks::initializers::writeDescriptorSet(
-				model->m_DescriptorSet,
-				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-				1,
-				&model->m_Texture.descriptor),
-			// Binding 2: Normal map
-			vks::initializers::writeDescriptorSet(
-				model->m_DescriptorSet,
-				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-				2,
-				&model->m_NormalMap.descriptor),
-			// Binding 5 : Vertex shader uniform buffer
-			vks::initializers::writeDescriptorSet(
-				model->m_DescriptorSet,
-				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-				5,
-				&uniformBuffers.modelViews.descriptor),
-		};
-		vkUpdateDescriptorSets(device, static_cast<uint32_t>(modelWriteDescriptorSets.size()), modelWriteDescriptorSets.data(), 0, nullptr);
-	});
-
-
-	// offscreen planets
-
-	//allocInfo =
-	//	vks::initializers::descriptorSetAllocateInfo(
-	//		descriptorPool,
-	//		&m_descriptorSetLayoutPlanet,
-	//		1);
-
-	//VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_CurrentScene->m_BodyTest->m_pPatch->m_DescriptorSet));
-
-	//auto body = m_CurrentScene->m_BodyTest;
-
-	//writeDescriptorSets = {
-	//	// Binding 0 : Vertex shader uniform buffer
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-	//		0,
-	//		&body->m_pPatch->uniformBuffer.descriptor),
-	//	// Binding 1: Diffuse
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		1,
-	//		&body->m_Texture.descriptor),
-	//	// Binding 2: Height
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		2,
-	//		&body->m_HeightMap.descriptor),
-	//	// Binding 3: height detail
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		3,
-	//		&body->m_HeightDetail.descriptor),
-
-	//	// Binding 4: texture detail
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		4,
-	//		&body->m_Detail1.descriptor),
-
-	//	// Binding 5: texture detail 2
-	//	vks::initializers::writeDescriptorSet(
-	//		body->m_pPatch->m_DescriptorSet,
-	//		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	//		5,
-	//		&body->m_Detail2.descriptor),
-
-	//};
-
-	//vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 
 
 }
@@ -939,7 +616,7 @@ void UniEngine::preparePipelines() {
 	VkPipelineRasterizationStateCreateInfo rasterizationState =
 		vks::initializers::pipelineRasterizationStateCreateInfo(
 			VK_POLYGON_MODE_FILL,
-			VK_CULL_MODE_BACK_BIT,
+			VK_CULL_MODE_NONE, // TODO: debug for backface culling!
 			VK_FRONT_FACE_CLOCKWISE,
 			0);
 
@@ -1064,85 +741,265 @@ void UniEngine::preparePipelines() {
 	multisampleState.minSampleShading = 0.25f;
 	VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offscreenSampleShading));
 
-
-	//// planet offscreen pipeline
-
-	//pipelineCreateInfo.layout = pipelineLayouts.planetOffscreen;
-
-	//pipelineCreateInfo.pVertexInputState = &m_CurrentScene->m_BodyTest->m_pPatch->vertexDescription.inputState;
-	//shaderStages[0] = loadShader(getAssetPath() + "shaders/planet.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-	//shaderStages[1] = loadShader(getAssetPath() + "shaders/planet.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
-
-	//VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanet));
-
-	//rasterizationState.polygonMode = VK_POLYGON_MODE_LINE;
-	//rasterizationState.lineWidth = 1.0f;
-
-	//VK_CHECK_RESULT(vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineCreateInfo, nullptr, &pipelines.offScreenPlanetWireframe));
-
-
-}
-
-size_t UniEngine::getDynamicAlignment() {
-	size_t minUboAlignment = vulkanDevice->properties.limits.minUniformBufferOffsetAlignment;
-
-	auto dynamicAlignment = sizeof(glm::mat4);
-	if(minUboAlignment > 0) {
-		dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
+	for(auto& material : m_MaterialInstances) {
+		material->SetupMaterial(pipelineCreateInfo);
 	}
 
-	return dynamicAlignment;
+
 }
 
+void UniEngine::setupDescriptorPool() {
+	auto modelCount = static_cast<uint32_t>(std::max((int)m_CurrentScene->GetModels().size(), 1)) * 2;
 
-// Prepare and initialize uniform buffer containing shader uniforms
-void UniEngine::prepareUniformBuffers() {
-	// Fullscreen vertex shader
-	VK_CHECK_RESULT(vulkanDevice->createBuffer(
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		&uniformBuffers.vsFullScreen,
-		sizeof(uboVS)));
+	std::vector<VkDescriptorPoolSize> poolSizes =
+	{
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 3 * modelCount + 1),
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2 * modelCount + 1),
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5 * modelCount + 5 + 5)
+	};
 
-	// Deferred vertex shader
-	VK_CHECK_RESULT(vulkanDevice->createBuffer(
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		&uniformBuffers.vsOffscreen,
-		sizeof(uboOffscreenVS)));
+	VkDescriptorPoolCreateInfo descriptorPoolInfo =
+		vks::initializers::descriptorPoolCreateInfo(
+			static_cast<uint32_t>(poolSizes.size()),
+			poolSizes.data(),
+			static_cast<uint32_t>(modelCount / 2 + 5));
+
+	VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr, &descriptorPool));
+}
+
+void UniEngine::setupDescriptorSets() {
+	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+
+	// Textured quad descriptor set
+	VkDescriptorSetAllocateInfo allocInfo =
+		vks::initializers::descriptorSetAllocateInfo(
+			descriptorPool,
+			&m_descriptorSetLayout,
+			1);
+
+	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSet));
+
+
+	// Image descriptors for the offscreen color attachments
+	VkDescriptorImageInfo texDescriptorPosition =
+		vks::initializers::descriptorImageInfo(
+			m_colorSampler,
+			offScreenFrameBuf.position.view,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	VkDescriptorImageInfo texDescriptorNormal =
+		vks::initializers::descriptorImageInfo(
+			m_colorSampler,
+			offScreenFrameBuf.normal.view,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	VkDescriptorImageInfo texDescriptorAlbedo =
+		vks::initializers::descriptorImageInfo(
+			m_colorSampler,
+			offScreenFrameBuf.albedo.view,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	writeDescriptorSets = {
+		// Binding 0 : Vertex shader uniform buffer
+		vks::initializers::writeDescriptorSet(
+			m_descriptorSet,
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			0,
+			&uniformBuffers.vsFullScreen.descriptor),
+		// Binding 1 : Position texture target
+		vks::initializers::writeDescriptorSet(
+			m_descriptorSet,
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			1,
+			&texDescriptorPosition),
+		// Binding 2 : Normals texture target
+		vks::initializers::writeDescriptorSet(
+			m_descriptorSet,
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			2,
+			&texDescriptorNormal),
+		// Binding 3 : Albedo texture target
+		vks::initializers::writeDescriptorSet(
+			m_descriptorSet,
+			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			3,
+			&texDescriptorAlbedo),
+		// Binding 4 : Fragment shader uniform buffer
+		vks::initializers::writeDescriptorSet(
+			m_descriptorSet,
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			4,
+			&uniformBuffers.fsLights.descriptor),
+	};
+
+	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+
+	// Models
+	auto models = m_CurrentScene->GetModels();
+	for_each(models.begin(), models.end(), [allocInfo, this](std::shared_ptr<UniModel> model) {
+
+		VkResult res = (vkAllocateDescriptorSets(device, &allocInfo, &model->m_DescriptorSet));
+		if(res != VK_SUCCESS)
+		{
+			std::cout << "Fatal : VkResult is \"" << vks::tools::errorString(res) << "\" in " << __FILE__ << " at line " << __LINE__ << std::endl;
+			assert(res == VK_SUCCESS);
+		}
+
+		std::vector<VkWriteDescriptorSet> modelWriteDescriptorSets =
+		{
+			// Binding 0: Vertex shader uniform buffer
+			vks::initializers::writeDescriptorSet(
+				model->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				0,
+				&uniformBuffers.vsOffscreen.descriptor),
+			// Binding 1: Color map
+			vks::initializers::writeDescriptorSet(
+				model->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				1,
+				&model->m_Texture.descriptor),
+			// Binding 2: Normal map
+			vks::initializers::writeDescriptorSet(
+				model->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				2,
+				&model->m_NormalMap.descriptor),
+			// Binding 5 : Vertex shader uniform buffer
+			vks::initializers::writeDescriptorSet(
+				model->m_DescriptorSet,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+				5,
+				&uniformBuffers.modelViews.descriptor),
+		};
+		vkUpdateDescriptorSets(device, static_cast<uint32_t>(modelWriteDescriptorSets.size()), modelWriteDescriptorSets.data(), 0, nullptr);
+	});
+
+}
+
+void UniEngine::buildCommandBuffers() {
+	VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+
+	VkClearValue clearValues[2];
+	clearValues[0].color = { { 1.0f, 1.0f, 1.0f, 0.0f } };
+	clearValues[1].depthStencil = { 1.0f, 0 };
+
+	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
+	renderPassBeginInfo.renderPass = renderPass;
+	renderPassBeginInfo.renderArea.offset.x = 0;
+	renderPassBeginInfo.renderArea.offset.y = 0;
+	renderPassBeginInfo.renderArea.extent.width = width;
+	renderPassBeginInfo.renderArea.extent.height = height;
+	renderPassBeginInfo.clearValueCount = 2;
+	renderPassBeginInfo.pClearValues = clearValues;
+
+	for(int32_t i = 0; i < drawCmdBuffers.size(); ++i) {
+		// Set target frame buffer
+		renderPassBeginInfo.framebuffer = frameBuffers[i];
+
+		VK_CHECK_RESULT(vkBeginCommandBuffer(drawCmdBuffers[i], &cmdBufInfo));
+
+		vkCmdBeginRenderPass(drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
+		vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
+
+		VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
+		vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
+
+		uint32_t dummy = 0;
+		vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.deferred, 0, 1, &m_descriptorSet, 1, &dummy);
+
+		if(m_debugDisplay) {
+			vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.debug);
+			vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
+			// Move viewport to display final composition in lower right corner
+			viewport.x = viewport.width * 0.5f;
+			viewport.y = viewport.height * 0.5f;
+			viewport.width = (float)width * 0.5f;
+			viewport.height = (float)height * 0.5f;
+			vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
+		}
+
+		GetScene()->GetCameraComponent()->aspect = (float)viewport.width / (float)viewport.height;
+		GetScene()->GetCameraComponent()->CalculateProjection();
+
+		// Final composition as full screen quad
+		vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_useMSAA ? pipelines.deferred : pipelines.deferredNoMSAA);
+		vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
+
+		vkCmdEndRenderPass(drawCmdBuffers[i]);
+
+		VK_CHECK_RESULT(vkEndCommandBuffer(drawCmdBuffers[i]));
+	}
+}
+
+// Build command buffer for rendering the scene to the offscreen frame buffer attachments
+void UniEngine::buildDeferredCommandBuffer() {
+	if(m_offScreenCmdBuffer == VK_NULL_HANDLE) {
+		m_offScreenCmdBuffer = VulkanExampleBase::createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
+	}
+
+	// Create a semaphore used to synchronize offscreen rendering and usage
+	if(m_offscreenSemaphore == VK_NULL_HANDLE) {
+		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
+		VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &m_offscreenSemaphore));
+	}
+
+	VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+
+	// Clear values for all attachments written in the fragment sahder
+	std::array<VkClearValue, 4> clearValues;
+	clearValues[0].color = clearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	clearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	clearValues[3].depthStencil = { 1.0f, 0 };
+
+	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
+	renderPassBeginInfo.renderPass = offScreenFrameBuf.renderPass;
+	renderPassBeginInfo.framebuffer = offScreenFrameBuf.frameBuffer;
+	renderPassBeginInfo.renderArea.extent.width = offScreenFrameBuf.width;
+	renderPassBeginInfo.renderArea.extent.height = offScreenFrameBuf.height;
+	renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+	renderPassBeginInfo.pClearValues = clearValues.data();
+
+	VK_CHECK_RESULT(vkBeginCommandBuffer(m_offScreenCmdBuffer, &cmdBufInfo));
+
+	vkCmdBeginRenderPass(m_offScreenCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	VkViewport viewport = vks::initializers::viewport((float)offScreenFrameBuf.width, (float)offScreenFrameBuf.height, 0.0f, 1.0f);
+	vkCmdSetViewport(m_offScreenCmdBuffer, 0, 1, &viewport);
+
+	VkRect2D scissor = vks::initializers::rect2D(offScreenFrameBuf.width, offScreenFrameBuf.height, 0, 0);
+	vkCmdSetScissor(m_offScreenCmdBuffer, 0, 1, &scissor);
+
+	vkCmdBindPipeline(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_useSampleShading ? pipelines.offscreenSampleShading : pipelines.offscreen);
+
+	// bind models
+
+	auto dynamicAlignment = getDynamicAlignment();
+	int index = 0;
 
 	auto models = m_CurrentScene->GetModels();
-	auto dynamicAlignment = getDynamicAlignment();
-	size_t bufferSize = std::max(static_cast<int>(models.size()), 1) * dynamicAlignment;
-	uboModelMatDynamic.model = (glm::mat4 *)alignedAlloc(bufferSize, dynamicAlignment);
-	assert(uboModelMatDynamic.model);
+	for_each(models.begin(), models.end(), [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
+		VkDeviceSize offsets[1] = { 0 };
+		uint32_t dynamicOffset = index * static_cast<uint32_t>(dynamicAlignment);
+		vkCmdBindDescriptorSets(m_offScreenCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayouts.offscreen, 0, 1, &model->m_DescriptorSet, 1, &dynamicOffset);
+		vkCmdBindVertexBuffers(m_offScreenCmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &model->m_Model.vertices.buffer, offsets);
+		vkCmdBindIndexBuffer(m_offScreenCmdBuffer, model->m_Model.indices.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(m_offScreenCmdBuffer, model->m_Model.indexCount, 1, 0, 0, 0);
+		index++;
+	});
 
-	// Deferred vertex shader dynamic
-	VK_CHECK_RESULT(vulkanDevice->createBuffer(
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 
-		&uniformBuffers.modelViews, bufferSize));
+	for(const auto& material : m_MaterialInstances) {
+		material->AddToCommandBuffer(m_offScreenCmdBuffer);
+	}
 
 
-	// Deferred fragment shader
-	VK_CHECK_RESULT(vulkanDevice->createBuffer(
-		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		&uniformBuffers.fsLights,
-		sizeof(uboFragmentLights)));
+	vkCmdEndRenderPass(m_offScreenCmdBuffer);
 
-	// Map persistent
-	VK_CHECK_RESULT(uniformBuffers.vsFullScreen.map());
-	VK_CHECK_RESULT(uniformBuffers.vsOffscreen.map());
-	VK_CHECK_RESULT(uniformBuffers.modelViews.map());
-	VK_CHECK_RESULT(uniformBuffers.fsLights.map());
-
-	// Update
-	updateUniformBuffersScreen();
-	updateUniformBufferDeferredMatrices();
-	updateUniformBufferDeferredLights();
-	updateDynamicUniformBuffers();
+	VK_CHECK_RESULT(vkEndCommandBuffer(m_offScreenCmdBuffer));
 }
+
 
 void UniEngine::updateUniformBuffersScreen() {
 	if(m_debugDisplay) {
@@ -1222,7 +1079,7 @@ void UniEngine::draw() {
 	submitInfo.pSignalSemaphores = &m_offscreenSemaphore;
 
 	std::array<VkCommandBuffer, 1> commandBuffers = {
-		m_offScreenCmdBuffer, //m_planetCmdBuffer
+		m_offScreenCmdBuffer,
 	};
 
 	// Submit work
@@ -1242,25 +1099,6 @@ void UniEngine::draw() {
 	VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
 	VulkanExampleBase::submitFrame();
-}
-
-void UniEngine::prepare() {
-
-	m_CurrentScene->Initialize(this);
-	SetupInput();
-	VulkanExampleBase::prepare();
-	loadAssets();
-	setupVertexDescriptions();
-	prepareOffscreenFramebuffer();
-	prepareUniformBuffers();
-	setupDescriptorSetLayout();
-	preparePipelines();
-	setupDescriptorPool();
-	setupDescriptorSets();
-	buildCommandBuffers();
-	buildDeferredCommandBuffer();
-	//buildPlanetCommandBuffer();
-	prepared = true;
 }
 
 void UniEngine::render() {
@@ -1301,33 +1139,24 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 				buildDeferredCommandBuffer();
 			}
 		}
-		if (vulkanDevice->features.fillModeNonSolid) {
-			if (overlay->checkBox("Wireframe Planet", &m_useWireframe)) {
-				//buildDeferredCommandBuffer();
-			}
+		
+		if(overlay->checkBox("Pause camera position", &m_CamPaused)) {
+			GetScene()->m_World->emit<CameraPauseEvent>({ m_CamPaused });
 		}
+
+		if(overlay->sliderFloat("Planet Z offset", &m_PlanetZOffset, -1, 50)){
+			GetScene()->m_World->emit<PlanetZEvent>({ m_PlanetZOffset });
+		}
+		GetScene()->m_World->each<PlayerControlComponent, MovementComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<PlayerControlComponent> player, ECS::ComponentHandle<MovementComponent> movement) {
+			overlay->text("Boost: %2.f", movement->m_BoostFactor);
+		});
+		
 	}
 }
 
 void UniEngine::ToggleWireframe()
 {
 	preparePipelines();
-}
-
-void UniEngine::SetupInput() {
-	m_CurrentScene->m_World->registerSystem(new PlayerControlSystem());
-	m_InputManager = std::make_shared<UniInput>();
-	m_InputManager->Initialize(height, width);
-
-	m_InputManager->OnPress(UniInput::ButtonQuit, [this](){ m_QuitMessageReceived = true; });
-	m_InputManager->OnRelease(UniInput::ButtonPause, [this]() { paused = !paused; });
-
-	m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisYaw, newValue }); });
-	m_InputManager->RegisterFloatCallback(UniInput::AxisThrust, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, newValue }); });
-	m_InputManager->RegisterFloatCallback(UniInput::AxisReverse, [this](float oldValue, float newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::AxisThrust, -newValue }); });
-	m_InputManager->RegisterBoolCallback(UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) { m_CurrentScene->m_World->emit<InputEvent>({ UniInput::ButtonRightClick, newValue ? 1.f : 0.f }); });
-
-	
 }
 
 void UniEngine::handleWMMessages(MSG& msg) {
@@ -1383,4 +1212,19 @@ void UniEngine::updateOverlay() {
 		mouseButtons.left = false;
 	}
 #endif
+}
+
+void UniEngine::RegisterMaterial(std::shared_ptr<UniMaterial> mat) {
+	m_MaterialInstances.push_back(mat);
+}
+
+void UniEngine::UnRegisterMaterial(std::shared_ptr<UniMaterial> mat) {
+	int i = 0;
+	while(i < m_MaterialInstances.size()) {
+		if(m_MaterialInstances[i] == mat) {
+			m_MaterialInstances.erase(m_MaterialInstances.begin() + i);
+			i = 0;
+		}
+		i++;
+	}
 }

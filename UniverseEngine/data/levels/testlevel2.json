@@ -1,0 +1,65 @@
+{
+    "level": {
+        "name": "Test Level",
+        "origin": [ 0, 0, 0 ],
+        "playerStart": {
+            "position": [ 0, -3.5, -14 ],
+            "rotation": [ 0, 0, 0 ]
+        },
+        "sceneObjects": [
+            {
+                "type": "model",
+                "name": "Armor",
+                "mesh": "models/armor/armor.dae",
+                "texture": "models/armor/color",
+                "normal": "models/armor/normal",
+                "position": [ 0.0, 0.0, 10.0 ],
+                "rotation": [ 0.0, 180.0, 0 ],
+                "createScale": [ 1, 1, 1 ],
+                "createUVScale": [ 1, 1 ],
+                "components": {
+                    "movement": {
+                        "velocity": [ 0, 0, 5 ],
+                        "rotation": [ 0, -90, 0 ]
+
+                    }
+                }
+            },
+            {
+                "type": "model",
+                "name": "Floor",
+                "mesh": "models/openbox.dae",
+                "texture": "textures/stonefloor02_color",
+                "normal": "textures/stonefloor02_normal",
+                "position": [ 0.0, 2.3, 0.0 ],
+                "rotation": [ 0, 0, 0 ],
+                "createScale": [ 15, 15, 15 ],
+                "createUVScale": [ 8, 8 ]
+            },
+            {
+                "type": "light",
+                "name": "light-white",
+                "position": [ 0.0, 0.0, 1.0 ],
+                "radius": 37.5,
+                "color": [ 1.5, 1.5, 1.5, 1.5 ],
+                "on": true
+            },
+            {
+                "type": "light",
+                "name": "light-red",
+                "position": [ 4.0, 0.0, 4.0 ],
+                "radius": 15,
+                "color": [ 1, 0, 0, 1 ],
+                "on": true
+            },
+            {
+                "type": "light",
+                "name": "light-blue",
+                "position": [ 2.0, -1.0, 0.0 ],
+                "radius": 5,
+                "color": [ 0, 0, 2.5, 1 ],
+                "on": true
+            }
+        ]
+    }
+}

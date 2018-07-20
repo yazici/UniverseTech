@@ -18,25 +18,25 @@ struct MovementComponent {
 	/** @brief units per second */
 	float m_MaxSpeed = 20.0f; 
 	 /** @brief units per second */
-	float m_MaxReverse = 3.0f;
+	float m_MaxReverse = 30.0f;
 	/** @brief units per second */
-	float m_MaxStrafe = 0.0f; 
+	float m_MaxStrafe = 20.0f; 
 	/** @brief units per second */
-	float m_MaxVertical = 0.0f; 
+	float m_MaxVertical = 20.0f; 
 
 	/** @brief units per second, per second */
 	float m_MaxAccel = 5.0f; 
 	/** @brief units per second, per second */
-	float m_MaxDecel = 20.0f; 
+	float m_MaxDecel = 8.0f; 
 	/** @brief units per second, per second */
-	float m_MaxStrafeAccel = 0.0f; 
+	float m_MaxStrafeAccel = 3.0f; 
 	/** @brief units per second, per second */
-	float m_MaxVerticalAccel = 0.0f; 
-	/** @brief units per second, per second */
-	float m_Drag = 0.0f; 
+	float m_MaxVerticalAccel = 3.0f; 
+	/** @brief percentage per second, per second */
+	float m_Drag = 0.05f; 
 
 	/** @brief degrees per second */
-	float m_MaxPitch = 180.0f; 
+	float m_MaxPitch = 0.0f; 
 	/** @brief degrees per second */
 	float m_MaxYaw = 90.0f; 
 	/** @brief degrees per second */
@@ -48,8 +48,11 @@ struct MovementComponent {
 	float m_MaxYawAccel = 360.f;
 	/** @brief degrees per second per second */
 	float m_MaxRollAccel = 720.f;
-	/** @brief degrees per second per second */
-	float m_RotationalDrag = 0.0f;
+	/** @brief percentage per second per second */
+	float m_RotationalDrag = 0.05f;
+
+	/** @brief multiplier for acceleration */
+	float m_BoostFactor = 1.0f;
 
 
 	bool isRelative = true;
@@ -62,6 +65,7 @@ struct MovementComponent {
 	
 	/** @brief set a target specified in world space */
 	void SetTarget(glm::vec3 target);
+	void SetBoost(float boost);
 	glm::vec3 GetTarget() { return m_Target; }
 	bool HasTarget() { return m_HasTarget; }
 private:

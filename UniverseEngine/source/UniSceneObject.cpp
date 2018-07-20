@@ -12,9 +12,9 @@ void UniSceneObject::SetScene(UniScene *scene) {
 	m_Scene = scene;
 }
 
-void UniSceneObject::SetEntity(ECS::Entity* ent) {
+void UniSceneObject::SetEntity(ECS::Entity* ent, glm::vec3 pos) {
 	m_Entity = ent;
-	m_Entity->assign<TransformComponent>();
+	m_Entity->assign<TransformComponent>(pos);
 }
 
 void UniSceneObject::SetParent(std::shared_ptr<UniSceneObject> parent) {

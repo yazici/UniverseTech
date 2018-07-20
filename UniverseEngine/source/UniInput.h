@@ -24,6 +24,19 @@ private:
 	UniInput& m_InputManager;
 };
 
+class UniDeviceButtonListener : public gainput::InputListener {
+public: 
+	UniDeviceButtonListener(gainput::InputManager& manager, int index) : manager_(manager), index_(index) {}
+	bool OnDeviceButtonBool(gainput::DeviceId deviceId, gainput::DeviceButtonId deviceButton, bool oldValue, bool newValue) override;
+
+	int GetPriority() const override {
+		return index_;
+	}
+private:
+	int index_;
+	gainput::InputManager& manager_;
+};
+
 
 class UniInput {
 
@@ -43,7 +56,9 @@ public:
 		AxisThrust,
 		AxisReverse,
 		AxisStrafe,
-		AxisAscend
+		AxisAscend,
+		ButtonBoostUp,
+		ButtonBoostDown
 	};
 
 	struct PointerPos {
@@ -56,6 +71,7 @@ public:
 	gainput::InputManager m_InputManager;
 	std::unique_ptr<gainput::InputMap> m_InputMap;
 	std::unique_ptr<UniMappedButtonListener> m_Listener;
+	std::unique_ptr<UniDeviceButtonListener> m_DeviceListener;
 	std::map<Button, std::vector<std::function<void(bool)>>> m_ButtonCallbacks;
 	std::map<Button, std::vector<std::function<void(float)>>> m_AxisCallbacks;
 	std::vector<std::function<void(float, float)>> m_PointerPosCallbacks;
@@ -84,5 +100,6 @@ public:
 	PointerPos GetPointerXY();
 
 	bool GetButtonState(Button button);
+
 };
 

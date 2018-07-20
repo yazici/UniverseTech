@@ -69,7 +69,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -90,10 +101,34 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\libs\gainput;..\libs\vulkan;..\libs\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\vulkan;..\libs\assimp;..\libs\gainput;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>
+      </Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -101,7 +136,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\fastnoise;..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="data/";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -136,6 +171,30 @@
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>
+      </Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -145,7 +204,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external\fastnoise;..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="data/";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -170,27 +229,33 @@
     <ClInclude Include="..\external\imgui\stb_textedit.h" />
     <ClInclude Include="..\external\imgui\stb_truetype.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="source\Components.h" />
     <ClInclude Include="source\components\Camera.h" />
     <ClInclude Include="source\components\LightComponent.h" />
     <ClInclude Include="source\components\Movement.h" />
-    <ClInclude Include="source\components\PlayerControlSystem.h" />
     <ClInclude Include="source\components\PlayerMovement.h" />
     <ClInclude Include="source\components\Transform.h" />
+    <ClInclude Include="source\components\UniPlanet.h" />
     <ClInclude Include="source\ECS.h" />
     <ClCompile Include="source\components\Movement.cpp" />
-    <ClCompile Include="source\components\PlayerControlSystem.cpp" />
     <ClCompile Include="source\components\PlayerMovement.cpp" />
     <ClCompile Include="source\components\Transform.cpp" />
+    <ClCompile Include="source\components\UniPlanet.cpp" />
+    <ClCompile Include="source\FastNoise.cpp" />
+    <ClCompile Include="source\systems\PlanetRenderSystem.cpp" />
+    <ClCompile Include="source\systems\PlayerControlSystem.cpp" />
+    <ClCompile Include="source\systems\Systems.cpp" />
     <ClCompile Include="source\UniFrustum.cpp" />
+    <ClInclude Include="source\factory.h" />
+    <ClInclude Include="source\FastNoise.h" />
+    <ClInclude Include="source\systems\events.h" />
+    <ClInclude Include="source\systems\PlanetRenderSystem.h" />
+    <ClInclude Include="source\systems\PlayerControlSystem.h" />
+    <ClInclude Include="source\systems\Systems.h" />
     <ClInclude Include="source\UniFrustum.hpp" />
     <ClInclude Include="source\Geometry.hpp" />
-    <ClInclude Include="source\Patch.hpp" />
-    <ClInclude Include="source\Systems.h" />
-    <ClInclude Include="source\Triangulator.hpp" />
-    <ClInclude Include="source\UniBody.h" />
     <ClInclude Include="source\UniEngine.h" />
     <ClInclude Include="source\UniInput.h" />
+    <ClInclude Include="source\UniMaterial.h" />
     <ClInclude Include="source\UniModel.h" />
     <ClInclude Include="source\UniScene.h" />
     <ClInclude Include="source\UniSceneObject.h" />
@@ -218,12 +283,9 @@
     <ClCompile Include="..\external\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="source\Patch.cpp" />
-    <ClCompile Include="source\Systems.cpp" />
-    <ClCompile Include="source\Triangulator.cpp" />
-    <ClCompile Include="source\UniBody.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
     <ClCompile Include="source\UniInput.cpp" />
+    <ClCompile Include="source\UniMaterial.cpp" />
     <ClCompile Include="source\UniModel.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
     <ClCompile Include="source\UniSceneObject.cpp" />
@@ -238,10 +300,32 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\levels\testlevel.json" />
+    <None Include="data\levels\testlevel2.json" />
+    <None Include="data\shaders\compileshaders.py" />
     <None Include="data\shaders\deferredmultisampling\debug.frag" />
     <None Include="data\shaders\deferredmultisampling\debug.vert" />
-    <None Include="data\shaders\deferredmultisampling\deferred.frag" />
-    <None Include="data\shaders\deferredmultisampling\deferred.vert" />
+    <CustomBuild Include="data\shaders\deferredmultisampling\deferred.frag">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslangValidator -V -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glslangValidator -V -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\deferredmultisampling\deferred.vert">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslangValidator -V -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glslangValidator -V -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+    </CustomBuild>
     <None Include="data\shaders\deferredmultisampling\mrt.frag" />
     <None Include="data\shaders\deferredmultisampling\mrt.vert" />
     <None Include="data\shaders\planet.frag" />
@@ -259,6 +343,32 @@
     </None>
     <None Include="data\shaders\scenerendering\scene.frag" />
     <None Include="data\shaders\scenerendering\scene.vert" />
+    <CustomBuild Include="data\shaders\uniplanet.frag">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslangValidator -V -o %(Identity).spv %(Identity)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glslangValidator -V -o %(Identity).spv %(Identity)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling Shader %(Identity)</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling Shader %(Identity)</Message>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\uniplanet.vert">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslangValidator -V -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glslangValidator -V -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="data\textures\terrain-ramp.dds" />
+    <Image Include="data\textures\terrain-ramp.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

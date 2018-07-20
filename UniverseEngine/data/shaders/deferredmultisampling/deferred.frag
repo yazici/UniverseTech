@@ -73,6 +73,18 @@ vec3 calculateLighting(vec3 pos, vec3 normal, vec4 albedo)
 
 		result += diff + spec;	
 	}
+
+	// cheeky hard-coded directional light for testing.
+
+	vec3 N = normalize(normal);
+	vec3 L = normalize(vec3(0, -1, 0));
+	vec3 V = ubo.viewPos.xyz - pos;
+	V = normalize(V);
+	vec3 R = reflect(L, N);
+	vec3 diffuse = max(dot(N, L), 0.0) * albedo.rgb;
+	vec3 specular = pow(max(dot(R, V), 0.0), 16.0) * vec3(0.75);
+	result += diffuse + specular;
+
 	return result;
 }
 
@@ -81,7 +93,7 @@ void main()
 	ivec2 attDim = textureSize(samplerPosition);
 	ivec2 UV = ivec2(inUV * attDim);
 	
-	#define ambient 0.15
+	#define ambient 0.35
 
 	// Ambient part
 	vec4 alb = resolve(samplerAlbedo, UV);

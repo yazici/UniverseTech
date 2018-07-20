@@ -1,12 +1,14 @@
 #include "UniScene.h"
 #include <memory>
-#include "Systems.h"
-#include "UniBody.h"
+#include "systems/Systems.h"
 #include "UniEngine.h"
+#include "components/UniPlanet.h"
 #include "components/PlayerMovement.h"
 #include "components/LightComponent.h"
 #include <nlohmann/json.hpp>
 #include <iosfwd>
+#include "systems/PlanetRenderSystem.h"
+#include "systems/PlayerControlSystem.h"
 
 
 using json = nlohmann::json;
@@ -21,43 +23,16 @@ void UniScene::Initialize(UniEngine* engine) {
 	m_World = ECS::World::createWorld();
 	m_World->registerSystem(new MovementSystem());
 	m_World->registerSystem(new CameraSystem());
+	m_World->registerSystem(new PlanetRenderSystem());
+	m_World->registerSystem(new PlayerControlSystem());
+	
 
-	m_CurrentCamera = Make<UniSceneObject>();
-	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 0.1f, 1000.0f);
+	m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0));
+	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 2.f, 30000.0f);
 
 	m_CurrentCamera->AddComponent<MovementComponent>();
 	m_CurrentCamera->AddComponent<PlayerControlComponent>();
 	//m_CurrentCamera->m_Entity->get<PlayerControlComponent>()->SetTarget(glm::vec3(0, 0, 0));
-}
-
-void UniScene::Load() {
-
-	
-
-	UniEngine& engine = UniEngine::GetInstance();
-
-	/*auto armor = Make<UniModel>("models/armor/armor.dae", "models/armor/color", "models/armor/normal");
-	armor->SetName("armor");
-	armor->GetTransform()->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
-	armor->GetTransform()->SetYaw(180.f);
-	armor->AddComponent<MovementComponent>(glm::dvec3(0, 0, 5), glm::vec3(0, 90, 0));
-	armor->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, 1.0f));
-	armor->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);*/
-
-
-	/*
-	auto vgr = m_CurrentScene->Make<UniModel>("models/voyager/voyager.dae", "models/voyager/voyager", "");
-	vgr->SetCreateInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec2(1.0f, -1.0f));
-	vgr->Load(vertexLayout, vulkanDevice, queue, true);
-	*/
-
-	/*auto floor = Make<UniModel>("models/openbox.dae", "textures/stonefloor02_color", "textures/stonefloor02_normal");
-	floor->SetCreateInfo(glm::vec3(0.0f, -2.3f, 0.0f), glm::vec3(15.0f), glm::vec2(8.0f, 8.0f));
-	floor->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);*/
-
-	//m_BodyTest = Make<UniBody>(7.0);
-	//m_BodyTest->Initialize();
-
 }
 
 void UniScene::Load(std::string filename) {
@@ -81,13 +56,17 @@ void UniScene::Load(std::string filename) {
 			auto modelPath = so.at("mesh");
 			auto texturePath = so.at("texture");
 			auto normalMapPath = so.at("normal");
-			std::cout << "Creating model path: " << modelPath << ", texture: " << texturePath << ", normals: " << normalMapPath << std::endl;
-			auto model = Make<UniModel>(modelPath, texturePath, normalMapPath);
 
+			glm::vec3 mpos;
 			if(so.find("position") != so.end()) {
 				auto pos = so.at("position");
-				model->GetTransform()->SetPosition(glm::vec3(pos[0], pos[1], pos[2]));
+				mpos = glm::vec3(pos[0], pos[1], pos[2]);
 			}
+
+			std::cout << "Creating model path: " << modelPath << ", texture: " << texturePath << ", normals: " << normalMapPath << std::endl;
+			auto model = Make<UniModel>(mpos, modelPath, texturePath, normalMapPath);
+
+			
 			if(so.find("rotation") != so.end()) {
 				auto rot = so.at("rotation");
 				model->GetTransform()->SetPitch(rot[0]);
@@ -127,17 +106,24 @@ void UniScene::Load(std::string filename) {
 			
 			model->SetCreateInfo(createOffset, createScale, createUVScale);
 			model->Load(engine.vertexLayout, engine.vulkanDevice, engine.GetQueue(), true);
+
+			if(so.find("enabled") != so.end()) {
+				model->SetRendered(so.at("enabled"));
+			}
 		}
 
 		if(soType == "light") {
 			std::cout << "Loading light: " << so.at("name") << std::endl;
 
-			auto light = Make<UniSceneObject>();
-
+			glm::vec3 lpos;
 			if(so.find("position") != so.end()) {
 				auto pos = so.at("position");
-				light->GetTransform()->SetPosition(glm::vec3(pos[0], pos[1], pos[2]));
+				lpos = glm::vec3(pos[0], pos[1], pos[2]);
 			}
+
+			auto light = Make<UniSceneObject>(lpos);
+
+			
 			if(so.find("rotation") != so.end()) {
 				auto rot = so.at("rotation");
 				light->GetTransform()->SetPitch(rot[0]);
@@ -183,10 +169,15 @@ void UniScene::Load(std::string filename) {
 
 	auto camObj = GetCameraObject();
 	camObj->GetTransform()->SetPosition(glm::vec3(playerPos.at(0), playerPos.at(1), playerPos.at(2)));
+	camObj->GetTransform()->SetYaw(playerRot.at(1));
 	GetCameraComponent()->CalculateView(camObj->GetTransform());
 
 
-	//std::cout << data.dump() << std::endl;
+	auto planetTest = Make<UniSceneObject>(glm::vec3(0, 0, 0));
+	planetTest->AddComponent<UniPlanet>(5000.0, 0.05, 0.05, 100);
+
+
+	std::cout << "Scene fully loaded." << std::endl;
 }
 
 void UniScene::Tick(float deltaTime) {
@@ -203,7 +194,7 @@ std::vector<std::shared_ptr<UniModel>> UniScene::GetModels() {
 	std::vector<std::shared_ptr<UniModel>> models;
 	for_each(m_SceneObjects.begin(), m_SceneObjects.end(), [&models](std::shared_ptr<UniSceneObject> so) {
 		auto model = std::dynamic_pointer_cast<UniModel>(so);
-		if(model) {
+		if(model && model->IsRendered()) {
 			models.push_back(model);
 		}
 	});

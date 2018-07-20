@@ -17,15 +17,19 @@
 #include "vks/VulkanTexture.hpp"
 #include "vks/VulkanModel.hpp"
 
-#include "UniModel.h"
-#include "UniScene.h"
-#include "UniInput.h"
 
 #define VERTEX_BUFFER_BIND_ID 0
 #define INSTANCE_BUFFER_BIND_ID 1
 #define ENABLE_VALIDATION false
 // todo: check if hardware supports sample number (or select max. supported)
 #define SAMPLE_COUNT VK_SAMPLE_COUNT_8_BIT
+
+
+// forward declarations
+class UniMaterial;
+class UniModel;
+class UniScene;
+class UniInput;
 
 class UniEngine final : public VulkanExampleBase {
 
@@ -95,21 +99,15 @@ public:
 		VkPipeline offscreen;				// (Offscreen) scene rendering (fill G-Buffers)
 		VkPipeline offscreenSampleShading;	// (Offscreen) scene rendering (fill G-Buffers) with sample shading rate enabled
 		VkPipeline debug;					// G-Buffers debug display
-		VkPipeline offScreenPlanet;
-		VkPipeline offScreenPlanetWireframe;
 	} pipelines;
 
 	struct {
 		VkPipelineLayout deferred;
 		VkPipelineLayout offscreen;
-		VkPipelineLayout planetOffscreen;
 	} pipelineLayouts;
 
 	VkDescriptorSet m_descriptorSet;
-	VkDescriptorSet m_descriptorSetDynamic;
 	VkDescriptorSetLayout m_descriptorSetLayout;
-	VkDescriptorSetLayout m_descriptorSetLayoutPlanet;
-	VkDescriptorSetLayout m_descriptorSetLayoutDynamic;
 
 	// Framebuffer for offscreen rendering
 	struct FrameBufferAttachment {
@@ -151,10 +149,13 @@ public:
 	void OnUpdateUIOverlay(vks::UIOverlay *overlay) override;
 	void ToggleWireframe();
 
+	void RegisterMaterial(std::shared_ptr<UniMaterial> mat);
+	void UnRegisterMaterial(std::shared_ptr<UniMaterial> mat);
+
 	VkDevice GetDevice() { return device; }
 	VkQueue GetQueue() { return queue; }
+	VkPipelineCache GetPipelineCache() { return pipelineCache; }
 	void Shutdown();
-	void buildPlanetCommandBuffer();
 	bool m_debugDisplay = false;
 	bool m_useMSAA = true;
 	bool m_useSampleShading = true;
@@ -164,7 +165,6 @@ public:
 	VkSampler m_colorSampler;
 
 	VkCommandBuffer m_offScreenCmdBuffer = VK_NULL_HANDLE;
-	VkCommandBuffer m_planetCmdBuffer = VK_NULL_HANDLE;
 
 	// Semaphore used to synchronize between offscreen and final scene rendering
 	VkSemaphore m_offscreenSemaphore = VK_NULL_HANDLE;
@@ -173,6 +173,9 @@ private:
 	std::shared_ptr<UniScene> m_CurrentScene;
 	std::shared_ptr<UniInput> m_InputManager;
 
+	std::vector<std::shared_ptr<UniMaterial>> m_MaterialInstances;
+	bool m_CamPaused = false;
+	float m_PlanetZOffset = 0;
 public:
 	std::shared_ptr<UniScene> GetScene() { return m_CurrentScene; }
 	void windowResized() override;
