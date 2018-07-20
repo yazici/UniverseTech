@@ -26,6 +26,8 @@ public:
 		});
 
 	UniMaterial() = default;
+	virtual void Destroy();
+	virtual ~UniMaterial() { Destroy(); }
 	
 	VkPipeline m_Pipeline;
 	VkPipelineLayout m_PipelineLayout;
@@ -33,19 +35,23 @@ public:
 	VkDescriptorSetLayout m_DescriptorSetLayout;
 	VkDescriptorPool m_DescriptorPool;
 
-	std::map<std::string, vks::Buffer> m_Buffers;
+	std::map<std::string, std::shared_ptr<vks::Buffer>> m_Buffers;
+	std::shared_ptr<vks::Buffer> GetBuffer(std::string buffer);
+	void SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer);
 
 
 	std::string m_VertexShader = "";
 	std::string m_FragmentShader = "";
 
 	virtual void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo) = 0;
-	virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) const = 0;
+	virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) = 0;
 };
 
 
 class PlanetMaterial : public UniMaterial {
 public:
+
+	virtual ~PlanetMaterial() { Destroy(); }
 
 	// Vertex layout for the models
 	vks::VertexLayout m_VertexLayout = vks::VertexLayout({
@@ -53,23 +59,16 @@ public:
 	});
 
 	void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo) override;
-	void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) const override;
+	void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) override;
 
-	std::shared_ptr<vks::Buffer> GetUniformBuffer() { return m_UniformBuffer; }
-	std::shared_ptr<vks::Buffer> GetVertexBuffer() { return m_VertexBuffer; }
-	std::shared_ptr<vks::Buffer> GetIndexBuffer() { return m_IndexBuffer; }
 	std::vector<std::shared_ptr<vks::Texture>> m_Textures;
-
-	void SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer);
-	
 
 	void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
 
+	void Destroy() override;
+
 private:
 	std::string m_Name;
-	std::shared_ptr<vks::Buffer> m_UniformBuffer;
-	std::shared_ptr<vks::Buffer> m_VertexBuffer;
-	std::shared_ptr<vks::Buffer> m_IndexBuffer;
 	uint32_t m_IndexCount;
 
 public:

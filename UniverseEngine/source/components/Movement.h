@@ -36,14 +36,14 @@ struct MovementComponent {
 	float m_Drag = 0.05f; 
 
 	/** @brief degrees per second */
-	float m_MaxPitch = 0.0f; 
+	float m_MaxPitch = 90.0f; 
 	/** @brief degrees per second */
 	float m_MaxYaw = 90.0f; 
 	/** @brief degrees per second */
 	float m_MaxRoll = 90.0f; 
 
 	/** @brief degrees per second per second */
-	float m_MaxPitchAccel = 720.f;
+	float m_MaxPitchAccel = 360.f;
 	/** @brief degrees per second per second */
 	float m_MaxYawAccel = 360.f;
 	/** @brief degrees per second per second */

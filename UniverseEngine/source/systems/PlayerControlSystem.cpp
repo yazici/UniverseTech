@@ -34,8 +34,14 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 			m_BoostFactor *= 2.0f;
 		break;
 	case UniInput::ButtonBoostDown:
-		if(m_BoostFactor > 1.f/1024.f)
+		if(m_BoostFactor > 1.f / 1024.f)
 			m_BoostFactor /= 2.0f;
+		break;
+	case UniInput::ButtonRollLeft:
+		m_InputRotation.z = event.value;
+		break;
+	case UniInput::ButtonRollRight:
+		m_InputRotation.z = -event.value;
 		break;
 
 	}

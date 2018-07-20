@@ -28,7 +28,7 @@ public:
 	UniPlanet(double radius = 1.0, double maxHeightOffset = 0.1, double maxDepthOffset = 0.1, uint16_t gridSize = 10);
 
 	void Destroy();
-	virtual ~UniPlanet() = default;
+	virtual ~UniPlanet() { Destroy(); }
 
 	void Initialize();
 	void CreateGrid();

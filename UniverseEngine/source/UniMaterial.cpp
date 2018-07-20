@@ -123,7 +123,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 			m_DescriptorSet,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			0,
-			&GetUniformBuffer()->descriptor),
+			&GetBuffer("uniform")->descriptor),
 		// Binding 1: Continent texture map
 		vks::initializers::writeDescriptorSet(
 			m_DescriptorSet,
@@ -151,25 +151,52 @@ PlanetMaterial::PlanetMaterial(std::string name) {
 }
 
 
-void PlanetMaterial::SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer) {
-	if(name == "uniform") {
-		m_UniformBuffer = buffer;
-	} else if(name == "index") {
-		m_IndexBuffer = buffer;
-	} else if(name == "vertex") {
-		m_VertexBuffer = buffer;
-	} else {
-		throw std::runtime_error("Could not assign buffer type");
-	}
+void UniMaterial::SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer) {
+	m_Buffers[name] = buffer;
 }
 
-void PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer) const {
+void PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer) {
 	vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
 
 	VkDeviceSize offsets[1] = { 0 };
+
 	vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSet, 0, nullptr);
-	vkCmdBindVertexBuffers(cmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &m_VertexBuffer->buffer, offsets);
-	vkCmdBindIndexBuffer(cmdBuffer, m_IndexBuffer->buffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindVertexBuffers(cmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &GetBuffer("vertex")->buffer, offsets);
+	vkCmdBindIndexBuffer(cmdBuffer, GetBuffer("index")->buffer, 0, VK_INDEX_TYPE_UINT32);
 	vkCmdDrawIndexed(cmdBuffer, m_IndexCount, 1, 0, 0, 0);
+
+}
+
+void PlanetMaterial::Destroy() {
+	std::cout << "Destroying planet material..." << std::endl;
+
+	for(auto& tex : m_Textures) {
+		tex->destroy();
+	}
+
+}
+
+std::shared_ptr<vks::Buffer> UniMaterial::GetBuffer(std::string buffer) {
+	if(m_Buffers.find(buffer) == m_Buffers.end()) {
+		m_Buffers[buffer] = std::make_shared<vks::Buffer>();
+	}
+	return m_Buffers.at(buffer);
+}
+
+void UniMaterial::Destroy() {
+
+	std::cout << "Destroying base material..." << std::endl;
+
+	auto& engine = UniEngine::GetInstance();
+	auto device = engine.GetDevice();
+	
+	vkDestroyPipeline(device, m_Pipeline, nullptr);
+	vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
+	vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
+	
+	for(const auto& kv : m_Buffers) {
+		vkDestroyBuffer(device, kv.second->buffer, nullptr);
+		vkFreeMemory(device, kv.second->memory, nullptr);
+	}
 
 }
