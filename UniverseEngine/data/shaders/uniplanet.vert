@@ -23,8 +23,7 @@ layout (binding = 1) uniform sampler2D continentTexture;
 //outputs
 layout(location = 0) out vec3 Normal;
 layout(location = 1) out vec3 outWorldPos;
-layout(location = 2) out vec3 outColor;
-layout(location = 3) out vec3 localPos;
+
 
 out gl_PerVertex
 {
@@ -64,8 +63,6 @@ void main()
 	outWorldPos = (ubo.model * vec4(TriPos, 1.f)).xyz;
 	outWorldPos.y = -outWorldPos.y;
 
-	outColor = vec3(1.0);
-	localPos = TriPos;
 
 	gl_Position = ubo.proj * ubo.view * vec4(outWorldPos, 1);
 	
