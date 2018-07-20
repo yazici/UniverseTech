@@ -11,6 +11,22 @@ const bool materialsAdded = [] {
 
 void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo) {
 
+	VkGraphicsPipelineCreateInfo localPCI = pipelineCreateInfo;
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
+		vks::initializers::pipelineInputAssemblyStateCreateInfo(
+			VK_PRIMITIVE_TOPOLOGY_PATCH_LIST,
+			0,
+			VK_FALSE);
+
+	VkPipelineTessellationStateCreateInfo tessellationState =
+		vks::initializers::pipelineTessellationStateCreateInfo(3);
+
+	localPCI.pInputAssemblyState = &inputAssemblyState;
+	localPCI.pTessellationState = &tessellationState;
+
+	assert(localPCI.pTessellationState != pipelineCreateInfo.pTessellationState);
+
 	auto& engine = UniEngine::GetInstance();
 	auto device = engine.GetDevice();
 
@@ -47,7 +63,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 		// Binding 0 : Vertex shader uniform buffer
 		vks::initializers::descriptorSetLayoutBinding(
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
 			0),
 		// Binding 1 : This is the continent noise texture
 		vks::initializers::descriptorSetLayoutBinding(
@@ -78,18 +94,20 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &m_PipelineLayout));
 
 
-	std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+	std::array<VkPipelineShaderStageCreateInfo, 4> shaderStages;
 
-	pipelineCreateInfo.pVertexInputState = &m_VertexDescription.inputState;
+	localPCI.pVertexInputState = &m_VertexDescription.inputState;
 
-	shaderStages[0] = engine.loadShader(engine.getAssetPath() + m_VertexShader, VK_SHADER_STAGE_VERTEX_BIT);
-	shaderStages[1] = engine.loadShader(engine.getAssetPath() + m_FragmentShader, VK_SHADER_STAGE_FRAGMENT_BIT);
+	shaderStages[0] = engine.loadShader(GetShader("vert"), VK_SHADER_STAGE_VERTEX_BIT);
+	shaderStages[1] = engine.loadShader(GetShader("frag"), VK_SHADER_STAGE_FRAGMENT_BIT);
+	shaderStages[2] = engine.loadShader(GetShader("tesc"), VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
+	shaderStages[3] = engine.loadShader(GetShader("tese"), VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
 	
-	pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
-	pipelineCreateInfo.pStages = shaderStages.data();
-	pipelineCreateInfo.layout = m_PipelineLayout;
+	localPCI.stageCount = static_cast<uint32_t>(shaderStages.size());
+	localPCI.pStages = shaderStages.data();
+	localPCI.layout = m_PipelineLayout;
 
-	VK_CHECK_RESULT(vkCreateGraphicsPipelines(engine.GetDevice(), engine.GetPipelineCache() , 1, &pipelineCreateInfo, nullptr, &m_Pipeline));
+	VK_CHECK_RESULT(vkCreateGraphicsPipelines(engine.GetDevice(), engine.GetPipelineCache() , 1, &localPCI, nullptr, &m_Pipeline));
 
 
 	std::vector<VkDescriptorPoolSize> poolSizes =
@@ -144,9 +162,13 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 }
 
 PlanetMaterial::PlanetMaterial(std::string name) {
+	auto& engine = UniEngine::GetInstance();
+	auto aPath = engine.getAssetPath();
 	m_Name = name;
-	m_VertexShader = "shaders/uniplanet.vert.spv";
-	m_FragmentShader = "shaders/uniplanet.frag.spv";
+	SetShader("vert", aPath + "shaders/uniplanet.vert.spv");
+	SetShader("frag", aPath + "shaders/uniplanet.frag.spv");
+	SetShader("tesc", aPath + "shaders/pntriangles.tesc.spv");
+	SetShader("tese", aPath + "shaders/pntriangles.tese.spv");
 
 }
 

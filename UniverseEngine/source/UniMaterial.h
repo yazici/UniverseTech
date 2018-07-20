@@ -40,8 +40,9 @@ public:
 	void SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer);
 
 
-	std::string m_VertexShader = "";
-	std::string m_FragmentShader = "";
+	std::map<std::string, std::string> m_Shaders;
+	std::string GetShader(std::string name) { return m_Shaders.at(name); }
+	void SetShader(std::string name, std::string shader) { m_Shaders[name] = shader; }
 
 	virtual void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo) = 0;
 	virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) = 0;

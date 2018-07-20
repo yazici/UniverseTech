@@ -1,7 +1,7 @@
 #version 450
 	
-layout(location = 0) in vec3 Normal;
-layout(location = 1) in vec3 WorldPos;
+layout(location = 0) in vec3 inNormal;
+layout(location = 1) in vec3 inPosition;
 	
 layout(binding = 0) uniform UBO {
 	//Transformation
@@ -13,6 +13,8 @@ layout(binding = 0) uniform UBO {
 	float radius;
 	float maxHeight;
 	float maxDepth;
+	float tessLevel;
+	float tessAlpha;
 } ubo;
 
 layout (binding = 1) uniform sampler2D continentTexture;
@@ -48,22 +50,22 @@ vec3 CalculateNormal(vec2 uv, sampler2D tex, vec3 offset)
 	float hD = height(uv - offset.yz, tex);
 	float hU = height(uv + offset.yz, tex);
 	// deduce terrain normal
-	vec3 N = normalize(vec3(hL - hR, hD - hU, 2.0));
-	vec3 norm = normalize(Normal);
+	vec3 N = normalize(vec3(hR - hL, hU - hD, 2.0));
+	vec3 norm = normalize(inNormal);
 	vec3 up = vec3(0, 1, 0)-norm;
 	vec3 tang = normalize(cross(norm, up)); //might need flipping
 	vec3 biTan = normalize(cross(norm, tang)); //same
 	mat3 localAxis = mat3(tang, biTan, norm);
 	vec3 result = normalize(localAxis * normalize(N));
 
-	result *= vec3(1, -1, 1);
+	//result *= vec3(1, -1, 1);
 	return result;
 }
 
 
 void main()
 {
-	vec3 n = normalize(vec3(WorldPos));
+	vec3 n = normalize(vec3(inPosition));
 
 	float u = atan(n.z, n.x) / (2* 3.1415926) + 0.5;
 	float v = n.y * 0.5 + 0.5;
@@ -73,6 +75,7 @@ void main()
 	outAlbedo = vec4(lookupTerrainColor(height(uv, continentTexture)), 1.0);
 	//outAlbedo = vec4(vec3(0.6), 1.0);
 	outNormal = vec4(CalculateNormal(uv, continentTexture, texOffset), 1.0);
-	outPosition = vec4(WorldPos, 1.0);
+	outPosition = vec4(inPosition, 1.0);
+
 
 } 

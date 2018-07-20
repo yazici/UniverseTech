@@ -18,11 +18,18 @@ struct PnPatch
  float n101;
 };
 
-// tessellation levels
-layout (binding = 0) uniform UBO 
-{
+layout(binding = 0) uniform UBO {
+	//Transformation
+	mat4 model;
+	mat4 view;
+	mat4 proj;
+	vec4 camPos;
+	float radius;
+	float maxHeight;
+	float maxDepth;
 	float tessLevel;
-} ubo; 
+	float tessAlpha;	
+} ubo;
 
 layout(vertices=3) out;
 

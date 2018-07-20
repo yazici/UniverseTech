@@ -158,7 +158,13 @@ void UniEngine::getEnabledFeatures() {
 		if (deviceFeatures.wideLines) {
 			enabledFeatures.wideLines = VK_TRUE;
 		}
-	};
+	}
+
+	if(deviceFeatures.tessellationShader) {
+		enabledFeatures.tessellationShader = VK_TRUE;
+	} else {
+		vks::tools::exitFatal("Selected GPU does not support tessellation shaders!", VK_ERROR_FEATURE_NOT_PRESENT);
+	}
 }
 
 size_t UniEngine::getDynamicAlignment() {

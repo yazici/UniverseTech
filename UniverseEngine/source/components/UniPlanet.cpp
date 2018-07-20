@@ -215,6 +215,9 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	m_UniformBufferData.maxHeight = (float)m_MaxHeightOffset;
 	m_UniformBufferData.minDepth = (float)m_MaxDepthOffset;
 
+	m_UniformBufferData.tessAlpha = 1.0f;
+	m_UniformBufferData.tessLevel = 3.0f;
+
 	vks::Buffer uniformStaging;
 	auto device = UniEngine::GetInstance().vulkanDevice;
 
