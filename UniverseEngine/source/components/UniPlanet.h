@@ -15,6 +15,8 @@ public:
 		float radius;
 		float maxHeight;
 		float minDepth;
+		float tessLevel;
+		float tessAlpha;
 	} m_UniformBufferData;
 
 	vks::Buffer m_VertexBuffer;

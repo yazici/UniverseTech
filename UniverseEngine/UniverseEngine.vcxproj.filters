@@ -288,12 +288,6 @@
     <None Include="data\shaders\deferredmultisampling\debug.vert">
       <Filter>shaders\deferredmulti</Filter>
     </None>
-    <None Include="data\shaders\deferredmultisampling\deferred.frag">
-      <Filter>shaders\deferredmulti</Filter>
-    </None>
-    <None Include="data\shaders\deferredmultisampling\deferred.vert">
-      <Filter>shaders\deferredmulti</Filter>
-    </None>
     <None Include="data\shaders\deferredmultisampling\mrt.frag">
       <Filter>shaders\deferredmulti</Filter>
     </None>
@@ -315,12 +309,6 @@
     <None Include="data\levels\testlevel.json">
       <Filter>Content\levels</Filter>
     </None>
-    <None Include="data\shaders\uniplanet.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="data\shaders\uniplanet.vert">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="data\levels\testlevel2.json">
       <Filter>Content\levels</Filter>
     </None>
@@ -335,5 +323,25 @@
     <Image Include="data\textures\terrain-ramp.dds">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="data\shaders\uniplanet.frag">
+      <Filter>shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\uniplanet.vert">
+      <Filter>shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\pntriangles.tesc">
+      <Filter>shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\pntriangles.tese">
+      <Filter>shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\deferredmultisampling\deferred.frag">
+      <Filter>shaders\deferredmulti</Filter>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\deferredmultisampling\deferred.vert">
+      <Filter>shaders\deferredmulti</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

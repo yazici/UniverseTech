@@ -51,7 +51,7 @@ void UniPlanet::Initialize() {
 	MakeContintentTexture();
 	MakeRampTexture();
 	
-	std::cout << "Created planet grid with " << m_GridPoints.size() << " points and " << m_Triangles.size() << " tris." << std::endl;
+	std::cout << "Created planet grid with " << m_GridPoints.size() << " points and " << m_Triangles.size() / 3 << " tris." << std::endl;
 }
 
 void UniPlanet::CreateGrid() {
@@ -127,7 +127,7 @@ void UniPlanet::UpdateMesh() {
 	auto zs = CalculateZOffset();
 	//std::cout << ", planet Z offset: " << zs << std::endl;
 
-	auto rot = glm::lookAt({ 0, 0, 0 }, m_CurrentCameraPos * glm::vec3(1, -1, 1), { 0, 1, 0 });
+	auto rot = glm::lookAt({ 0, 0, 0 }, m_CurrentCameraPos, { 0, 1, 0 });
 
 	auto F = glm::normalize(m_CurrentCameraPos);
 	auto Z = F + glm::vec3(1.f, 0.f, 0.f);
@@ -214,6 +214,9 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	m_UniformBufferData.radius = (float)m_Radius;
 	m_UniformBufferData.maxHeight = (float)m_MaxHeightOffset;
 	m_UniformBufferData.minDepth = (float)m_MaxDepthOffset;
+
+	m_UniformBufferData.tessAlpha = 1.0f;
+	m_UniformBufferData.tessLevel = 3.0f;
 
 	vks::Buffer uniformStaging;
 	auto device = UniEngine::GetInstance().vulkanDevice;

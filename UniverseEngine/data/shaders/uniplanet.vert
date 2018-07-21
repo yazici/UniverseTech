@@ -15,16 +15,16 @@ layout(binding = 0) uniform UBO {
 	float radius;
 	float maxHeight;
 	float maxDepth;
-	
+	float tessLevel;
+	float tessAlpha;	
 } ubo;
 
 layout (binding = 1) uniform sampler2D continentTexture;
 
 //outputs
-layout(location = 0) out vec3 Normal;
-layout(location = 1) out vec3 outWorldPos;
-layout(location = 2) out vec3 outColor;
-layout(location = 3) out vec3 localPos;
+layout(location = 0) out vec3 outNormal;
+layout(location = 1) out vec3 outPos;
+
 
 out gl_PerVertex
 {
@@ -56,18 +56,17 @@ void main()
 
 	TriPos = n * height(uv, continentTexture);
 	
-	Normal = normalize(pos);
+	outNormal = normalize(pos);
 	mat3 mNormal = transpose(inverse(mat3(ubo.model)));
-	Normal = mNormal * Normal;
+	outNormal = mNormal * outNormal;
 	
 
-	outWorldPos = (ubo.model * vec4(TriPos, 1.f)).xyz;
-	outWorldPos.y = -outWorldPos.y;
+//	outPos = (ubo.model * vec4(TriPos, 1.f)).xyz;
+//	outPos.y = -outPos.y;
+	outPos = TriPos;
 
-	outColor = vec3(1.0);
-	localPos = TriPos;
 
-	gl_Position = ubo.proj * ubo.view * vec4(outWorldPos, 1);
+	gl_Position = vec4(outPos, 1);
 	
 }
 

@@ -1,4 +1,8 @@
 #pragma once
+#ifndef _CAMERA_HEADER_
+#define _CAMERA_HEADER_
+
+
 #define GLM_FORCE_RADIANS
 #define GLM_ENABLE_EXPERIMENTAL
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -10,6 +14,7 @@
 #include <iostream>
 #include "Transform.h"
 #include "../ECS.h"
+
 
 struct CameraComponent {
 
@@ -65,7 +70,18 @@ struct CameraComponent {
 	}
 
 	void CalculateProjection() {
-		matrices.projection = glm::perspective(glm::radians(fov), aspect, nearClip, farClip);
+		//matrices.projection = glm::perspective(glm::radians(fov), aspect, nearClip, farClip);
+		
+		auto fov_radians = glm::radians(fov);
+
+		float f = 1.0f / tan(fov_radians / 2.0f);
+		matrices.projection = glm::mat4(
+			f / aspect, 0.0f, 0.0f, 0.0f,
+			0.0f, f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, -1.0f,
+			0.0f, 0.0f, nearClip, 0.0f);
+
+		
 	}
 
 	glm::vec3 GetPosition() {
@@ -75,3 +91,5 @@ struct CameraComponent {
 
 
 };
+
+#endif
