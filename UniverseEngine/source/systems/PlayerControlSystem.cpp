@@ -13,11 +13,11 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 		m_InputDirection.z = event.value;
 		break;
 	case UniInput::AxisStrafe:
-		std::cout << "Strafing: " << event.value << std::endl;
+		//std::cout << "Strafing: " << event.value << std::endl;
 		m_InputDirection.x = event.value;
 		break;
 	case UniInput::AxisAscend:
-		std::cout << "Ascending: " << event.value << std::endl;
+		//std::cout << "Ascending: " << event.value << std::endl;
 		m_InputDirection.y = event.value;
 		break;
 	case UniInput::AxisPitch:
