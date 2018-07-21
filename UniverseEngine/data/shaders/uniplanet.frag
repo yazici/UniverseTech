@@ -74,7 +74,7 @@ void main()
 	
 	outAlbedo = vec4(lookupTerrainColor(height(uv, continentTexture)), 1.0);
 	//outAlbedo = vec4(vec3(0.6), 1.0);
-	outNormal = vec4(CalculateNormal(uv, continentTexture, texOffset), 1.0);
+	outNormal = vec4(CalculateNormal(uv, continentTexture, texOffset), 1.0);	
 	outPosition = vec4(inPosition, 1.0);
 
 

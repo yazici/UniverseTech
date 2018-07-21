@@ -649,7 +649,7 @@ void UniEngine::preparePipelines() {
 		vks::initializers::pipelineDepthStencilStateCreateInfo(
 			VK_TRUE,
 			VK_TRUE,
-			VK_COMPARE_OP_LESS_OR_EQUAL);
+			VK_COMPARE_OP_GREATER_OR_EQUAL);
 
 	VkPipelineViewportStateCreateInfo viewportState =
 		vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
@@ -897,7 +897,7 @@ void UniEngine::buildCommandBuffers() {
 
 	VkClearValue clearValues[2];
 	clearValues[0].color = { { 1.0f, 1.0f, 1.0f, 0.0f } };
-	clearValues[1].depthStencil = { 1.0f, 0 };
+	clearValues[1].depthStencil = { 0.0f, 0 };
 
 	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
 	renderPassBeginInfo.renderPass = renderPass;
@@ -967,7 +967,7 @@ void UniEngine::buildDeferredCommandBuffer() {
 	std::array<VkClearValue, 4> clearValues;
 	clearValues[0].color = clearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
 	clearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	clearValues[3].depthStencil = { 1.0f, 0 };
+	clearValues[3].depthStencil = { 0.0f, 0 };
 
 	VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
 	renderPassBeginInfo.renderPass = offScreenFrameBuf.renderPass;

@@ -34,7 +34,7 @@ void UniScene::Initialize(UniEngine* engine) {
 	
 
 	m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0));
-	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 2.f, 30000.0f);
+	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 0.0001f);
 
 	m_CurrentCamera->AddComponent<MovementComponent>();
 	m_CurrentCamera->AddComponent<PlayerControlComponent>();
@@ -179,7 +179,7 @@ void UniScene::Load(std::string filename) {
 	GetCameraComponent()->CalculateView(camObj->GetTransform());
 
 
-	auto planetTest = Make<UniSceneObject>(glm::vec3(0, 0, 0));
+	auto planetTest = Make<UniSceneObject>(glm::vec3(3000, 0, 0));
 	planetTest->AddComponent<UniPlanet>(5000.0, 0.05, 0.05, 100);
 	planetTest->m_Entity->get<UniPlanet>()->Initialize();
 
