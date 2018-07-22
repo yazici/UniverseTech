@@ -246,9 +246,10 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 
 }
 
+// TODO: Fixme for pn-patch interpolation causing offset problems where shader != cpp
 float UniPlanet::GetAltitude(glm::vec3& point) {
 
-	std::cout << "Input pos: " << point.x << ", " << point.y << ", " << point.z;
+	//std::cout << "Input pos: " << point.x << ", " << point.y << ", " << point.z;
 
 	auto p = glm::normalize(point);
 
@@ -263,13 +264,13 @@ float UniPlanet::GetAltitude(glm::vec3& point) {
 
 	auto n = m_ContinentData[y * 1024 + x];
 
-	std::cout << ". Lookup offset data: " << x << ", " << y << " = " << n;
+	//std::cout << ". Lookup offset data: " << x << ", " << y << " = " << n;
 
 	n = std::clamp(n, 0.5f, 1.f);
 
 	auto height = (float)m_Radius + float(m_Radius) * (float)m_MaxHeightOffset * n;
 
-	std::cout << ", height: " << height << std::endl;
+	//std::cout << ", height: " << height << std::endl;
 
 	auto altitude = glm::length(point) - (float)height;
 
