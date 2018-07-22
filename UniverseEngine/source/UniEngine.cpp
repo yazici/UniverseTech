@@ -1163,7 +1163,7 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 			GetScene()->m_World->emit<PlanetZEvent>({ m_PlanetZOffset });
 		}
 		GetScene()->m_World->each<PlayerControlComponent, MovementComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<PlayerControlComponent> player, ECS::ComponentHandle<MovementComponent> movement) {
-			overlay->text("Boost: %2.f", movement->m_BoostFactor);
+			overlay->text("Boost: %.3f", movement->m_BoostFactor);
 		});
 		
 	}
@@ -1217,6 +1217,25 @@ void UniEngine::updateOverlay() {
 #endif
 
 	ImGui::End();
+
+
+	ImGui::SetNextWindowPos(ImVec2((uint32_t)width - 10 - 120 * 2 * UIOverlay->scale, 10));
+	ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiSetCond_FirstUseEver);
+	ImGui::Begin("Current position:", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 5.0f * UIOverlay->scale));
+#endif
+	ImGui::PushItemWidth(110.0f * UIOverlay->scale);
+	OnUpdateUserUIOverlay(UIOverlay);
+	ImGui::PopItemWidth();
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+	ImGui::PopStyleVar();
+#endif
+
+	ImGui::End();
+
+
 	ImGui::PopStyleVar();
 	ImGui::Render();
 
@@ -1241,5 +1260,20 @@ void UniEngine::UnRegisterMaterial(std::shared_ptr<UniMaterial> mat) {
 			i = 0;
 		}
 		i++;
+	}
+}
+
+void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay *overlay) {
+	for(const auto& so : GetScene()->m_SceneObjects) {
+		if(so->GetComponent<UniPlanet>()) {
+			if(overlay->header(so->GetName().c_str())) {
+			auto camPos = GetScene()->GetCameraObject()->GetTransform()->GetPosition();
+			auto transform = so->GetComponent<TransformComponent>();
+			camPos = transform->TransformWSToObject(camPos);
+			auto altitude = so->GetComponent<UniPlanet>()->GetAltitude(camPos);
+			overlay->text("Alt: %.5f km", altitude);
+			overlay->text("Dist: %.5f km", glm::length(camPos));
+			}
+		}
 	}
 }

@@ -10,6 +10,7 @@
 #include <stb_image.h>
 
 
+
 UniPlanet::UniPlanet(double radius /*= 1.0*/, double maxHeightOffset /*= 0.1*/, double maxDepthOffset /*= 0.1*/, uint16_t gridSize /*= 10*/){
 
 	m_Radius = radius;
@@ -245,6 +246,37 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 
 }
 
+float UniPlanet::GetAltitude(glm::vec3& point) {
+
+	std::cout << "Input pos: " << point.x << ", " << point.y << ", " << point.z;
+
+	auto p = glm::normalize(point);
+
+	float u = glm::atan(p.z, p.x) / (2 * 3.1415926f) + 0.5f;
+	float v = p.y * 0.5f + 0.5f;
+
+	uint32_t x = (uint32_t)round(u * 1024.f);
+	uint32_t y = (uint32_t)round(v * 1024.f);
+
+	x = x % 1024;
+	y = y % 1024;
+
+	auto n = m_ContinentData[y * 1024 + x];
+
+	std::cout << ". Lookup offset data: " << x << ", " << y << " = " << n;
+
+	n = std::clamp(n, 0.5f, 1.f);
+
+	auto height = (float)m_Radius + float(m_Radius) * (float)m_MaxHeightOffset * n;
+
+	std::cout << ", height: " << height << std::endl;
+
+	auto altitude = glm::length(point) - (float)height;
+
+	return altitude;
+
+}
+
 void UniPlanet::SetZOffset(float  value) {
 	m_ZOffset = value;
 }
@@ -312,6 +344,7 @@ void UniPlanet::MakeContintentTexture() {
 			auto nv = (glm::normalize(glm::vec3(x, y, z)) + noiseOffset) * noiseScale;
 
 			float n = noise.GetNoise(nv.x, nv.y, nv.z) / 2.f + 0.5f;
+			m_ContinentData.push_back(n);
 			buffer.emplace_back(n, n, n, 1);
 		}
 	}
@@ -321,6 +354,10 @@ void UniPlanet::MakeContintentTexture() {
 	auto t = make_shared<vks::Texture>(m_ContinentTexture);
 
 	m_Material->m_Textures.push_back(t);
+}
+
+double UniPlanet::GetRadius() {
+	return m_Radius;
 }
 
 void UniPlanet::MakeRampTexture() {

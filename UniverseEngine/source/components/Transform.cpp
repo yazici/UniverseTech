@@ -13,6 +13,10 @@ glm::vec3 TransformComponent::TransformLocalToWS(glm::vec3 localPos) {
 	return glm::vec3(GetModelMat() * glm::vec4(localPos, 1));
 }
 
+glm::vec3 TransformComponent::GetPosition() {
+	return TransformLocalToWS(glm::vec3(0));
+}
+
 glm::vec3 TransformComponent::TransformWSToLocal(glm::vec3 wsPos) {
 	return glm::vec3(glm::inverse(GetModelMat()) * glm::vec4(wsPos, 1.0));
 }

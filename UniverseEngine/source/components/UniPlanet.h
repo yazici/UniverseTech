@@ -42,6 +42,7 @@ public:
 	void UpdateMesh();
 	void UpdateBuffers();
 	void UpdateUniformBuffers(glm::mat4& modelMat);
+	float GetAltitude(glm::vec3& point);
 
 	std::shared_ptr<PlanetMaterial> m_Material;
 
@@ -70,5 +71,9 @@ private:
 	vks::Texture2D m_RampTexture;
 	void MakeRampTexture();
 	void MakeContintentTexture();
+public:
+	double GetRadius();
+private:
+	std::vector<float> m_ContinentData;
 };
 

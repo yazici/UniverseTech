@@ -11,10 +11,11 @@ using json = nlohmann::json;
 
 class UniModel : public UniSceneObject{
 public:
-	UniModel();
+	UniModel() { m_Name = "unnamed model"; }
+	UniModel(std::string n);
 	~UniModel();
 
-	UniModel(const std::string &modelpath, const std::string &texturePath, const std::string &normalMapPath);
+	UniModel(std::string n, const std::string &modelpath, const std::string &texturePath, const std::string &normalMapPath);
 
 	void SetScale(float scale = 1.f);
 	void SetCreateInfo(glm::vec3 center, glm::vec3 scale, glm::vec2 uvScale);

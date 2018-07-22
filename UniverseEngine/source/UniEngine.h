@@ -185,5 +185,5 @@ public:
 	void handleWMMessages(MSG& msg) override;
 
 	void updateOverlay() override;
-
+	void OnUpdateUserUIOverlay(vks::UIOverlay *overlay);
 };

@@ -10,8 +10,8 @@ class UniScene;
 
 class UniSceneObject {
 public:
-	UniSceneObject();
-	virtual ~UniSceneObject();
+	UniSceneObject(std::string name = "unnamed object") { m_Name = name; }
+	virtual ~UniSceneObject() = default;
 
 	std::shared_ptr<UniSceneObject> m_Parent;
 
@@ -27,7 +27,7 @@ public:
 	void AddComponent(_Types&&... _Args);
 
 	template<class T>
-	T GetComponent();
+	ECS::ComponentHandle<T> GetComponent();
 
 	std::string GetName() { return m_Name; }
 	void SetName(std::string name) { m_Name = name; }
@@ -47,7 +47,7 @@ void UniSceneObject::AddComponent(_Types&&... _Args) {
 }
 
 template<class T>
-T UniSceneObject::GetComponent() {
+ECS::ComponentHandle<T> UniSceneObject::GetComponent() {
 	return m_Entity->get<T>();
 }
 

@@ -52,6 +52,8 @@ struct TransformComponent {
 
 	glm::vec3 TransformLocalToWS(glm::vec3 localPos);
 
+	glm::vec3 GetPosition();
+
 	glm::vec3 TransformWSToLocal(glm::vec3 wsPos);
 
 	glm::vec3 TransformWSToObject(glm::vec3 wsPos);

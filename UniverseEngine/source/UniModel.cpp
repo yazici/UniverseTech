@@ -7,17 +7,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-UniModel::UniModel() {
-
-	UniSceneObject();
-
+UniModel::UniModel(std::string n) {
+	m_Name = n;
 	m_ModelCreateInfo.center = glm::vec3(0, 0, 0);
 	m_ModelCreateInfo.scale = glm::vec3(1.f);
 	m_ModelCreateInfo.uvscale = glm::vec2(1.f);
 }
 
-UniModel::UniModel(const std::string &modelpath, const std::string &texturePath, const std::string &normalMapPath) {
-	UniModel();
+UniModel::UniModel(std::string n, const std::string &modelpath, const std::string &texturePath, const std::string &normalMapPath) {
+	m_Name = n;
+	m_ModelCreateInfo.center = glm::vec3(0, 0, 0);
+	m_ModelCreateInfo.scale = glm::vec3(1.f);
+	m_ModelCreateInfo.uvscale = glm::vec2(1.f);
 	m_ModelPath = modelpath;
 	m_TexturePath = texturePath;
 	m_NormalMapPath = normalMapPath;

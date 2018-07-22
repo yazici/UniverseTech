@@ -33,7 +33,7 @@ void UniScene::Initialize(UniEngine* engine) {
 	m_World->registerSystem(new PlayerControlSystem());
 	
 
-	m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0));
+	m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
 	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 0.0001f);
 
 	m_CurrentCamera->AddComponent<MovementComponent>();
@@ -70,7 +70,7 @@ void UniScene::Load(std::string filename) {
 			}
 
 			std::cout << "Creating model path: " << modelPath << ", texture: " << texturePath << ", normals: " << normalMapPath << std::endl;
-			auto model = Make<UniModel>(mpos, modelPath, texturePath, normalMapPath);
+			auto model = Make<UniModel>(mpos, (std::string)so.at("name"), modelPath, texturePath, normalMapPath);
 
 			
 			if(so.find("rotation") != so.end()) {
@@ -127,7 +127,7 @@ void UniScene::Load(std::string filename) {
 				lpos = glm::vec3(pos[0], pos[1], pos[2]);
 			}
 
-			auto light = Make<UniSceneObject>(lpos);
+			auto light = Make<UniSceneObject>(lpos, (std::string)so.at("name"));
 
 			
 			if(so.find("rotation") != so.end()) {
@@ -179,7 +179,7 @@ void UniScene::Load(std::string filename) {
 	GetCameraComponent()->CalculateView(camObj->GetTransform());
 
 
-	auto planetTest = Make<UniSceneObject>(glm::vec3(3000, 0, 0));
+	auto planetTest = Make<UniSceneObject>(glm::vec3(0, 0, 0), "test world");
 	planetTest->AddComponent<UniPlanet>(5000.0, 0.05, 0.05, 100);
 	planetTest->m_Entity->get<UniPlanet>()->Initialize();
 

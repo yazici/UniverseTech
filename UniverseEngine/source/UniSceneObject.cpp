@@ -2,11 +2,6 @@
 #include "UniSceneObject.h"
 
 
-UniSceneObject::UniSceneObject() {
-}
-
-UniSceneObject::~UniSceneObject() {}
-
 
 void UniSceneObject::SetScene(UniScene *scene) {
 	m_Scene = scene;
