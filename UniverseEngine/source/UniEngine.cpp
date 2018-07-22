@@ -1159,9 +1159,6 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 			GetScene()->m_World->emit<CameraPauseEvent>({ m_CamPaused });
 		}
 
-		if(overlay->sliderFloat("Planet Z offset", &m_PlanetZOffset, -1, 50)){
-			GetScene()->m_World->emit<PlanetZEvent>({ m_PlanetZOffset });
-		}
 		GetScene()->m_World->each<PlayerControlComponent, MovementComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<PlayerControlComponent> player, ECS::ComponentHandle<MovementComponent> movement) {
 			overlay->text("Boost: %.3f", movement->m_BoostFactor);
 		});
@@ -1219,7 +1216,7 @@ void UniEngine::updateOverlay() {
 	ImGui::End();
 
 
-	ImGui::SetNextWindowPos(ImVec2((uint32_t)width - 10 - 120 * 2 * UIOverlay->scale, 10));
+	ImGui::SetNextWindowPos(ImVec2((uint32_t)width - 170, 10));
 	ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiSetCond_FirstUseEver);
 	ImGui::Begin("Current position:", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 

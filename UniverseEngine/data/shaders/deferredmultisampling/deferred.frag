@@ -47,12 +47,12 @@ vec3 calculateLighting(vec3 pos, vec3 normal, vec4 albedo)
 	for(int i = 0; i < ubo.numLights; ++i)
 	{
 		// Vector to light
-		vec3 L = ubo.lights[i].position.xyz - pos;
+		vec3 L = (ubo.lights[i].position.xyz * vec3(1, -1, 1)) - pos;
 		// Distance from light to fragment position
 		float dist = length(L);
 
 		// Viewer to fragment
-		vec3 V = ubo.viewPos.xyz - pos;
+		vec3 V = (ubo.viewPos.xyz * vec3(1, -1, 1)) - pos;
 		V = normalize(V);
 		
 		// Light to fragment
