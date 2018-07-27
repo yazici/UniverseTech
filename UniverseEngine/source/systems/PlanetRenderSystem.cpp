@@ -48,10 +48,8 @@ void PlanetRenderSystem::tick(ECS::World* world, float deltaTime) {
 
 		bool shouldUpdateCamera = false;
 
-		if(camDistance != storedDistance || angle > thresholdAngle)
+		if(storedDistance / camDistance > 1.2 || storedDistance / camDistance < (1.0/1.2) || angle > thresholdAngle)
 			shouldUpdateCamera = true;
-
-
 		
 		if(!isCameraPaused && shouldUpdateCamera)
 			planet->SetCameraPosition(camPos);

@@ -326,10 +326,10 @@ float detailHeightFactor(vec3 pos, float base){
 		return 0.0;
 	}
 
-	float multiplier = base - 0.5;
-	multiplier = max(0.0, multiplier);
+	float multiplier = base - 0.4;
+	multiplier = max(0.1, multiplier);
 	
-	multiplier *= 3.0;
+	multiplier *= 6.0;
 
 	//multiplier = 1.0;
 
@@ -414,8 +414,8 @@ vec3 CalculateNormal(vec3 pos, sampler2D tex, float radius, float maxHeight)
 	vec3 tang = normalize(cross(norm, up)); //might need flipping
 	vec3 biTan = normalize(cross(norm, tang)); //same
 
-	vec3 off1 = normalize(norm + tang * 0.001);
-	vec3 off2 = normalize(norm + biTan * 0.001);
+	vec3 off1 = normalize(norm + tang * 0.00001);
+	vec3 off2 = normalize(norm + biTan * 0.00001);
 	
 	float h1 = GetHeight(off1, tex, radius, maxHeight);
 	float h2 = GetHeight(off2, tex, radius, maxHeight);
