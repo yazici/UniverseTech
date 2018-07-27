@@ -3,6 +3,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
+#include "noise.glsl"
+
 // PN patch data
 struct PnPatch
 {
@@ -31,6 +33,8 @@ layout(binding = 0) uniform UBO {
 	float tessAlpha;
 } ubo;
 
+layout (binding = 1) uniform sampler2D continentTexture;
+
 layout(triangles, fractional_odd_spacing, ccw) in;
 
 layout(location = 0) in vec3 inNormal[];
@@ -43,16 +47,6 @@ layout(location = 1) out vec3 outPosition;
 
 #define uvw gl_TessCoord
 
-
-float height(vec2 uv, sampler2D tex){
-	float bump = texture(tex, uv).x;
-	bump = clamp(bump, 0.5, 1.0);
-	float offset = mix(0, ubo.maxHeight, bump);
-
-	//return ubo.radius;
-
-	return (ubo.radius + (ubo.radius * offset));
-}
 
 void main()
 {
@@ -78,10 +72,10 @@ void main()
 
     // normal
     // Barycentric normal
-    //vec3 barNormal = gl_TessCoord[2]*inNormal[0] + gl_TessCoord[0]*inNormal[1] + gl_TessCoord[1]*inNormal[2];
-    //vec3 pnNormal  = inNormal[0]*uvwSquared[2] + inNormal[1]*uvwSquared[0] + inNormal[2]*uvwSquared[1]
-	//                   + n110*uvw[2]*uvw[0] + n011*uvw[0]*uvw[1]+ n101*uvw[2]*uvw[1];
-    //outNormal = ubo.tessAlpha*pnNormal + (1.0-ubo.tessAlpha) * barNormal;
+//    vec3 barNormal = gl_TessCoord[2]*inNormal[0] + gl_TessCoord[0]*inNormal[1] + gl_TessCoord[1]*inNormal[2];
+//    vec3 pnNormal  = inNormal[0]*uvwSquared[2] + inNormal[1]*uvwSquared[0] + inNormal[2]*uvwSquared[1]
+//	                   + n110*uvw[2]*uvw[0] + n011*uvw[0]*uvw[1]+ n101*uvw[2]*uvw[1];
+//    outNormal = ubo.tessAlpha*pnNormal + (1.0-ubo.tessAlpha) * barNormal;
 	
 
     // compute interpolated pos
@@ -107,10 +101,17 @@ void main()
     // final position and normal
     vec3 finalPos = (1.0-ubo.tessAlpha)*barPos + ubo.tessAlpha*pnPos;
 
-	outPosition = finalPos;
-	outNormal = normalize(outPosition);
-	mat3 mNormal = transpose(inverse(mat3(ubo.model)));
-	outNormal = mNormal * outNormal;
+	vec3 norm = normalize(finalPos);
 
-	gl_Position   = ubo.proj * ubo.view * ubo.model * vec4(finalPos,1.0);
+	float height = GetHeight(norm, continentTexture, ubo.radius, ubo.maxHeight);
+
+	finalPos = norm * height;
+	
+	outPosition = finalPos;
+	outNormal = CalculateNormal(finalPos, continentTexture, ubo.radius, ubo.maxHeight);
+//	
+//	mat3 mNormal = transpose(inverse(mat3(ubo.model)));
+//	outNormal = mNormal * outNormal;
+
+	gl_Position = ubo.proj * ubo.view * ubo.model * vec4(finalPos,1.0);
 }

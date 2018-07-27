@@ -1266,7 +1266,7 @@ void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay *overlay) {
 			if(overlay->header(so->GetName().c_str())) {
 			auto camPos = GetScene()->GetCameraObject()->GetTransform()->GetPosition();
 			auto transform = so->GetComponent<TransformComponent>();
-			camPos = transform->TransformWSToObject(camPos);
+			camPos = transform->TransformWSToLocal(camPos);
 			auto altitude = so->GetComponent<UniPlanet>()->GetAltitude(camPos);
 			overlay->text("Alt: %.5f km", altitude);
 			overlay->text("Dist: %.5f km", glm::length(camPos));

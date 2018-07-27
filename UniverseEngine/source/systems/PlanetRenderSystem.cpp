@@ -3,6 +3,10 @@
 #include "../components/Transform.h"
 #include "../UniEngine.h"
 #include "../UniScene.h"
+#define GLM_FORCE_RADIANS
+#define GLM_ENABLE_EXPERIMENTAL
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include "glm/gtx/vector_angle.hpp"
 
 
 PlanetRenderSystem::PlanetRenderSystem() {}
@@ -29,8 +33,27 @@ void PlanetRenderSystem::tick(ECS::World* world, float deltaTime) {
 		auto transform = entity->get<TransformComponent>();
 		
 		auto camPos = transform->TransformWSToLocal(cam->GetPosition());
+		auto camDistance = glm::length(camPos);
+		auto storedPos = planet->CameraPos();
+		auto storedDistance = glm::length(storedPos);
 
-		if(!isCameraPaused)
+		float angle = glm::angle(glm::normalize(camPos), glm::normalize(storedPos));
+
+		glm::vec3 gridLeft = planet->GetMesh()[0];
+		glm::vec3 gridRight = planet->GetMesh()[planet->GridSize() -1];
+
+		float gridAngle = glm::angle(glm::normalize(gridLeft), glm::normalize(gridRight));
+		
+		float thresholdAngle =  gridAngle / 100.f;
+
+		bool shouldUpdateCamera = false;
+
+		if(camDistance != storedDistance || angle > thresholdAngle)
+			shouldUpdateCamera = true;
+
+
+		
+		if(!isCameraPaused && shouldUpdateCamera)
 			planet->SetCameraPosition(camPos);
 
 		auto modelMat = transform->GetModelMat();

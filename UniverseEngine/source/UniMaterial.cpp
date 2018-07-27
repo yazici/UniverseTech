@@ -68,7 +68,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 		// Binding 1 : This is the continent noise texture
 		vks::initializers::descriptorSetLayoutBinding(
 			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
 			1),
 		// Binding 1 : This is the terrain color ramp texture
 		vks::initializers::descriptorSetLayoutBinding(

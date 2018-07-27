@@ -343,5 +343,8 @@
     <CustomBuild Include="data\shaders\deferredmultisampling\deferred.vert">
       <Filter>shaders\deferredmulti</Filter>
     </CustomBuild>
+    <CustomBuild Include="data\shaders\noise.glsl">
+      <Filter>shaders</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

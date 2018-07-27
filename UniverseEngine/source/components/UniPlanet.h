@@ -43,6 +43,9 @@ public:
 	void UpdateBuffers();
 	void UpdateUniformBuffers(glm::mat4& modelMat);
 	float GetAltitude(glm::vec3& point);
+	glm::vec3 CameraPos() { return m_CurrentCameraPos; }
+	std::vector<glm::vec3> GetMesh() { return m_MeshVerts; }
+	uint16_t GridSize() { return m_GridSize; }
 
 	std::shared_ptr<PlanetMaterial> m_Material;
 

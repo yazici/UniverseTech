@@ -217,7 +217,7 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	m_UniformBufferData.minDepth = (float)m_MaxDepthOffset;
 
 	m_UniformBufferData.tessAlpha = 1.0f;
-	m_UniformBufferData.tessLevel = 3.0f;
+	m_UniformBufferData.tessLevel = 6.0f;
 
 	vks::Buffer uniformStaging;
 	auto device = UniEngine::GetInstance().vulkanDevice;
@@ -324,17 +324,20 @@ void UniPlanet::DestroyBuffers() {
 	m_UniformBuffer.destroy();
 }
 
+
+// TODO: height calculation needs to happen in tess or geometry shader
 void UniPlanet::MakeContintentTexture() {
 
 	FastNoise noise;
 	noise.SetNoiseType(FastNoise::SimplexFractal);
+	noise.SetFractalOctaves(3);
 
 	auto& engine = UniEngine::GetInstance();
 
 	std::vector<glm::vec4> buffer;
 
 	glm::vec3 noiseOffset = { 2, 2, 2 };
-	float noiseScale = 100.3587f;
+	float noiseScale = 120.3587f;
 
 	for(float lat = -90.f; lat < 90.f; lat += 180.f / 1024) {
 		for(float lon = 0; lon < 360.f; lon += 360.f / 1024) {
@@ -346,7 +349,7 @@ void UniPlanet::MakeContintentTexture() {
 
 			float n = noise.GetNoise(nv.x, nv.y, nv.z) / 2.f + 0.5f;
 			m_ContinentData.push_back(n);
-			buffer.emplace_back(n, n, n, 1);
+			buffer.emplace_back(n, n, n, 0);
 		}
 	}
 
