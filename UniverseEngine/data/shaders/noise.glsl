@@ -320,26 +320,41 @@ vec3 CalculateOffset(vec3 pos){
 }
 
 
-float detailHeightFactor(vec3 pos){
+float detailHeightFactor(vec3 pos, float base){
+
+	if(base < 0.4){
+		return 0.0;
+	}
+
+	float multiplier = base - 0.5;
+	multiplier = max(0.0, multiplier);
+	
+	multiplier *= 3.0;
+
+	//multiplier = 1.0;
 
 	pos = normalize(pos);
 
 	float factor = 0.0;
 
 	vec3 tpos = pos * 12.3587;
-	//factor += fractalNoise(1, 4, tpos);
+	factor += max(0.0, fractalNoise(0, 4, tpos));
 
-	vec2 w = worley(pos * 0.52, 0.92, false);
-	factor += (w.y - w.x) / 2.0;
+	//vec2 w = worley(pos * 0.52, 0.92, false);
+	//factor += (w.y - w.x) / 2.0;
 
-	w = worley(pos * 5.0, 1.0, false);
-	factor *= 1.0 + (w.x / 8.0);
+	//w = worley(pos * 5.0, 1.0, false);
+	//factor *= 1.0 + (w.x / 8.0);
 
-	tpos += vec3(14, 0, 0);
-	factor += fractalNoise(3, 5, tpos);
+	tpos *= 4.0;
+	factor += max(0.0, fractalNoise(0, 4, tpos));
 
-	tpos /= 1.6;
-	factor *= (1.0 + fractalNoise(8, 2, tpos));
+
+	tpos *= 2.7;
+	factor += max(0.0, fractalNoise(0, 4, tpos));
+
+	//tpos /= 1.6;
+	//factor *= (1.0 + fractalNoise(8, 2, tpos));
 //
 //	pos -= vec3(0, 0, 2.3587);
 //	factor += fractalNoise(10, 4, pos);
@@ -350,13 +365,15 @@ float detailHeightFactor(vec3 pos){
 
 	//if(bump < 0.6)
 	//	bump = 0.5;
+
+	//factor /= 2.0;
 		
-	return factor;
+	return factor * multiplier;
 }
 
 
 // TODO: - THIS NEEDS TO HAPPEN IN THE TESSELLATION OR GEOMETRY SHADER
-float detailHeight(vec3 pos, float radius, float maxHeight){
+float detailHeight(vec3 pos, float radius, float maxHeight, float base){
 
 //	float hRatio = (length(pos) - radius) / (radius * maxHeight);
 //
@@ -366,7 +383,7 @@ float detailHeight(vec3 pos, float radius, float maxHeight){
 //	multiplier = clamp(multiplier, 0.0, 1.0);
 	
 	
-	float factor = detailHeightFactor(pos);
+	float factor = detailHeightFactor(pos, base);
 	//factor *= multiplier;
 
 	//return ubo.radius;
@@ -378,7 +395,7 @@ float GetHeight(vec3 pos, sampler2D tex, float radius, float maxHeight){
 
 	float hF = 0.0;
 	hF += heightFactor(pos, tex);
-	hF += detailHeightFactor(pos);
+	hF += detailHeightFactor(pos, hF);
 
 	//hF = clamp(hF, -1.0, 1.0);
 	

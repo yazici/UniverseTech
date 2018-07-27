@@ -33,7 +33,11 @@ vec3 lookupTerrainColor(float height){
 	float mixValue = (height - ubo.radius) / (ubo.radius * ubo.maxHeight);
 //	mixValue += 1.0;
 //	mixValue /= 2.0;
-	mixValue = clamp(mixValue, 0.0, 1.0);
+	if(mixValue > 0.6){
+		mixValue /= 1.3;
+		mixValue = max(0.6, mixValue);
+	}
+	mixValue = clamp(mixValue, 0.48, 1.0);
 	vec3 color = texture(terrainColorRamp, vec2((mixValue * (512. - 1.) + 0.5) / 512., 0.5)).rgb;
 	return color;
 }
