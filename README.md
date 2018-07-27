@@ -7,9 +7,9 @@ Dependencies are in ./external, tracked as git submodules.
 
 Currently built as a Visual Studio 2017 Win 10 x64 project, with AVX and multithreading support. You will need a graphics card with Vulkan support in the drivers.
 
-![Current Screenshot](screenshots/current.png)
+![Demo scene screenshot](screenshots/current.png)
 
-![Debug screenshot](screenshots/debug.png)
+![Debug overlay screenshot](screenshots/debug.png)
 
 
 Base engine capabilities in current version:
