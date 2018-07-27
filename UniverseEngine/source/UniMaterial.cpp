@@ -4,7 +4,7 @@
 
 
 const bool materialsAdded = [] {
-	MaterialFactory PlanetMaterialInitializer("planet", [](std::string name) { return std::make_unique<PlanetMaterial>(name); });
+	MaterialFactory PlanetMaterialInitializer("planet", [](std::string name, bool hasOcean) { return std::make_unique<PlanetMaterial>(name, hasOcean); });
 	return true;
 }();
 
@@ -102,12 +102,43 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 	shaderStages[1] = engine.loadShader(GetShader("frag"), VK_SHADER_STAGE_FRAGMENT_BIT);
 	shaderStages[2] = engine.loadShader(GetShader("tesc"), VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
 	shaderStages[3] = engine.loadShader(GetShader("tese"), VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-	
+
 	localPCI.stageCount = static_cast<uint32_t>(shaderStages.size());
 	localPCI.pStages = shaderStages.data();
 	localPCI.layout = m_PipelineLayout;
 
-	VK_CHECK_RESULT(vkCreateGraphicsPipelines(engine.GetDevice(), engine.GetPipelineCache() , 1, &localPCI, nullptr, &m_Pipeline));
+	VK_CHECK_RESULT(vkCreateGraphicsPipelines(engine.GetDevice(), engine.GetPipelineCache(), 1, &localPCI, nullptr, &m_Pipeline));
+
+	// OCEAN PIPELINE
+	if(m_RenderOcean) {
+
+		inputAssemblyState =
+			vks::initializers::pipelineInputAssemblyStateCreateInfo(
+				VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+				0,
+				VK_FALSE);
+		localPCI.pInputAssemblyState = &inputAssemblyState;
+		localPCI.pTessellationState = nullptr;
+
+		VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &m_OceanPipelineLayout));
+
+
+		std::array<VkPipelineShaderStageCreateInfo, 2> oceanShaderStages;
+
+		localPCI.pVertexInputState = &m_VertexDescription.inputState;
+
+		oceanShaderStages[0] = engine.loadShader(GetShader("oceanvert"), VK_SHADER_STAGE_VERTEX_BIT);
+		oceanShaderStages[1] = engine.loadShader(GetShader("oceanfrag"), VK_SHADER_STAGE_FRAGMENT_BIT);
+		/*shaderStages[2] = engine.loadShader(GetShader("tesc"), VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
+		shaderStages[3] = engine.loadShader(GetShader("tese"), VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);*/
+
+		localPCI.stageCount = static_cast<uint32_t>(oceanShaderStages.size());
+		localPCI.pStages = oceanShaderStages.data();
+		localPCI.layout = m_OceanPipelineLayout;
+
+		VK_CHECK_RESULT(vkCreateGraphicsPipelines(engine.GetDevice(), engine.GetPipelineCache(), 1, &localPCI, nullptr, &m_OceanPipeline));
+
+	}
 
 
 	std::vector<VkDescriptorPoolSize> poolSizes =
@@ -161,14 +192,20 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 
 }
 
-PlanetMaterial::PlanetMaterial(std::string name) {
+PlanetMaterial::PlanetMaterial(std::string name, bool hasOcean) {
 	auto& engine = UniEngine::GetInstance();
 	auto aPath = engine.getAssetPath();
 	m_Name = name;
+	m_RenderOcean = hasOcean;
 	SetShader("vert", aPath + "shaders/uniplanet.vert.spv");
 	SetShader("frag", aPath + "shaders/uniplanet.frag.spv");
 	SetShader("tesc", aPath + "shaders/pntriangles.tesc.spv");
 	SetShader("tese", aPath + "shaders/pntriangles.tese.spv");
+
+	if(m_RenderOcean) {
+		SetShader("oceanvert", aPath + "shaders/uniocean.vert.spv");
+		SetShader("oceanfrag", aPath + "shaders/uniocean.frag.spv");
+	}
 
 }
 
@@ -182,10 +219,26 @@ void PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer) {
 
 	VkDeviceSize offsets[1] = { 0 };
 
+	// surface 
+
 	vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSet, 0, nullptr);
 	vkCmdBindVertexBuffers(cmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &GetBuffer("vertex")->buffer, offsets);
 	vkCmdBindIndexBuffer(cmdBuffer, GetBuffer("index")->buffer, 0, VK_INDEX_TYPE_UINT32);
 	vkCmdDrawIndexed(cmdBuffer, m_IndexCount, 1, 0, 0, 0);
+
+
+	// ocean
+
+	if(m_RenderOcean) {
+		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_OceanPipeline);
+
+		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_OceanPipelineLayout, 0, 1, &m_DescriptorSet, 0, nullptr);
+		vkCmdBindVertexBuffers(cmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &GetBuffer("oceanvertex")->buffer, offsets);
+		vkCmdBindIndexBuffer(cmdBuffer, GetBuffer("index")->buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(cmdBuffer, m_IndexCount, 1, 0, 0, 0);
+
+	}
+
 
 }
 
@@ -214,6 +267,8 @@ void UniMaterial::Destroy() {
 	
 	vkDestroyPipeline(device, m_Pipeline, nullptr);
 	vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
+	vkDestroyPipeline(device, m_OceanPipeline, nullptr);
+	vkDestroyPipelineLayout(device, m_OceanPipelineLayout, nullptr);
 	vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
 	
 	for(const auto& kv : m_Buffers) {

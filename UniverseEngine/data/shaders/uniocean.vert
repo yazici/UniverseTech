@@ -1,8 +1,6 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
-
-#include "noise.glsl"
 	
 //Patch
 layout (location = 0) in vec3 inPos;
@@ -17,7 +15,7 @@ layout(binding = 0) uniform UBO {
 	float maxHeight;
 	float maxDepth;
 	float tessLevel;
-	float tessAlpha;	
+	float tessAlpha;
 	bool hasOcean;
 } ubo;
 
@@ -38,12 +36,12 @@ void main()
 	//initial position
 
 	vec3 n = normalize(inPos);
-	float height = GetHeight(inPos, continentTexture, ubo.radius, ubo.maxHeight);
+	float height = ubo.radius * 1.001;
 	
 	outNormal = n;
 	outPos = n * height;
 
-	gl_Position = vec4(outPos, 1);
+	gl_Position = ubo.proj * ubo.view * ubo.model * vec4(outPos, 1);
 	
 }
 

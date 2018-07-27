@@ -31,6 +31,8 @@ public:
 	
 	VkPipeline m_Pipeline;
 	VkPipelineLayout m_PipelineLayout;
+	VkPipeline m_OceanPipeline;
+	VkPipelineLayout m_OceanPipelineLayout;
 	VkDescriptorSet m_DescriptorSet;
 	VkDescriptorSetLayout m_DescriptorSetLayout;
 	VkDescriptorPool m_DescriptorPool;
@@ -72,10 +74,11 @@ private:
 	std::string m_Name;
 	uint32_t m_IndexCount;
 
+	bool m_RenderOcean = false;
 public:
 	PlanetMaterial() = default;
-	PlanetMaterial(std::string name);
+	PlanetMaterial(std::string name, bool hasOcean = false);
 
 };
 
-using MaterialFactory = Factory<std::string, std::shared_ptr<UniMaterial>>::Initializer<std::string>;
+using MaterialFactory = Factory<std::string, std::shared_ptr<UniMaterial>>::Initializer<std::string, bool>;

@@ -346,5 +346,11 @@
     <CustomBuild Include="data\shaders\noise.glsl">
       <Filter>shaders</Filter>
     </CustomBuild>
+    <CustomBuild Include="data\shaders\uniocean.frag">
+      <Filter>shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\uniocean.vert">
+      <Filter>shaders</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

@@ -17,9 +17,11 @@ public:
 		float minDepth;
 		float tessLevel;
 		float tessAlpha;
+		bool hasOcean = false;
 	} m_UniformBufferData;
 
 	vks::Buffer m_VertexBuffer;
+	vks::Buffer m_OceanVertexBuffer;
 	vks::Buffer m_IndexBuffer;
 	vks::Buffer m_UniformBuffer;
 	uint32_t m_VertexCount;
@@ -27,7 +29,7 @@ public:
 	VkDescriptorSet m_DescriptorSet;
 
 
-	UniPlanet(double radius = 1.0, double maxHeightOffset = 0.1, double maxDepthOffset = 0.1, uint16_t gridSize = 10);
+	UniPlanet(double radius = 1.0, double maxHeightOffset = 0.1, double maxDepthOffset = 0.1, uint16_t gridSize = 10, bool hasOcean = false);
 
 	void Destroy();
 	virtual ~UniPlanet() { Destroy(); }
@@ -50,6 +52,9 @@ public:
 	std::shared_ptr<PlanetMaterial> m_Material;
 
 	void SetZOffset(float value);
+
+	double GetRadius();
+
 private:
 
 	double m_Radius = 1.0;
@@ -61,6 +66,7 @@ private:
 
 	std::vector<glm::vec3> m_GridPoints;
 	std::vector<glm::vec3> m_MeshVerts;
+	std::vector<glm::vec3> m_OceanVerts;
 	std::vector<uint32_t> m_Triangles;
 
 	glm::vec3 m_CurrentCameraPos = glm::vec3(0, 0, 10);
@@ -74,9 +80,9 @@ private:
 	vks::Texture2D m_RampTexture;
 	void MakeRampTexture();
 	void MakeContintentTexture();
-public:
-	double GetRadius();
-private:
+
 	std::vector<float> m_ContinentData;
+	bool m_HasOcean = false;
+	uint32_t m_OceanVertexCount;
 };
 
