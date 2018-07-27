@@ -782,6 +782,8 @@ bool VulkanExampleBase::initVulkan()
 {
 	VkResult err;
 
+	_putenv("DISABLE_VK_LAYER_VALVE_steam_overlay_1=1");
+
 	// Vulkan instance
 	err = createInstance(settings.validation);
 	if (err) {
