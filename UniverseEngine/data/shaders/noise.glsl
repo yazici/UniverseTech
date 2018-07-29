@@ -1,4 +1,21 @@
 
+const uint SimplexType = 0x00000001u;
+const uint WorleyTypeP1 = 0x00000002u;
+const uint WorleyTypeP2 = 0x00000004u;
+const uint WorleyTypeP1MinusP2 = 0x00000008u;
+
+struct NoiseLayer {
+	uint type;
+	uint octaves;
+	float seed;
+	float scale;
+	float amplitude;
+	float gain;
+	float lacunarity;
+	float range_min;
+	float range_max;
+};
+
 
 vec3 mod289(vec3 x) {
   return x - floor(x * (1.0 / 289.0)) * 289.0;

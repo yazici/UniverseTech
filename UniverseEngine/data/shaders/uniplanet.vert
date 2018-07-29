@@ -4,7 +4,6 @@
 
 #include "noise.glsl"
 	
-//Patch
 layout (location = 0) in vec3 inPos;
 
 layout(binding = 0) uniform UBO {
@@ -22,6 +21,14 @@ layout(binding = 0) uniform UBO {
 } ubo;
 
 layout (binding = 1) uniform sampler2D continentTexture;
+
+layout(binding = 3) buffer NoiseLayers {
+	NoiseLayer layers[];
+};
+
+layout(push_constant) uniform PushConsts {
+	uint noise_layers;
+} pushConsts;
 
 //outputs
 layout(location = 0) out vec3 outNormal;

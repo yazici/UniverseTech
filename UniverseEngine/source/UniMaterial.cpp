@@ -74,7 +74,12 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 		vks::initializers::descriptorSetLayoutBinding(
 			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			2)
+			2),
+		// Binding 3 : Noise layer storage buffer
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+			3),
 
 	};
 
@@ -91,6 +96,15 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 			&m_DescriptorSetLayout,
 			1);
 
+	VkPushConstantRange pCR = vks::initializers::pushConstantRange(
+		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+		sizeof(m_NoiseLayerCount),
+		0
+	);
+
+	pPipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+	pPipelineLayoutCreateInfo.pPushConstantRanges = &pCR;
+	
 	VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo, nullptr, &m_PipelineLayout));
 
 
@@ -145,6 +159,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 	{
 		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
 		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2),
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1),
 	};
 
 	VkDescriptorPoolCreateInfo descriptorPoolInfo =
@@ -179,12 +194,18 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			1,
 			&m_Textures[0]->descriptor),
-		// Binding 1: Terrain color ramp texture
+		// Binding 2: Terrain color ramp texture
 		vks::initializers::writeDescriptorSet(
 			m_DescriptorSet,
 			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			2,
 			&m_Textures[1]->descriptor),
+		// Binding 3: Noise layer storage buffer
+		vks::initializers::writeDescriptorSet(
+			m_DescriptorSet,
+			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			3,
+			&GetBuffer("noiselayers")->descriptor),
 
 	};
 	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
@@ -219,7 +240,15 @@ void PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer) {
 
 	VkDeviceSize offsets[1] = { 0 };
 
-	// surface 
+	// surface
+	vkCmdPushConstants(
+		cmdBuffer,
+		m_PipelineLayout,
+		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+		0,
+		sizeof(m_NoiseLayerCount),
+		&m_NoiseLayerCount
+	);
 
 	vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSet, 0, nullptr);
 	vkCmdBindVertexBuffers(cmdBuffer, VERTEX_BUFFER_BIND_ID, 1, &GetBuffer("vertex")->buffer, offsets);

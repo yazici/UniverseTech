@@ -299,7 +299,11 @@
     <ResourceCompile Include="UniverseEngine.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\levels\testlevel.json" />
+    <Text Include="data\levels\testlevel.json">
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </Text>
     <None Include="data\levels\testlevel2.json" />
     <None Include="data\shaders\compileshaders.py" />
     <None Include="data\shaders\deferredmultisampling\debug.frag" />

@@ -1,4 +1,4 @@
-{
+﻿{
     "level": {
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
@@ -8,16 +8,16 @@
         },
         "sceneObjects": [
             {
-                "type": "model",
-                "name": "Floor",
-                "mesh": "models/openbox.dae",
-                "texture": "textures/stonefloor02_color",
-                "normal": "textures/stonefloor02_normal",
-                "position": [ 0.0, -5000, 0.0 ],
+                "type": "planet",
+                "name": "Céleste's World",
+                "position": [ 0.0, 0.0, 0.0 ],
                 "rotation": [ 0, 0, 0 ],
-                "createScale": [ 20000, 20000, 20000 ],
-                "createUVScale": [ 8, 8 ],
-                "enabled":  false
+                "enabled": true,
+                "radius": 5000.0,
+                "maxHeight": 0.002,
+                "maxDepth": 0.002,
+                "gridSize": 100,
+                "hasOcean": true
             }
         ]
     }

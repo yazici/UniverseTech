@@ -67,7 +67,7 @@ public:
 	std::vector<std::shared_ptr<vks::Texture>> m_Textures;
 
 	void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
-
+	void SetNoiseLayerCount(uint32_t c) { m_NoiseLayerCount = c; }
 	void Destroy() override;
 
 private:
@@ -75,6 +75,8 @@ private:
 	uint32_t m_IndexCount;
 
 	bool m_RenderOcean = false;
+	uint32_t m_NoiseLayerCount = 0;
+
 public:
 	PlanetMaterial() = default;
 	PlanetMaterial(std::string name, bool hasOcean = false);
