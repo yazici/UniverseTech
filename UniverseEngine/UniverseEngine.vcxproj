@@ -299,13 +299,35 @@
     <ResourceCompile Include="UniverseEngine.rc" />
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="data\shaders\uniocean.tesc">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslc -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity).spv</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glslc -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\uniocean.tese">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslc -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glslc -o %(Identity).spv %(Identity)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling shader %(Identity)</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+    </CustomBuild>
     <Text Include="data\levels\testlevel.json">
       <FileType>Document</FileType>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </Text>
     <None Include="data\levels\testlevel2.json" />
-    <CustomBuild Include="data\shaders\adaptivesubdiv.tesc">
+    <CustomBuild Include="data\shaders\uniplanet.tesc">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslc -o %(Identity).spv %(Identity)</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling Shader %(Identity)</Message>
@@ -316,7 +338,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
     </CustomBuild>
-    <CustomBuild Include="data\shaders\adaptivesubdiv.tese">
+    <CustomBuild Include="data\shaders\uniplanet.tese">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslc -o %(Identity).spv %(Identity)</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling shader %(Identity)</Message>

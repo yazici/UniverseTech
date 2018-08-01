@@ -164,6 +164,11 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 
 		shaderStages[0] = engine.loadShader(GetShader("oceanvert"), VK_SHADER_STAGE_VERTEX_BIT);
 		shaderStages[1] = engine.loadShader(GetShader("oceanfrag"), VK_SHADER_STAGE_FRAGMENT_BIT);
+		shaderStages[2] = engine.loadShader(GetShader("oceantesc"), VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
+		shaderStages[3] = engine.loadShader(GetShader("oceantese"), VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
+
+		shaderStages[2].pSpecializationInfo = &specializationInfo;
+		shaderStages[3].pSpecializationInfo = &specializationInfo;
 
 		m_SpecializationData.isDisplaced = false;
 
@@ -239,13 +244,15 @@ PlanetMaterial::PlanetMaterial(std::string name, bool hasOcean) {
 	m_RenderOcean = hasOcean;
 	SetShader("vert", aPath + "shaders/uniplanet.vert.spv");
 	SetShader("frag", aPath + "shaders/uniplanet.frag.spv");
-	SetShader("tesc", aPath + "shaders/adaptivesubdiv.tesc.spv");
-	SetShader("tese", aPath + "shaders/adaptivesubdiv.tese.spv");
+	SetShader("tesc", aPath + "shaders/uniplanet.tesc.spv");
+	SetShader("tese", aPath + "shaders/uniplanet.tese.spv");
 
 	if(m_RenderOcean) {
 		// todo: ocean needs to be tessellated because it's too square!
 		SetShader("oceanvert", aPath + "shaders/uniocean.vert.spv");
 		SetShader("oceanfrag", aPath + "shaders/uniocean.frag.spv");
+		SetShader("oceantesc", aPath + "shaders/uniocean.tesc.spv");
+		SetShader("oceantese", aPath + "shaders/uniocean.tese.spv");
 	}
 
 }

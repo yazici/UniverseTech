@@ -300,6 +300,12 @@
     <None Include="data\shaders\compileshaders.py">
       <Filter>Tools</Filter>
     </None>
+    <None Include="data\shaders\uniocean.tesc">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\uniocean.tese">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\textures\terrain-ramp.png">
@@ -337,10 +343,10 @@
     <CustomBuild Include="data\shaders\uniocean.vert">
       <Filter>shaders</Filter>
     </CustomBuild>
-    <CustomBuild Include="data\shaders\adaptivesubdiv.tesc">
+    <CustomBuild Include="data\shaders\uniplanet.tesc">
       <Filter>shaders</Filter>
     </CustomBuild>
-    <CustomBuild Include="data\shaders\adaptivesubdiv.tese">
+    <CustomBuild Include="data\shaders\uniplanet.tese">
       <Filter>shaders</Filter>
     </CustomBuild>
   </ItemGroup>
