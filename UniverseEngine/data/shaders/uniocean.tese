@@ -3,8 +3,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#include "noise.glsl"
-
 layout(binding = 0) uniform UBO {
 	//Transformation
 	mat4 model;
@@ -22,9 +20,12 @@ layout(binding = 0) uniform UBO {
 	bool hasOcean;
 } ubo;
 
-layout (binding = 1) uniform sampler2D continentTexture;
+layout(push_constant) uniform PushConsts {
+	int noiseLayers;
+	float time;
+} pc;
 
-layout (constant_id = 0) const bool DISPLACEMENT_USED = true;
+layout (binding = 1) uniform sampler2D continentTexture;
 
 layout(quads, equal_spacing, cw) in;
 
@@ -33,6 +34,8 @@ layout(location = 1) in vec3 inPosition[];
  
 layout (location = 0) out vec3 outNormal;
 layout (location = 1) out vec3 outWorldPos;
+
+
 
 
 
@@ -52,25 +55,57 @@ void main()
 
 	// Displace
 
-	vec3 norm = normalize(pos.xyz);
+	vec3 p = pos.xyz;
+	vec3 norm = normalize(p);
+	vec3 v = norm;
+	float r = ubo.radius + ubo.radius * ubo.maxHeight / 2.0;
 
+	float A = 0.1;
+	float s = 5.0;
+	float w = 2.0;
+	float t = pc.time;
 
-	float height = ubo.radius + ubo.radius * ubo.maxHeight / 2.0;
-	pos = vec4(norm * height, 1.0);
+	vec3 psum = vec3(0);
+	vec3 nsum = vec3(0);
+
+	int WAVE_COUNT = 6;
+
+	vec3 waves[6] = { 
+		vec3(0, 1, 0), 
+		vec3(-1, 0, 0),
+		vec3(1, 1, 0), 
+		vec3(19, 0, -1),
+		vec3(0, -1, 12), 
+		vec3(1, 27, 0)
+	};
+
+	for(int i = 0; i < WAVE_COUNT; i++){
+		vec3 o = normalize(waves[i]);
+		float Q = smoothstep(1 - length(dot(v, o)), 0.2, 0.4);
+
+		float l = dot(acos(dot(v, o)), r);
+		vec3 d = cross(v, cross(v-o, v));
 	
-	if(DISPLACEMENT_USED){	
-		height = GetHeight(norm, continentTexture, ubo.radius, ubo.maxHeight);
-		pos = vec4(norm * height, 1.0);
-		outNormal = CalculateNormal(pos.xyz, tF, continentTexture, ubo.radius, ubo.maxHeight);	
+		float wavefract = w * l + s * t;
+
+		vec3 tp = A * sin(wavefract) + Q * A * cos(wavefract) * d;
+		vec3 tn = Q * A * w * sin(wavefract) - d * A * w * cos(wavefract);
+
+		psum += tp;
+		nsum += tn;
 	}
 
-	
+	vec3 ps = v * r + v * psum;
 
+	vec3 ns = v - v * nsum;
+
+	pos = vec4(ps, 1.0);
 	// Perspective projection
 	
 	gl_Position = ubo.proj * ubo.view * ubo.model * pos;
 
 
-	outWorldPos = pos.xyz;
+	outWorldPos = ps;
+	outNormal = ns;
 
 }

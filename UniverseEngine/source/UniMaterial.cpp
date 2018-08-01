@@ -99,7 +99,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 
 	VkPushConstantRange pCR = vks::initializers::pushConstantRange(
 		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-		sizeof(m_NoiseLayerCount),
+		sizeof(m_PushConstants),
 		0
 	);
 
@@ -273,8 +273,8 @@ void PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer) {
 		m_PipelineLayout,
 		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
 		0,
-		sizeof(m_NoiseLayerCount),
-		&m_NoiseLayerCount
+		sizeof(m_PushConstants),
+		&m_PushConstants
 	);
 
 	vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSet, 0, nullptr);

@@ -496,6 +496,10 @@ void UniPlanet::UpdateStorageBuffer() {
 	vkFreeMemory(device->logicalDevice, storageStaging.memory, nullptr);
 }
 
+void UniPlanet::UpdateTime(float t) {
+	m_Material->SetTime(t);
+}
+
 double UniPlanet::GetRadius() {
 	return m_Radius;
 }

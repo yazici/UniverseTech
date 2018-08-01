@@ -73,7 +73,8 @@ public:
 
 	void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
 	void SetOceanIndexCount(uint32_t count = 0) { m_OceanIndexCount = count; }
-	void SetNoiseLayerCount(uint32_t c) { m_NoiseLayerCount = c; }
+	void SetNoiseLayerCount(uint32_t c) { m_PushConstants.noiseLayers = c; }
+	void SetTime(float t) { m_PushConstants.time += t; }
 	void Destroy() override;
 
 private:
@@ -82,7 +83,11 @@ private:
 	uint32_t m_OceanIndexCount;
 
 	bool m_RenderOcean = false;
-	uint32_t m_NoiseLayerCount = 0;
+
+	struct {
+		uint32_t noiseLayers = 0;
+		float time = 0.0f;
+	} m_PushConstants;
 
 public:
 	PlanetMaterial() = default;

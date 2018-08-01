@@ -79,7 +79,7 @@ public:
 	double GetRadius();
 	uint32_t AddNoiseLayer(NoiseType type, uint32_t octaves, float seed=1337.0f);
 	void SetNoiseParam(uint32_t index, std::string param, float value);
-	
+	void UpdateTime(float t);
 
 private:
 
@@ -116,5 +116,6 @@ private:
 	void UpdateStorageBuffer();
 	
 	uint32_t m_OceanIndexCount;
+
 };
 
