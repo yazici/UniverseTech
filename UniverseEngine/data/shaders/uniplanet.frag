@@ -17,9 +17,12 @@ layout(binding = 0) uniform UBO {
 	float maxHeight;
 	float maxDepth;
 	float tessLevel;
-	float tessAlpha;
+	vec4 frustumPlanes[6];
+	vec2 viewportDim;
+	float tessellatedEdgeSize;
 	bool hasOcean;
 } ubo;
+
 
 layout (binding = 1) uniform sampler2D continentTexture;
 layout (binding = 2) uniform sampler2D terrainColorRamp;

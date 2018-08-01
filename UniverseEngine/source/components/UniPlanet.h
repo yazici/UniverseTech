@@ -3,6 +3,7 @@
 #include "../vks/VulkanBuffer.hpp"
 #include "../vks/VulkanTexture.hpp"
 #include "../UniMaterial.h"
+#include "../vks/frustum.hpp"
 
 class UniPlanet{
 public:
@@ -22,7 +23,9 @@ public:
 		float maxHeight;
 		float minDepth;
 		float tessLevel;
-		float tessAlpha;
+		glm::vec4 frustumPlanes[6];
+		glm::vec2 viewportDim;
+		float tessellatedEdgeSize;
 		bool hasOcean = false;
 	} m_UniformBufferData;
 
@@ -41,11 +44,14 @@ public:
 	vks::Buffer m_VertexBuffer;
 	vks::Buffer m_OceanVertexBuffer;
 	vks::Buffer m_IndexBuffer;
+	vks::Buffer m_OceanIndexBuffer;
 	vks::Buffer m_UniformBuffer;
 	vks::Buffer m_StorageBuffer;
 	uint32_t m_VertexCount;
 	uint32_t m_IndexCount;
 	VkDescriptorSet m_DescriptorSet;
+
+	vks::Frustum frustum;
 
 
 	UniPlanet(double radius = 1.0, double maxHeightOffset = 0.1, double maxDepthOffset = 0.1, uint16_t gridSize = 10, bool hasOcean = false);
@@ -55,7 +61,8 @@ public:
 
 	void Initialize();
 	void CreateGrid();
-	void CreateTriangles();
+	void CreateOceanTriangles();
+	void CreateQuads();
 	glm::vec3 RotatePointToCamera(glm::vec3 point);
 	double CalculateZOffset();
 	void SetCameraPosition(glm::vec3& cam);
@@ -86,7 +93,8 @@ private:
 	std::vector<glm::vec3> m_GridPoints;
 	std::vector<glm::vec3> m_MeshVerts;
 	std::vector<glm::vec3> m_OceanVerts;
-	std::vector<uint32_t> m_Triangles;
+	std::vector<uint32_t> m_Indices;
+	std::vector<uint32_t> m_OceanIndices;
 
 	std::vector<NoiseLayerData> m_NoiseLayers;
 
@@ -106,5 +114,7 @@ private:
 	bool m_HasOcean = false;
 	uint32_t m_OceanVertexCount;
 	void UpdateStorageBuffer();
+	
+	uint32_t m_OceanIndexCount;
 };
 

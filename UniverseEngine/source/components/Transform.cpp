@@ -50,7 +50,7 @@ void TransformComponent::SetPitch(float p) {
 }
 
 void TransformComponent::SetYaw(float y) {
-	glm::vec3 euler = glm::vec3(0, y, 0);
+	glm::vec3 euler = glm::vec3(0.0, y, 0.0);
 	Rotate(euler);
 }
 

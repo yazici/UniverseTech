@@ -294,21 +294,6 @@
     <None Include="data\shaders\deferredmultisampling\mrt.vert">
       <Filter>shaders\deferredmulti</Filter>
     </None>
-    <None Include="data\shaders\planet.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="data\shaders\planet.vert">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="data\shaders\planet.frag.spv">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="data\shaders\planet.vert.spv">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="data\levels\testlevel.json">
-      <Filter>Content\levels</Filter>
-    </None>
     <None Include="data\levels\testlevel2.json">
       <Filter>Content\levels</Filter>
     </None>
@@ -352,5 +337,16 @@
     <CustomBuild Include="data\shaders\uniocean.vert">
       <Filter>shaders</Filter>
     </CustomBuild>
+    <CustomBuild Include="data\shaders\adaptivesubdiv.tesc">
+      <Filter>shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\adaptivesubdiv.tese">
+      <Filter>shaders</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data\levels\testlevel.json">
+      <Filter>Content\levels</Filter>
+    </Text>
   </ItemGroup>
 </Project>

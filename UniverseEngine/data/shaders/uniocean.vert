@@ -2,7 +2,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 	
-//Patch
 layout (location = 0) in vec3 inPos;
 
 layout(binding = 0) uniform UBO {
@@ -10,14 +9,18 @@ layout(binding = 0) uniform UBO {
 	mat4 model;
 	mat4 view;
 	mat4 proj;
+	//Morph calculation
 	vec4 camPos;
 	float radius;
 	float maxHeight;
 	float maxDepth;
 	float tessLevel;
-	float tessAlpha;
+	vec4 frustumPlanes[6];
+	vec2 viewportDim;
+	float tessellatedEdgeSize;
 	bool hasOcean;
 } ubo;
+
 
 layout (binding = 1) uniform sampler2D continentTexture;
 
@@ -36,12 +39,12 @@ void main()
 	//initial position
 
 	vec3 n = normalize(inPos);
-	float height = ubo.radius * 1.001;
+	float height = ubo.radius + ubo.radius * ubo.maxHeight / 2.0;
 	
 	outNormal = n;
 	outPos = n * height;
 
-	gl_Position = ubo.proj * ubo.view * ubo.model * vec4(outPos, 1);
+	gl_Position = vec4(outPos, 1);
 	
 }
 

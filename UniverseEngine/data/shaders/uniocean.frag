@@ -17,9 +17,12 @@ layout(binding = 0) uniform UBO {
 	float maxHeight;
 	float maxDepth;
 	float tessLevel;
-	float tessAlpha;
+	vec4 frustumPlanes[6];
+	vec2 viewportDim;
+	float tessellatedEdgeSize;
 	bool hasOcean;
 } ubo;
+
 
 		
 layout (location = 0) out vec4 outPosition;
@@ -32,7 +35,7 @@ void main()
 
 	outAlbedo = vec4(0.2, 0.3, 0.9, 0.8);
 	//outAlbedo = vec4(vec3(0.6), 1.0);
-	outNormal = vec4(inNormal, 1.0);	
+	outNormal = vec4(normalize(inPosition), 1.0);	
 	outPosition = ubo.model * vec4(inPosition, 1.0);
 
 }
