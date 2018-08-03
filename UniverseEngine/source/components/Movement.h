@@ -9,7 +9,7 @@
 
 struct MovementComponent {
 	MovementComponent() : m_dVelocity(glm::dvec3(0.0)), m_Rotation(glm::vec3(0.f)) {}
-	MovementComponent(glm::dvec3 vel, glm::vec3 rot = glm::vec3(0)) : m_dVelocity(vel), m_Rotation(rot) {}
+	MovementComponent(glm::dvec3 vel, glm::vec3 rot = glm::vec3(0.0)) : m_dVelocity(vel), m_Rotation(rot) {}
 
 	/** @brief units per second */
 	glm::dvec3 m_dVelocity; 

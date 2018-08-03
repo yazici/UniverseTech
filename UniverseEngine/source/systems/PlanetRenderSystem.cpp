@@ -54,7 +54,7 @@ void PlanetRenderSystem::tick(ECS::World* world, float deltaTime) {
 		if(camDistance < planet->GetRadius() + planet->GetRadius() * 0.01)
 			shouldUpdateCamera = true;
 		
-		if(!isCameraPaused && shouldUpdateCamera)
+		if(!isCameraPaused)// && shouldUpdateCamera)
 			planet->SetCameraPosition(camPos);
 
 		auto modelMat = transform->GetModelMat();
@@ -62,5 +62,6 @@ void PlanetRenderSystem::tick(ECS::World* world, float deltaTime) {
 		planet->UpdateMesh();
 		planet->UpdateBuffers();
 		planet->UpdateUniformBuffers(modelMat);
+		planet->UpdateTime(deltaTime);
 	});
 }

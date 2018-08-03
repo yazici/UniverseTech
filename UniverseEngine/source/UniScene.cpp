@@ -34,7 +34,7 @@ void UniScene::Initialize(UniEngine* engine) {
 	
 
 	m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
-	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 60.f, 0.0001f);
+	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 50.f, 0.0001f, 100000.f);
 
 	m_CurrentCamera->AddComponent<MovementComponent>();
 	m_CurrentCamera->AddComponent<PlayerControlComponent>();
@@ -167,6 +167,42 @@ void UniScene::Load(std::string filename) {
 			}
 
 		}
+		if(soType == "planet") {
+			std::cout << "Loading planet: " << so.at("name") << std::endl;
+
+			glm::vec3 ppos;
+			if(so.find("position") != so.end()) {
+				auto pos = so.at("position");
+				ppos = glm::vec3(pos[0], pos[1], pos[2]);
+			}
+
+			auto radius = so.at("radius");
+			auto maxHeight = so.at("maxHeight");
+			auto maxDepth = so.at("maxDepth");
+			auto gridSize = 100;
+			if(so.find("gridSize") != so.end()) {
+				gridSize = so.at("gridSize");
+			}
+			auto hasOcean = false;
+			if(so.find("hasOcean") != so.end()) {
+				hasOcean = so.at("hasOcean");
+			}
+
+			std::string name = so.at("name");
+
+			auto planet = Make<UniSceneObject>(ppos, name);
+			planet->AddComponent<UniPlanet>(radius, maxHeight, maxDepth, gridSize, hasOcean);
+
+			if(so.find("rotation") != so.end()) {
+				auto rot = so.at("rotation");
+				planet->GetTransform()->SetPitch(rot[0]);
+				planet->GetTransform()->SetYaw(rot[1]);
+				planet->GetTransform()->SetRoll(rot[2]);
+			}
+			planet->GetComponent<UniPlanet>()->AddNoiseLayer(UniPlanet::SIMPLEX, 1);
+			planet->GetComponent<UniPlanet>()->Initialize();
+
+		}
 	}
 
 	auto playerStart = level.at("playerStart");
@@ -177,11 +213,6 @@ void UniScene::Load(std::string filename) {
 	camObj->GetTransform()->SetPosition(glm::vec3(playerPos.at(0), playerPos.at(1), playerPos.at(2)));
 	camObj->GetTransform()->SetYaw(playerRot.at(1));
 	GetCameraComponent()->CalculateView(camObj->GetTransform());
-
-
-	auto planetTest = Make<UniSceneObject>(glm::vec3(0, 0, 0), "test world");
-	planetTest->AddComponent<UniPlanet>(5000.0, 0.002, 0.002, 100, true);
-	planetTest->m_Entity->get<UniPlanet>()->Initialize();
 
 	std::cout << "Scene fully loaded." << std::endl;
 }

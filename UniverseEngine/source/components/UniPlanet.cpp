@@ -42,9 +42,11 @@ void UniPlanet::Initialize() {
 	engine.RegisterMaterial(m_Material);
 	
 	CreateGrid();
-	CreateTriangles();
+	CreateQuads();
+	CreateOceanTriangles();
 	UpdateMesh();
 	CreateBuffers();
+	UpdateStorageBuffer();
 	UpdateBuffers();
 
 	auto modelMat = glm::mat4(1.0);
@@ -53,7 +55,7 @@ void UniPlanet::Initialize() {
 	MakeContintentTexture();
 	MakeRampTexture();
 	
-	std::cout << "Created planet grid with " << m_GridPoints.size() << " points and " << m_Triangles.size() / 3 << " tris." << std::endl;
+	std::cout << "Created planet grid with " << m_GridPoints.size() << " points and " << m_Indices.size() / 4 << " quads." << std::endl;
 }
 
 void UniPlanet::CreateGrid() {
@@ -71,22 +73,37 @@ void UniPlanet::CreateGrid() {
 	assert(m_GridPoints.size() == (m_GridSize + 1) * (m_GridSize + 1));
 }
 
-void UniPlanet::CreateTriangles() {
-	m_Triangles.clear();
+void UniPlanet::CreateOceanTriangles() {
+	m_OceanIndices.clear();
 	for(int y = 0; y < m_GridSize; y++) {
 		for(int x = 0; x < m_GridSize; x++) {
-			m_Triangles.push_back(y * (m_GridSize + 1) + x);
-			m_Triangles.push_back((y + 1) * (m_GridSize + 1) + x);
-			m_Triangles.push_back(y * (m_GridSize + 1) + x + 1);
+			m_OceanIndices.push_back(y * (m_GridSize + 1) + x);
+			m_OceanIndices.push_back((y + 1) * (m_GridSize + 1) + x);
+			m_OceanIndices.push_back(y * (m_GridSize + 1) + x + 1);
 
-			m_Triangles.push_back(y * (m_GridSize + 1) + x + 1);
-			m_Triangles.push_back((y + 1) * (m_GridSize + 1) + x);
-			m_Triangles.push_back((y + 1) * (m_GridSize + 1) + x + 1);
+			m_OceanIndices.push_back(y * (m_GridSize + 1) + x + 1);
+			m_OceanIndices.push_back((y + 1) * (m_GridSize + 1) + x);
+			m_OceanIndices.push_back((y + 1) * (m_GridSize + 1) + x + 1);
 
 		}
 	}
 
-	assert(m_Triangles.size() == m_GridSize * m_GridSize * 6);
+	assert(m_OceanIndices.size() == m_GridSize * m_GridSize * 6);
+}
+
+void UniPlanet::CreateQuads() {
+	m_Indices.clear();
+	for(int y = 0; y < m_GridSize; y++) {
+		for(int x = 0; x < m_GridSize; x++) {
+			m_Indices.push_back(y * (m_GridSize + 1) + x);
+			m_Indices.push_back((y + 1) * (m_GridSize + 1) + x);
+			m_Indices.push_back((y + 1) * (m_GridSize + 1) + x + 1);
+			m_Indices.push_back(y * (m_GridSize + 1) + x + 1);
+			
+		}
+	}
+
+	assert(m_Indices.size() == m_GridSize * m_GridSize * 4);
 }
 
 glm::vec3 UniPlanet::RotatePointToCamera(glm::vec3 point)
@@ -157,16 +174,18 @@ void UniPlanet::UpdateMesh() {
 
 
 void UniPlanet::UpdateBuffers() {
-	m_IndexCount = static_cast<uint32_t>(m_Triangles.size());
+	m_IndexCount = static_cast<uint32_t>(m_Indices.size());
 	m_VertexCount = static_cast<uint32_t>(m_MeshVerts.size());
 	m_OceanVertexCount = static_cast<uint32_t>(m_OceanVerts.size());
+	m_OceanIndexCount = static_cast<uint32_t>(m_OceanIndices.size());
 
 	m_Material->SetIndexCount(m_IndexCount);
+	m_Material->SetOceanIndexCount(m_OceanIndexCount);
 
 	uint32_t vertexBufferSize = static_cast<uint32_t>(m_MeshVerts.size() * sizeof(glm::vec3));
-	uint32_t indexBufferSize = static_cast<uint32_t>(m_Triangles.size() * sizeof(uint32_t));
+	uint32_t indexBufferSize = static_cast<uint32_t>(m_Indices.size() * sizeof(uint32_t));
 
-	vks::Buffer vertexStaging, indexStaging, oceanVertexStaging;
+	vks::Buffer vertexStaging, indexStaging, oceanVertexStaging, oceanIndexStaging;
 
 	auto device = UniEngine::GetInstance().vulkanDevice;
 
@@ -184,7 +203,7 @@ void UniPlanet::UpdateBuffers() {
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		&indexStaging,
 		indexBufferSize,
-		m_Triangles.data()));
+		m_Indices.data()));
 
 	// Copy from staging buffers
 	VkCommandBuffer copyCmd = device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -209,6 +228,19 @@ void UniPlanet::UpdateBuffers() {
 
 		copyRegion.size = m_OceanVertexBuffer.size;
 		vkCmdCopyBuffer(copyCmd, oceanVertexStaging.buffer, m_OceanVertexBuffer.buffer, 1, &copyRegion);
+
+		uint32_t oceanIndexBufferSize = static_cast<uint32_t>(m_OceanIndices.size() * sizeof(uint32_t));
+		// Index buffer
+		VK_CHECK_RESULT(device->createBuffer(
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			&oceanIndexStaging,
+			oceanIndexBufferSize,
+			m_OceanIndices.data()));
+
+		copyRegion.size = m_OceanIndexBuffer.size;
+		vkCmdCopyBuffer(copyCmd, oceanIndexStaging.buffer, m_OceanIndexBuffer.buffer, 1, &copyRegion);
+
 	}
 
 	device->flushCommandBuffer(copyCmd, UniEngine::GetInstance().GetQueue());
@@ -221,6 +253,8 @@ void UniPlanet::UpdateBuffers() {
 	if(m_HasOcean) {
 		vkDestroyBuffer(device->logicalDevice, oceanVertexStaging.buffer, nullptr);
 		vkFreeMemory(device->logicalDevice, oceanVertexStaging.memory, nullptr);
+		vkDestroyBuffer(device->logicalDevice, oceanIndexStaging.buffer, nullptr);
+		vkFreeMemory(device->logicalDevice, oceanIndexStaging.memory, nullptr);
 	}
 
 }
@@ -242,9 +276,19 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	m_UniformBufferData.maxHeight = (float)m_MaxHeightOffset;
 	m_UniformBufferData.minDepth = (float)m_MaxDepthOffset;
 
-	m_UniformBufferData.tessAlpha = 1.0f;
-	m_UniformBufferData.tessLevel = 8.0f;
+	frustum.update(m_UniformBufferData.projMat * m_UniformBufferData.viewMat * m_UniformBufferData.modelMat);
+	memcpy(m_UniformBufferData.frustumPlanes, frustum.planes.data(), sizeof(glm::vec4) * 6);
+	
+	
+	auto camDist = glm::length(camPos) - (float)m_Radius;
+	
+	m_UniformBufferData.tessLevel = 0.75f;
 
+	m_UniformBufferData.viewportDim = glm::vec2((float)engine.width, (float)engine.height);
+	m_UniformBufferData.tessellatedEdgeSize = 4.f;
+
+	m_UniformBufferData.hasOcean = m_HasOcean;
+	
 	vks::Buffer uniformStaging;
 	auto device = UniEngine::GetInstance().vulkanDevice;
 
@@ -312,7 +356,10 @@ void UniPlanet::CreateBuffers() {
 
 	uint32_t vertexBufferSize = static_cast<uint32_t>(m_MeshVerts.size() * sizeof(glm::vec3));
 	uint32_t oceanVertexBufferSize = static_cast<uint32_t>(m_OceanVerts.size() * sizeof(glm::vec3));
-	uint32_t indexBufferSize = static_cast<uint32_t>(m_Triangles.size() * sizeof(uint32_t));
+	uint32_t indexBufferSize = static_cast<uint32_t>(m_Indices.size() * sizeof(uint32_t));
+	uint32_t oceanIndexBufferSize = static_cast<uint32_t>(m_OceanIndices.size() * sizeof(uint32_t));
+	uint32_t ubSize = static_cast<uint32_t>(sizeof(UniPlanet::UniformBufferData));
+	uint32_t storageBufferSize = static_cast<uint32_t>(m_NoiseLayers.size() * sizeof(NoiseLayerData));
 
 	auto device = UniEngine::GetInstance().vulkanDevice;
 
@@ -334,6 +381,13 @@ void UniPlanet::CreateBuffers() {
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			&m_OceanVertexBuffer,
 			oceanVertexBufferSize));
+
+		// Index buffer
+		VK_CHECK_RESULT(device->createBuffer(
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			&m_OceanIndexBuffer,
+			oceanIndexBufferSize));
 	}
 
 	// Index buffer
@@ -343,21 +397,27 @@ void UniPlanet::CreateBuffers() {
 		&m_IndexBuffer,
 		indexBufferSize));
 
-	uint32_t ubSize = static_cast<uint32_t>(sizeof(UniPlanet::UniformBufferData));
-
+	// uniform buffer
 	VK_CHECK_RESULT(device->createBuffer(
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		&m_UniformBuffer, ubSize));
 
+	// storage buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		&m_StorageBuffer, storageBufferSize));
+
 
 	m_Material->SetBuffer("uniform", std::make_shared<vks::Buffer>(m_UniformBuffer));
+	m_Material->SetBuffer("noiselayers", std::make_shared<vks::Buffer>(m_StorageBuffer));
 	m_Material->SetBuffer("vertex", std::make_shared<vks::Buffer>(m_VertexBuffer));
 	m_Material->SetBuffer("index", std::make_shared<vks::Buffer>(m_IndexBuffer));
+	m_Material->SetBuffer("oceanindex", std::make_shared<vks::Buffer>(m_OceanIndexBuffer));
 	if(m_HasOcean) {
 		m_Material->SetBuffer("oceanvertex", std::make_shared<vks::Buffer>(m_OceanVertexBuffer));
 	}
-
 }
 
 void UniPlanet::DestroyBuffers() {
@@ -365,12 +425,12 @@ void UniPlanet::DestroyBuffers() {
 	m_VertexBuffer.destroy();
 	if(m_HasOcean) {
 		m_OceanVertexBuffer.destroy();
+		m_OceanIndexBuffer.destroy();
 	}
 	m_UniformBuffer.destroy();
 }
 
 
-// TODO: height calculation needs to happen in tess or geometry shader
 void UniPlanet::MakeContintentTexture() {
 
 	FastNoise noise;
@@ -405,8 +465,52 @@ void UniPlanet::MakeContintentTexture() {
 	m_Material->m_Textures.push_back(t);
 }
 
+void UniPlanet::UpdateStorageBuffer() {
+	auto& engine = UniEngine::GetInstance();
+	
+	vks::Buffer storageStaging;
+	auto device = engine.vulkanDevice;
+
+	m_Material->SetNoiseLayerCount(static_cast<uint32_t>(m_NoiseLayers.size()));
+
+	// Vertex buffer
+	VK_CHECK_RESULT(device->createBuffer(
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&storageStaging,
+		static_cast<uint32_t>(m_NoiseLayers.size() * sizeof(NoiseLayerData)),
+		m_NoiseLayers.data()));
+
+	// Copy from staging buffers
+	VkCommandBuffer copyCmd = device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+	VkBufferCopy copyRegion{};
+
+	copyRegion.size = static_cast<uint32_t>(m_NoiseLayers.size() * sizeof(NoiseLayerData));
+	vkCmdCopyBuffer(copyCmd, storageStaging.buffer, m_StorageBuffer.buffer, 1, &copyRegion);
+
+	device->flushCommandBuffer(copyCmd, engine.GetQueue());
+
+	// Destroy staging resources
+	vkDestroyBuffer(device->logicalDevice, storageStaging.buffer, nullptr);
+	vkFreeMemory(device->logicalDevice, storageStaging.memory, nullptr);
+}
+
+void UniPlanet::UpdateTime(float t) {
+	m_Material->SetTime(t);
+}
+
 double UniPlanet::GetRadius() {
 	return m_Radius;
+}
+
+uint32_t UniPlanet::AddNoiseLayer(NoiseType type, uint32_t octaves, float seed/*=1337.0f*/) {
+	auto nl = NoiseLayerData();
+	nl.type = static_cast<uint32_t>(type);
+	nl.octaves = octaves;
+	nl.seed = seed;
+	m_NoiseLayers.push_back(nl);
+	return static_cast<uint32_t>(m_NoiseLayers.size() - 1);
 }
 
 void UniPlanet::MakeRampTexture() {

@@ -41,8 +41,8 @@ struct CameraComponent {
 
 	CameraType cameraType = CAMERA_FIXED;
 
-	CameraComponent(ECS::ComponentHandle<TransformComponent> transform, float ratio=1.77778f, float verticalFOV=60.f, float nClip=0.1f, float fClip=1000.f) {
-		target = { 0, 0, 1 };
+	CameraComponent(ECS::ComponentHandle<TransformComponent> transform, float ratio=1.77778f, float verticalFOV=50.f, float nClip=0.1f, float fClip=1000.f) {
+		target = glm::vec3(0.0, 0.0, 1.0);
 		aspect = aspect;
 		fov = verticalFOV;
 		nearClip = nClip;
@@ -60,8 +60,8 @@ struct CameraComponent {
 		auto mat = transform->GetModelMat();
 		
 		m_Position = mat[3];
-		auto forward = transform->TransformLocalToWS(glm::vec3(0, 0, 1));
-		auto up = glm::mat3(mat) * glm::vec3(0, 1, 0);
+		auto forward = transform->TransformLocalToWS(glm::vec3(0.0, 0.0, 1.0));
+		auto up = glm::mat3(mat) * glm::vec3(0.0, 1.0, 0.0);
 
 		if(cameraType == CameraType::CAMERA_FIXED) {
 			target = forward;
@@ -71,6 +71,8 @@ struct CameraComponent {
 
 	void CalculateProjection() {
 		//matrices.projection = glm::perspective(glm::radians(fov), aspect, nearClip, farClip);
+
+
 		
 		auto fov_radians = glm::radians(fov);
 

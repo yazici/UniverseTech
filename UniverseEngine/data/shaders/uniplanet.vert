@@ -4,7 +4,6 @@
 
 #include "noise.glsl"
 	
-//Patch
 layout (location = 0) in vec3 inPos;
 
 layout(binding = 0) uniform UBO {
@@ -12,16 +11,28 @@ layout(binding = 0) uniform UBO {
 	mat4 model;
 	mat4 view;
 	mat4 proj;
+	//Morph calculation
 	vec4 camPos;
 	float radius;
 	float maxHeight;
 	float maxDepth;
 	float tessLevel;
-	float tessAlpha;	
+	vec4 frustumPlanes[6];
+	vec2 viewportDim;
+	float tessellatedEdgeSize;
 	bool hasOcean;
 } ubo;
 
+
 layout (binding = 1) uniform sampler2D continentTexture;
+
+layout(binding = 3) buffer NoiseLayers {
+	NoiseLayer layers[];
+};
+
+layout(push_constant) uniform PushConsts {
+	uint noise_layers;
+} pushConsts;
 
 //outputs
 layout(location = 0) out vec3 outNormal;

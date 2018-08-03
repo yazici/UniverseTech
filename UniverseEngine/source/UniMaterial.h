@@ -53,6 +53,11 @@ public:
 
 class PlanetMaterial : public UniMaterial {
 public:
+	struct SpecializationData {
+		// Sets the displacement used in the tessellation shader
+		bool isDisplaced = true;
+	} m_SpecializationData;
+
 
 	virtual ~PlanetMaterial() { Destroy(); }
 
@@ -67,14 +72,23 @@ public:
 	std::vector<std::shared_ptr<vks::Texture>> m_Textures;
 
 	void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
-
+	void SetOceanIndexCount(uint32_t count = 0) { m_OceanIndexCount = count; }
+	void SetNoiseLayerCount(uint32_t c) { m_PushConstants.noiseLayers = c; }
+	void SetTime(float t) { m_PushConstants.time += t; }
 	void Destroy() override;
 
 private:
 	std::string m_Name;
 	uint32_t m_IndexCount;
+	uint32_t m_OceanIndexCount;
 
 	bool m_RenderOcean = false;
+
+	struct {
+		uint32_t noiseLayers = 0;
+		float time = 0.0f;
+	} m_PushConstants;
+
 public:
 	PlanetMaterial() = default;
 	PlanetMaterial(std::string name, bool hasOcean = false);

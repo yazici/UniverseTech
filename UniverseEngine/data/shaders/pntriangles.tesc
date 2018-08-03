@@ -28,8 +28,13 @@ layout(binding = 0) uniform UBO {
 	float maxHeight;
 	float maxDepth;
 	float tessLevel;
-	float tessAlpha;	
+	float tessAlpha;
+	vec2 viewportDim;
+	float tessellatedEdgeSize;
+	bool hasOcean;
 } ubo;
+
+
 
 layout(vertices=3) out;
 
@@ -52,6 +57,34 @@ float vij(int i, int j)
 					- gl_in[i].gl_Position.xyz;
 	vec3 Ni_plus_Nj  = inNormal[i]+inNormal[j];
 	return 2.0*dot(Pj_minus_Pi, Ni_plus_Nj)/dot(Pj_minus_Pi, Pj_minus_Pi);
+}
+
+float screenSpaceTessFactor(vec4 p0, vec4 p1)
+{
+	// Calculate edge mid point
+	vec4 midPoint = 0.5 * (p0 + p1);
+	// Sphere radius as distance between the control points
+	float radius = distance(p0, p1) / 2.0;
+
+	// View space
+	vec4 v0 = ubo.model * ubo.view * midPoint;
+
+	// Project into clip space
+	vec4 clip0 = (ubo.proj * (v0 - vec4(radius, vec3(0.0))));
+	vec4 clip1 = (ubo.proj * (v0 + vec4(radius, vec3(0.0))));
+
+	// Get normalized device coordinates
+	clip0 /= clip0.w;
+	clip1 /= clip1.w;
+
+	// Convert to viewport coordinates
+	clip0.xy *= ubo.viewportDim;
+	clip1.xy *= ubo.viewportDim;
+	
+	// Return the tessellation factor based on the screen size 
+	// given by the distance of the two edge control points in screen space
+	// and a reference (min.) tessellation size for the edge set by the application
+	return clamp(distance(clip0, clip1) / ubo.tessellatedEdgeSize * ubo.tessLevel, 1.0, 64.0);
 }
 
 void main()
@@ -90,6 +123,18 @@ void main()
 	outPatch[gl_InvocationID].n101 = N2+N0-vij(2,0)*(P0-P2);
 
 	// set tess levels
-	gl_TessLevelOuter[gl_InvocationID] = ubo.tessLevel;
-	gl_TessLevelInner[0] = ubo.tessLevel;
+	if (ubo.tessLevel > 0.0)
+	{
+		float tessLevel = max(screenSpaceTessFactor(gl_in[2].gl_Position, gl_in[0].gl_Position), max(screenSpaceTessFactor(gl_in[0].gl_Position, gl_in[1].gl_Position), screenSpaceTessFactor(gl_in[1].gl_Position, gl_in[2].gl_Position)));
+	
+		gl_TessLevelOuter[gl_InvocationID] = tessLevel;
+		gl_TessLevelInner[0] = ubo.tessLevel;
+	}
+	else
+	{
+		// Tessellation factor can be set to zero by example
+		// to demonstrate a simple passthrough
+		gl_TessLevelInner[0] = 1.0;
+		gl_TessLevelOuter[gl_InvocationID] = 1.0;
+	}
 }

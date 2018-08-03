@@ -1,4 +1,21 @@
 
+const uint SimplexType = 0x00000001u;
+const uint WorleyTypeP1 = 0x00000002u;
+const uint WorleyTypeP2 = 0x00000004u;
+const uint WorleyTypeP1MinusP2 = 0x00000008u;
+
+struct NoiseLayer {
+	uint type;
+	uint octaves;
+	float seed;
+	float scale;
+	float amplitude;
+	float gain;
+	float lacunarity;
+	float range_min;
+	float range_max;
+};
+
 
 vec3 mod289(vec3 x) {
   return x - floor(x * (1.0 / 289.0)) * 289.0;
@@ -322,10 +339,10 @@ vec3 CalculateOffset(vec3 pos){
 
 float detailHeightFactor(vec3 pos, float base){
 
-	if(base < 0.4){
-		return 0.0;
-	}
-
+//	if(base < 0.4){
+//		return 0.0;
+//	}
+//
 	float multiplier = base - 0.4;
 	multiplier = max(0.1, multiplier);
 	
@@ -405,7 +422,7 @@ float GetHeight(vec3 pos, sampler2D tex, float radius, float maxHeight){
 
 
 
-vec3 CalculateNormal(vec3 pos, sampler2D tex, float radius, float maxHeight)
+vec3 CalculateNormal(vec3 pos, float offMult, sampler2D tex, float radius, float maxHeight)
 {
 
 	vec3 norm = normalize(pos);
@@ -414,8 +431,8 @@ vec3 CalculateNormal(vec3 pos, sampler2D tex, float radius, float maxHeight)
 	vec3 tang = normalize(cross(norm, up)); //might need flipping
 	vec3 biTan = normalize(cross(norm, tang)); //same
 
-	vec3 off1 = normalize(norm + tang * 0.00001);
-	vec3 off2 = normalize(norm + biTan * 0.00001);
+	vec3 off1 = normalize(pos + tang * offMult);
+	vec3 off2 = normalize(pos + biTan * offMult);
 	
 	float h1 = GetHeight(off1, tex, radius, maxHeight);
 	float h2 = GetHeight(off2, tex, radius, maxHeight);

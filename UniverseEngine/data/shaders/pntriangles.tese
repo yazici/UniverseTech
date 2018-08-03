@@ -31,6 +31,9 @@ layout(binding = 0) uniform UBO {
 	float maxDepth;
 	float tessLevel;
 	float tessAlpha;
+	vec2 viewportDim;
+	float tessellatedEdgeSize;
+	bool hasOcean;
 } ubo;
 
 layout (binding = 1) uniform sampler2D continentTexture;
