@@ -33,7 +33,7 @@ layout (location = 2) out vec4 outAlbedo;
 void main()
 {
 
-	outAlbedo = vec4(0.12, 0.13, 0.7, 0.4);
+	outAlbedo = vec4(0.12, 0.13, 0.7, 0.9);
 	//outAlbedo = vec4(vec3(0.6), 1.0);
 	//outNormal = vec4(normalize(inPosition), 1.0);	
 	outNormal = vec4(inNormal, 1.0);

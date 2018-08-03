@@ -36,7 +36,10 @@ layout (location = 0) out vec3 outNormal;
 layout (location = 1) out vec3 outWorldPos;
 
 
-
+float rand(vec2 n){
+  return 0.5 + 0.5 * 
+     fract(sin(dot(n.xy, vec2(12.9898, 78.233)))* 43758.5453);
+}
 
 
 void main()
@@ -60,28 +63,36 @@ void main()
 	vec3 v = norm;
 	float r = ubo.radius + ubo.radius * ubo.maxHeight / 2.0;
 
-	float A = 0.1;
-	float s = 5.0;
-	float w = 2.0;
 	float t = pc.time;
 
 	vec3 psum = vec3(0);
 	vec3 nsum = vec3(0);
 
-	int WAVE_COUNT = 6;
-
-	vec3 waves[6] = { 
-		vec3(0, 1, 0), 
-		vec3(-1, 0, 0),
-		vec3(1, 1, 0), 
-		vec3(19, 0, -1),
-		vec3(0, -1, 12), 
-		vec3(1, 27, 0)
+	vec3 TESTWAVES[4] = {
+		vec3(0, 1, 0),
+		vec3(1, 0, 0),
+		vec3(0, 0, 1),
+		vec3(0, -1, 0)
 	};
 
-	for(int i = 0; i < WAVE_COUNT; i++){
-		vec3 o = normalize(waves[i]);
-		float Q = smoothstep(1 - length(dot(v, o)), 0.2, 0.4);
+	int WAVE_COUNT = 20;
+
+	for(float i = 0.0; i < WAVE_COUNT; i++){
+
+		float rf = rand(vec2(i, 3.1414 * i)); 
+
+		float wx = -1.0 + 2.0 * rand(vec2(3.1 * (i+rf), 17.07 * (i-rf)));
+		float wy = -1.0 + 2.0 * rand(vec2(8.355 * (i-rf), 4.13 * (i+rf)));
+		float wz = -1.0 + 2.0 * rand(vec2(11.235 * (i/rf), 0.888 * (i*rf)));
+		
+		vec3 o = normalize(vec3(wx, wy, wz));
+		//o = TESTWAVES[i];
+
+		float A = 0.001 + 0.001 / (i+1);// + 0.001 * rand(vec2(3.1 * (i+rf), 17.07 * (i-rf)));
+		float s = 2.6 * (i+1);// * rand(vec2(8.355 * (i-rf), 4.13 * (i+rf)));
+		float w = 50.0 + i * 5;// * rand(vec2(11.235 * (i-rf), 0.888 * (i*rf)));
+
+		float Q = smoothstep(1 - length(dot(v, o)), 0.01, 0.8);
 
 		float l = dot(acos(dot(v, o)), r);
 		vec3 d = cross(v, cross(v-o, v));
