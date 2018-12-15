@@ -32,7 +32,7 @@ struct TransformComponent {
 
 	glm::dvec3 m_dPos; // relative to parent, no parent == world space
 	glm::vec3 m_Scale;
-	glm::quat m_Rotation = glm::quat();
+	glm::quat m_Rotation = glm::identity<glm::quat>();
 
 	glm::vec3 m_Forward;
 	glm::vec3 m_Up;
@@ -50,6 +50,7 @@ struct TransformComponent {
 
 	glm::vec3 TransformWSToLocal(glm::vec3 wsPos);
 
+	glm::vec3 TransformLocalDirectionToWorldSpace(glm::vec3 wsPos);
 	glm::vec3 TransformWSToObject(glm::vec3 wsPos);
 
 	void SetPosition(const glm::dvec3 &pos);
@@ -68,6 +69,7 @@ struct TransformComponent {
 
 	void Rotate(glm::quat q);
 
+	void Rotate(glm::dvec3 angular);
 	void RotateToTarget(glm::vec3 target);
 
 	void MoveForward(double distance);
@@ -77,6 +79,7 @@ struct TransformComponent {
 	void MoveWorld(glm::dvec3 velocity);
 	void MoveRelative(glm::dvec3 velocity);
 
+	glm::quat GetRotation();
 	glm::mat4 GetModelMat();
 
 	glm::mat4 GetObjectMat();

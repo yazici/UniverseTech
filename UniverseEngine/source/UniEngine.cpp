@@ -1157,8 +1157,10 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 			GetScene()->m_World->emit<CameraPauseEvent>({ m_CamPaused });
 		}
 
+		
+
 		GetScene()->m_World->each<PlayerControlComponent, TransformComponent, PhysicsComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<PlayerControlComponent> player, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<PhysicsComponent> physics) {
-			overlay->text("Boost: %.3f", 1.0);
+			overlay->text("Boost: %.3f", 1.0f);
 			overlay->text("Velocity: %.3f m/s", glm::length(physics->m_Velocity));
 		});
 		

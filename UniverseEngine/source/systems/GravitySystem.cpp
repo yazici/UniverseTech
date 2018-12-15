@@ -39,7 +39,7 @@ void GravitySystem::tick(ECS::World* world, float deltaTime) {
 
 				auto force = (direction * (float)gravFactor);
 
-				physics->AddForce(force * deltaTime);
+				//physics->AddForce(force * deltaTime);
 			}
 		}
 	});

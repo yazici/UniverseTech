@@ -49,18 +49,25 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 }
 
 void PlayerControlSystem::tick(ECS::World* world, float deltaTime) {
-	world->each<PlayerControlComponent>([&](ECS::Entity* entity, ECS::ComponentHandle<PlayerControlComponent> player) {
+	world->each<PlayerControlComponent, TransformComponent>([&](ECS::Entity* entity, ECS::ComponentHandle<PlayerControlComponent> player, ECS::ComponentHandle<TransformComponent> transform) {
 
 		auto physics = entity->get<PhysicsComponent>();
 		glm::vec3 direction = m_InputDirection;
-		
+
 		if(!player->HasTarget()) {
 			glm::vec3 rotation = m_InputRotation;
 
+			// TODO: debugging test
+
 			if(!isFullStop) {
-				physics->AddTorque(rotation, 90.0f * deltaTime);
-				std::cout << "Got input rotation " << glm::to_string(rotation * 90.f * deltaTime) << std::endl;
-				physics->AddForce(direction * deltaTime);
+				if(glm::length(rotation) != 0.0) {
+					physics->AddAngularVelocity(glm::normalize(rotation) * deltaTime);
+					//std::cout << "Got input rotation " << glm::to_string(rotation * 90.0f) << std::endl;
+				}
+
+				direction = transform->TransformLocalDirectionToWorldSpace(direction);
+
+				physics->AddForce(direction * m_BoostFactor * 5515.3f * deltaTime);
 			} else {
 				physics->FullStop();
 			}

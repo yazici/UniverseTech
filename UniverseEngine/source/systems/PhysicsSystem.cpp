@@ -2,7 +2,7 @@
 #include "../3dmaths.h"
 
 void PhysicsSystem::tick(ECS::World* world, float deltaTime) {
-	std::cout << "Ticking physics system" << std::endl;
+	//std::cout << "Ticking physics system" << std::endl;
 	world->each<TransformComponent, PhysicsComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<PhysicsComponent> physics) {
 
 		if(physics->m_IsStatic)
@@ -18,8 +18,8 @@ void PhysicsSystem::tick(ECS::World* world, float deltaTime) {
 
 		transform->MoveWorld(physics->m_Velocity * (double)deltaTime);
 
-		std::cout << "Got torque: " << glm::to_string(physics->m_Torque) << std::endl;
+		//std::cout << "Got rotation: " << glm::to_string(physics->m_AngularVelocity) << std::endl;
 		
-		//transform->Rotate(physics->m_Torque * deltaTime);
+		transform->Rotate(physics->m_AngularVelocity * (double)deltaTime);
 	});
 }

@@ -28,6 +28,11 @@ glm::vec3 TransformComponent::TransformWSToLocal(glm::vec3 wsPos) {
 	return glm::vec3(glm::inverse(GetModelMat()) * glm::vec4(wsPos, 1.0));
 }
 
+glm::vec3 TransformComponent::TransformLocalDirectionToWorldSpace(glm::vec3 wsPos) {
+	return glm::rotate(GetRotation(), wsPos);
+}
+
+
 glm::vec3 TransformComponent::TransformWSToObject(glm::vec3 wsPos) {
 	return glm::vec3(glm::inverse(GetObjectMat()) * glm::vec4(wsPos, 1.0));
 }
@@ -59,6 +64,12 @@ void TransformComponent::Rotate(glm::vec3 axis, float degrees) {
 	Rotate(rotQ);
 }
 
+void TransformComponent::Rotate(glm::dvec3 angular) {
+	auto rotQ = glm::quat(angular);
+	Rotate(rotQ);
+}
+
+
 void TransformComponent::Rotate(glm::vec3 euler) {
 	auto rotQ = glm::quat(glm::radians(euler));
 	Rotate(rotQ);
@@ -68,7 +79,7 @@ void TransformComponent::Rotate(glm::quat q) {
 	// TODO: This is not working!!!
 	// FIXME: I am BROKEN
 
-	m_Rotation = m_Rotation * q;
+	m_Rotation *= q;
 
 	glm::mat3 m = glm::mat3(m_Rotation);
 	m_Right = m[0];
@@ -109,6 +120,15 @@ void TransformComponent::MoveRelative(glm::dvec3 velocity) {
 	m_dPos += (glm::dvec3)m_Forward * velocity.z;
 
 	//std::cout << "Position now: " << m_dPos.x << ", " << m_dPos.y << ", " << m_dPos.z << std::endl;
+}
+
+glm::quat TransformComponent::GetRotation() {
+	auto rot = m_Rotation;
+	if(m_Parent) {
+		rot *= m_Parent->GetTransform()->GetRotation();
+	}
+
+	return rot;
 }
 
 glm::mat4 TransformComponent::GetModelMat() {

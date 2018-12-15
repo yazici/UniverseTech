@@ -37,7 +37,7 @@ void UniScene::Initialize(UniEngine* engine) {
 	//m_CurrentCamera->AddComponent<MovementComponent>();
 	m_CurrentCamera->AddComponent<PlayerControlComponent>();
 	m_CurrentCamera->AddComponent<PhysicsComponent>(5000.0);
-	//m_CurrentCamera->m_Entity->get<PlayerControlComponent>()->SetTarget(glm::vec3(0, 0, 0));
+	m_CurrentCamera->m_Entity->get<PhysicsComponent>()->SetSceneObject(m_CurrentCamera);
 }
 
 void UniScene::Load(std::string filename) {
@@ -191,6 +191,7 @@ void UniScene::Load(std::string filename) {
 			auto density = so.at("density");
 
 			planet->AddComponent<PhysicsComponent>(radius, density, true);
+			planet->m_Entity->get<PhysicsComponent>()->SetSceneObject(planet);
 
 			if(so.find("rotation") != so.end()) {
 				auto rot = so.at("rotation");
