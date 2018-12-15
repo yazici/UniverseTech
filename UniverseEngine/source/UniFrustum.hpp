@@ -1,9 +1,8 @@
 #pragma once
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
 #include <vector>
 #include "Geometry.hpp"
 #include "components/Camera.h"
+#include "3dmaths.h"
 
 class Camera;
 

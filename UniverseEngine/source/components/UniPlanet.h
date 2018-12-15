@@ -1,9 +1,10 @@
 #pragma once
-#include <glm/glm.hpp>
+
 #include "../vks/VulkanBuffer.hpp"
 #include "../vks/VulkanTexture.hpp"
 #include "../UniMaterial.h"
 #include "../vks/frustum.hpp"
+#include "../3dmaths.h"
 
 class UniPlanet{
 public:
@@ -65,6 +66,7 @@ public:
 	void CreateQuads();
 	glm::vec3 RotatePointToCamera(glm::vec3 point);
 	double CalculateZOffset();
+	double CalculateOceanZOffset();
 	void SetCameraPosition(glm::vec3& cam);
 	double GetPositionOffset(glm::vec3& pos);
 	void UpdateMesh();
@@ -89,6 +91,8 @@ private:
 
 	uint16_t m_GridSize = 10;
 	double m_GridZOffset = 0.0;
+
+	double m_MaxWaveHeight = 20.0;
 
 	std::vector<glm::vec3> m_GridPoints;
 	std::vector<glm::vec3> m_MeshVerts;

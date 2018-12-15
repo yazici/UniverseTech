@@ -8,7 +8,7 @@
 
 #include <array>
 #include <math.h>
-#include <glm/glm.hpp>
+#include "../3dmaths.h"
 
 namespace vks
 {

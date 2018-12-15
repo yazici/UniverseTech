@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
-#include <glm/glm.hpp>
+
+#include "3dmaths.h"
 
 struct Plane {
 	Plane() {

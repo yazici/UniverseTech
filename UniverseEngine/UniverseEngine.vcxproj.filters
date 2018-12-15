@@ -34,26 +34,20 @@
     <Filter Include="shaders\deferredmulti">
       <UniqueIdentifier>{b05c8669-3195-4f56-b5f9-abb5a7c6427f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\components">
-      <UniqueIdentifier>{34588440-f845-4917-beaf-164ecde64229}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\components">
-      <UniqueIdentifier>{a6138d90-99c8-41c6-958d-bcb0a5dbdad8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Content">
       <UniqueIdentifier>{1ec31e9a-9908-4616-9538-191208e1aaaa}</UniqueIdentifier>
     </Filter>
     <Filter Include="Content\levels">
       <UniqueIdentifier>{37c707ef-4469-405b-ac8a-c176bea40af6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\systems">
-      <UniqueIdentifier>{ce565bba-9282-4a62-8692-ef86a0e87878}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\systems">
-      <UniqueIdentifier>{7c3c5419-900b-4e3b-a86d-2b8633169aa7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tools">
       <UniqueIdentifier>{4473a60b-eb18-4533-9fcf-764294a71281}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{bedbba23-e127-404a-b4a3-78f8a5dfd990}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Systems">
+      <UniqueIdentifier>{e2618317-bb2a-42b3-9c04-57c27cb912d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -153,35 +147,8 @@
     <ClInclude Include="source\vks\frustum.hpp">
       <Filter>Header Files\vks</Filter>
     </ClInclude>
-    <ClInclude Include="source\components\Transform.h">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
-    <ClInclude Include="source\components\Camera.h">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
-    <ClInclude Include="source\components\Movement.h">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="source\UniInput.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\components\PlayerMovement.h">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
-    <ClInclude Include="source\components\LightComponent.h">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
-    <ClInclude Include="source\components\UniPlanet.h">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
-    <ClInclude Include="source\systems\Systems.h">
-      <Filter>Header Files\systems</Filter>
-    </ClInclude>
-    <ClInclude Include="source\systems\PlayerControlSystem.h">
-      <Filter>Header Files\systems</Filter>
-    </ClInclude>
-    <ClInclude Include="source\systems\PlanetRenderSystem.h">
-      <Filter>Header Files\systems</Filter>
     </ClInclude>
     <ClInclude Include="source\UniMaterial.h">
       <Filter>Header Files</Filter>
@@ -189,10 +156,52 @@
     <ClInclude Include="source\factory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\systems\events.h">
-      <Filter>Header Files\systems</Filter>
-    </ClInclude>
     <ClInclude Include="source\FastNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\events.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\PlanetRenderSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\PlayerControlSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\Systems.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Camera.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\LightComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Movement.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Transform.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\UniPlanet.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\GravitySystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\PhysicsComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Components.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\PhysicsSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\PlayerControl.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="source\3dmaths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -239,35 +248,44 @@
     <ClCompile Include="source\UniFrustum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\components\Transform.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="source\UniInput.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\components\Movement.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
-    <ClCompile Include="source\components\PlayerMovement.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
-    <ClCompile Include="source\components\UniPlanet.cpp">
-      <Filter>Source Files\components</Filter>
-    </ClCompile>
-    <ClCompile Include="source\systems\Systems.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="source\systems\PlayerControlSystem.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
-    <ClCompile Include="source\systems\PlanetRenderSystem.cpp">
-      <Filter>Source Files\systems</Filter>
     </ClCompile>
     <ClCompile Include="source\UniMaterial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\FastNoise.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\PlanetRenderSystem.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\PlayerControlSystem.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\Systems.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\Movement.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\Transform.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\UniPlanet.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\GravitySystem.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\PhysicsComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\PhysicsSystem.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\PlayerControl.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -314,12 +332,6 @@
       <Filter>shaders</Filter>
     </CustomBuild>
     <CustomBuild Include="data\shaders\uniplanet.vert">
-      <Filter>shaders</Filter>
-    </CustomBuild>
-    <CustomBuild Include="data\shaders\pntriangles.tesc">
-      <Filter>shaders</Filter>
-    </CustomBuild>
-    <CustomBuild Include="data\shaders\pntriangles.tese">
       <Filter>shaders</Filter>
     </CustomBuild>
     <CustomBuild Include="data\shaders\deferredmultisampling\deferred.frag">

@@ -229,18 +229,24 @@
     <ClInclude Include="..\external\imgui\stb_textedit.h" />
     <ClInclude Include="..\external\imgui\stb_truetype.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="source\3dmaths.h" />
     <ClInclude Include="source\components\Camera.h" />
+    <ClInclude Include="source\components\Components.h" />
     <ClInclude Include="source\components\LightComponent.h" />
     <ClInclude Include="source\components\Movement.h" />
-    <ClInclude Include="source\components\PlayerMovement.h" />
+    <ClInclude Include="source\components\PhysicsComponent.h" />
+    <ClInclude Include="source\components\PlayerControl.h" />
     <ClInclude Include="source\components\Transform.h" />
     <ClInclude Include="source\components\UniPlanet.h" />
     <ClInclude Include="source\ECS.h" />
     <ClCompile Include="source\components\Movement.cpp" />
-    <ClCompile Include="source\components\PlayerMovement.cpp" />
+    <ClCompile Include="source\components\PhysicsComponent.cpp" />
+    <ClCompile Include="source\components\PlayerControl.cpp" />
     <ClCompile Include="source\components\Transform.cpp" />
     <ClCompile Include="source\components\UniPlanet.cpp" />
     <ClCompile Include="source\FastNoise.cpp" />
+    <ClCompile Include="source\systems\GravitySystem.cpp" />
+    <ClCompile Include="source\systems\PhysicsSystem.cpp" />
     <ClCompile Include="source\systems\PlanetRenderSystem.cpp" />
     <ClCompile Include="source\systems\PlayerControlSystem.cpp" />
     <ClCompile Include="source\systems\Systems.cpp" />
@@ -248,6 +254,8 @@
     <ClInclude Include="source\factory.h" />
     <ClInclude Include="source\FastNoise.h" />
     <ClInclude Include="source\systems\events.h" />
+    <ClInclude Include="source\systems\GravitySystem.h" />
+    <ClInclude Include="source\systems\PhysicsSystem.h" />
     <ClInclude Include="source\systems\PlanetRenderSystem.h" />
     <ClInclude Include="source\systems\PlayerControlSystem.h" />
     <ClInclude Include="source\systems\Systems.h" />
@@ -382,36 +390,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
-    </CustomBuild>
-    <CustomBuild Include="data\shaders\pntriangles.tesc">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslc -o %(Identity).spv %(Identity)</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling shader %(Identity)</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity).spv</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glslc -o %(Identity).spv %(Identity)</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling shader %(Identity)</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-    </CustomBuild>
-    <CustomBuild Include="data\shaders\pntriangles.tese">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslc -o %(Identity).spv %(Identity)</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compiling shader %(Identity)</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Identity).spv</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">glslc -o %(Identity).spv %(Identity)</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling shader %(Identity)</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </AdditionalInputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </AdditionalInputs>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
     </CustomBuild>
     <None Include="data\shaders\scenerendering\scene.frag" />
     <None Include="data\shaders\scenerendering\scene.vert" />

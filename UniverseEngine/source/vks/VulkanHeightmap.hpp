@@ -6,13 +6,14 @@
 * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
 */
 
-#include <glm/glm.hpp>
-#include <glm/glm.hpp>
+
 #include <gli/gli.hpp>
 
 #include "vulkan/vulkan.h"
 #include "VulkanDevice.hpp"
 #include "VulkanBuffer.hpp"
+
+#include "3dmaths.h"
 
 namespace vks 
 {

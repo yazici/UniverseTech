@@ -3,17 +3,10 @@
 #define _CAMERA_HEADER_
 
 
-#define GLM_FORCE_RADIANS
-#define GLM_ENABLE_EXPERIMENTAL
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <iostream>
 #include "Transform.h"
 #include "../ECS.h"
+#include "../3dmaths.h"
 
 
 struct CameraComponent {
@@ -59,9 +52,9 @@ struct CameraComponent {
 	void CalculateView(ECS::ComponentHandle<TransformComponent> transform) {
 		auto mat = transform->GetModelMat();
 		
-		m_Position = mat[3];
-		auto forward = transform->TransformLocalToWS(glm::vec3(0.0, 0.0, 1.0));
-		auto up = glm::mat3(mat) * glm::vec3(0.0, 1.0, 0.0);
+		m_Position = { mat[3].x, mat[3].y, mat[3].z };
+		auto forward = transform->TransformLocalToWS(glm::vec3(0.0, 0.0, 1000.0));
+		auto up = glm::mat3(mat) * glm::vec3(0.0, 1000.0, 0.0);
 
 		if(cameraType == CameraType::CAMERA_FIXED) {
 			target = forward;

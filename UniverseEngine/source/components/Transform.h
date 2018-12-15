@@ -1,15 +1,9 @@
 #pragma once
 
-#define GLM_FORCE_RADIANS
-#define GLM_ENABLE_EXPERIMENTAL
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
+
 #include <iostream>
 #include "../ECS.h"
+#include "../3dmaths.h"
 
 
 class UniSceneObject;
@@ -37,12 +31,12 @@ struct TransformComponent {
 	}
 
 	glm::dvec3 m_dPos; // relative to parent, no parent == world space
+	glm::vec3 m_Scale;
+	glm::quat m_Rotation = glm::quat();
+
 	glm::vec3 m_Forward;
 	glm::vec3 m_Up;
 	glm::vec3 m_Right;
-	glm::vec3 m_Scale;
-
-	glm::quat m_Rotation;
 
 	std::shared_ptr<UniSceneObject> m_Parent;
 
@@ -64,11 +58,7 @@ struct TransformComponent {
 
 	void SetPosition(double x, double y, double z);
 
-	void SetPitch(float p);
-
-	void SetYaw(float y);
-
-	void SetRoll(float r);
+	void SetRotation(const glm::dvec3 &angleAxis);
 
 	void SetScale(const glm::vec3 &scale);
 
@@ -76,12 +66,15 @@ struct TransformComponent {
 
 	void Rotate(glm::vec3 euler);
 
+	void Rotate(glm::quat q);
+
 	void RotateToTarget(glm::vec3 target);
 
 	void MoveForward(double distance);
 
 	void MoveForward(float distance);
 
+	void MoveWorld(glm::dvec3 velocity);
 	void MoveRelative(glm::dvec3 velocity);
 
 	glm::mat4 GetModelMat();

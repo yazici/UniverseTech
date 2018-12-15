@@ -88,9 +88,9 @@ void main()
 
 	for(int i = 0; i < WAVE_COUNT; i++){
 
-		float A = 0.001;  // amplitude
-		float s = 0.2;  // speed (km/s!)
-		float w = 50.0;  // frequency
+		float A = 0.1;  // amplitude
+		float s = 0.2;  // speed (m/s!)
+		float w = 1.0;  // frequency
 
 		A = A * float(i+1);
 		w = w / float(i+1);

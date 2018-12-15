@@ -1,14 +1,11 @@
 #include "UniScene.h"
 #include <memory>
+#include <cmath>
 #include "systems/Systems.h"
 #include "UniEngine.h"
-#include "components/UniPlanet.h"
-#include "components/PlayerMovement.h"
-#include "components/LightComponent.h"
+#include "components/Components.h"
 #include <nlohmann/json.hpp>
 #include <iosfwd>
-#include "systems/PlanetRenderSystem.h"
-#include "systems/PlayerControlSystem.h"
 
 
 using json = nlohmann::json;
@@ -31,13 +28,15 @@ void UniScene::Initialize(UniEngine* engine) {
 	m_World->registerSystem(new CameraSystem());
 	m_World->registerSystem(new PlanetRenderSystem());
 	m_World->registerSystem(new PlayerControlSystem());
+	m_World->registerSystem(new GravitySystem());
+	m_World->registerSystem(new PhysicsSystem());
 	
 
 	m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
-	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 50.f, 0.0001f, 100000.f);
-
-	m_CurrentCamera->AddComponent<MovementComponent>();
+	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 50.f, 0.1f, 100000000.f);
+	//m_CurrentCamera->AddComponent<MovementComponent>();
 	m_CurrentCamera->AddComponent<PlayerControlComponent>();
+	m_CurrentCamera->AddComponent<PhysicsComponent>(5000.0);
 	//m_CurrentCamera->m_Entity->get<PlayerControlComponent>()->SetTarget(glm::vec3(0, 0, 0));
 }
 
@@ -75,9 +74,7 @@ void UniScene::Load(std::string filename) {
 			
 			if(so.find("rotation") != so.end()) {
 				auto rot = so.at("rotation");
-				model->GetTransform()->SetPitch(rot[0]);
-				model->GetTransform()->SetYaw(rot[1]);
-				model->GetTransform()->SetRoll(rot[2]);
+				model->GetTransform()->SetRotation({ rot[0], rot[1], rot[2] });
 			}
 
 			glm::vec3 createScale = { so.at("createScale")[0], so.at("createScale")[1], so.at("createScale")[2] };
@@ -132,9 +129,7 @@ void UniScene::Load(std::string filename) {
 			
 			if(so.find("rotation") != so.end()) {
 				auto rot = so.at("rotation");
-				light->GetTransform()->SetPitch(rot[0]);
-				light->GetTransform()->SetYaw(rot[1]);
-				light->GetTransform()->SetRoll(rot[2]);
+				light->GetTransform()->SetRotation({ rot[0], rot[1], rot[2] });
 			}
 
 			auto radius = so.at("radius");
@@ -193,11 +188,13 @@ void UniScene::Load(std::string filename) {
 			auto planet = Make<UniSceneObject>(ppos, name);
 			planet->AddComponent<UniPlanet>(radius, maxHeight, maxDepth, gridSize, hasOcean);
 
+			auto density = so.at("density");
+
+			planet->AddComponent<PhysicsComponent>(radius, density, true);
+
 			if(so.find("rotation") != so.end()) {
 				auto rot = so.at("rotation");
-				planet->GetTransform()->SetPitch(rot[0]);
-				planet->GetTransform()->SetYaw(rot[1]);
-				planet->GetTransform()->SetRoll(rot[2]);
+				planet->GetTransform()->SetRotation({ rot[0], rot[1], rot[2] });
 			}
 			planet->GetComponent<UniPlanet>()->AddNoiseLayer(UniPlanet::SIMPLEX, 1);
 			planet->GetComponent<UniPlanet>()->Initialize();
@@ -211,7 +208,7 @@ void UniScene::Load(std::string filename) {
 
 	auto camObj = GetCameraObject();
 	camObj->GetTransform()->SetPosition(glm::vec3(playerPos.at(0), playerPos.at(1), playerPos.at(2)));
-	camObj->GetTransform()->SetYaw(playerRot.at(1));
+	camObj->GetTransform()->SetRotation({ playerRot[0], playerRot[1], playerRot[2] });
 	GetCameraComponent()->CalculateView(camObj->GetTransform());
 
 	std::cout << "Scene fully loaded." << std::endl;

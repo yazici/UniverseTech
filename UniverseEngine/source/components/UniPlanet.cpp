@@ -132,6 +132,26 @@ double UniPlanet::CalculateZOffset() {
 
 }
 
+double UniPlanet::CalculateOceanZOffset() {
+	double d = glm::length(m_CurrentCameraPos);
+	//std::cout << "Camera distance: " << d;
+	double d2 = pow(d, 2.0);
+	auto r = m_Radius;
+	double r2 = pow(r, 2.0);
+
+	double R = r + m_MaxWaveHeight;
+	double R2 = pow(R, 2.0);
+
+	auto h = sqrt(d2 - r2);
+	auto s = sqrt(R2 - r2);
+
+	auto zs = R2 + d2 - pow(h + s, 2.0);
+	zs /= ((2 * r * h) + (2 * r * s));
+
+	return zs;
+
+}
+
 void UniPlanet::SetCameraPosition(glm::vec3& cam) {
 	m_CurrentCameraPos = cam;
 	//std::cout << "Camera relative to planet: " << cam.x << ", " << cam.y << ", " << cam.z << std::endl;
@@ -145,6 +165,7 @@ void UniPlanet::UpdateMesh() {
 	m_MeshVerts.clear();
 	m_OceanVerts.clear();
 	auto zs = CalculateZOffset();
+	auto ozs = CalculateOceanZOffset();
 	//std::cout << ", planet Z offset: " << zs << std::endl;
 
 	auto rot = glm::lookAt({ 0, 0, 0 }, m_CurrentCameraPos, { 0, 1, 0 });
@@ -158,16 +179,21 @@ void UniPlanet::UpdateMesh() {
 
 	for(auto gp : m_GridPoints) {
 		glm::vec3 point({ gp.x, gp.y, gp.z - zs });
-		point = glm::vec4(point, 0) * rot;
+		point = glm::vec3(glm::vec4(point, 0) * rot);
 		point = glm::normalize(point) * (float)m_Radius;
 		//pos *= GetPositionOffset(gp);
 		m_MeshVerts.push_back(point);
+	}
 
-		if(m_HasOcean) {
+	if(m_HasOcean) {
+		for(auto gp : m_GridPoints) {
+			glm::vec3 point({ gp.x, gp.y, gp.z - ozs });
+			point = glm::vec3(glm::vec4(point, 0) * rot);
+			point = glm::normalize(point) * (float)m_Radius;
 			m_OceanVerts.push_back(point);
 		}
-
 	}
+
 
 	
 }

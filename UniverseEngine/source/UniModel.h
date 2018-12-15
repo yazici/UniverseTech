@@ -5,6 +5,7 @@
 #include "vulkan/vulkan_core.h"
 #include "UniSceneObject.h"
 #include <nlohmann/json.hpp>
+#include "3dmaths.h"
 
 using json = nlohmann::json;
 

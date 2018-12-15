@@ -1,10 +1,6 @@
 #pragma once
 
-#define GLM_FORCE_RADIANS
-#define GLM_ENABLE_EXPERIMENTAL
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <algorithm>
+#include "../3dmaths.h"
 
 
 struct MovementComponent {
@@ -17,22 +13,22 @@ struct MovementComponent {
 	glm::vec3 m_Rotation; 
 
 	/** @brief units per second */
-	float m_MaxSpeed = 20.0f; 
+	float m_MaxSpeed = 20000.0f; 
 	 /** @brief units per second */
-	float m_MaxReverse = 30.0f;
+	float m_MaxReverse = 30000.0f;
 	/** @brief units per second */
-	float m_MaxStrafe = 20.0f; 
+	float m_MaxStrafe = 20000.0f; 
 	/** @brief units per second */
-	float m_MaxVertical = 20.0f; 
+	float m_MaxVertical = 20000.0f; 
 
 	/** @brief units per second, per second */
-	float m_MaxAccel = 5.0f; 
+	float m_MaxAccel = 500.0f; 
 	/** @brief units per second, per second */
-	float m_MaxDecel = 8.0f; 
+	float m_MaxDecel = 800.0f; 
 	/** @brief units per second, per second */
-	float m_MaxStrafeAccel = 3.0f; 
+	float m_MaxStrafeAccel = 300.0f; 
 	/** @brief units per second, per second */
-	float m_MaxVerticalAccel = 3.0f; 
+	float m_MaxVerticalAccel = 300.0f; 
 	/** @brief percentage per second, per second */
 	float m_Drag = 0.05f; 
 
@@ -59,6 +55,7 @@ struct MovementComponent {
 	bool isRelative = true;
 
 	void ApplyAcceleration(glm::vec3 accel, float deltaTime);
+	void ApplyPhysics(glm::vec3 accel, float deltaTime);
 	void ApplyTorque(glm::vec3 euler, float deltaTime);
 	void CrashStop(float deltaTime = 0.f);
 	void FullStop(float deltaTime);

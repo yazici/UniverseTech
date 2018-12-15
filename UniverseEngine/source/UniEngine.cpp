@@ -11,13 +11,11 @@
 #include <assert.h>
 #include <algorithm>
 #include "systems/events.h"
-#include "components/LightComponent.h"
-#include "components/UniPlanet.h"
+#include "components/Components.h"
 #include "UniModel.h"
 #include "UniScene.h"
 #include "UniInput.h"
 #include "UniMaterial.h"
-#include "components/PlayerMovement.h"
 
 #define ENABLE_VALIDATION true
 
@@ -1159,8 +1157,9 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 			GetScene()->m_World->emit<CameraPauseEvent>({ m_CamPaused });
 		}
 
-		GetScene()->m_World->each<PlayerControlComponent, MovementComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<PlayerControlComponent> player, ECS::ComponentHandle<MovementComponent> movement) {
-			overlay->text("Boost: %.3f", movement->m_BoostFactor);
+		GetScene()->m_World->each<PlayerControlComponent, TransformComponent, PhysicsComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<PlayerControlComponent> player, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<PhysicsComponent> physics) {
+			overlay->text("Boost: %.3f", 1.0);
+			overlay->text("Velocity: %.3f m/s", glm::length(physics->m_Velocity));
 		});
 		
 	}
@@ -1216,8 +1215,8 @@ void UniEngine::updateOverlay() {
 	ImGui::End();
 
 
-	ImGui::SetNextWindowPos(ImVec2((uint32_t)width - 170, 10));
-	ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiSetCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(width - 170.f, 10.f));
+	ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiSetCond_FirstUseEver);
 	ImGui::Begin("Current position:", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
 #if defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -1268,8 +1267,8 @@ void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay *overlay) {
 			auto transform = so->GetComponent<TransformComponent>();
 			camPos = transform->TransformWSToLocal(camPos);
 			auto altitude = so->GetComponent<UniPlanet>()->GetAltitude(camPos);
-			overlay->text("Alt: %.5f km", altitude);
-			overlay->text("Dist: %.5f km", glm::length(camPos));
+			overlay->text("Alt: %.3f km", altitude / 1000.0);
+			overlay->text("Dist: %.3f km", glm::length(camPos) / 1000.0);
 			}
 		}
 	}

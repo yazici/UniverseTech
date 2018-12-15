@@ -1,9 +1,9 @@
 #pragma once
 #include "../ECS.h"
 #include <iostream>
-#include <glm/glm.hpp>
-#include "../components/PlayerMovement.h"
+#include "../components/Components.h"
 #include "events.h"
+#include "../3dmaths.h"
 
 class PlayerControlSystem : public ECS::EntitySystem, public ECS::EventSubscriber<InputEvent> {
 

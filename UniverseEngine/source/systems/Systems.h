@@ -2,6 +2,10 @@
 
 #include "../ECS.h"
 #include "../components/Components.h"
+#include "GravitySystem.h"
+#include "PhysicsSystem.h"
+#include "PlanetRenderSystem.h"
+#include "PlayerControlSystem.h"
 
 class MovementSystem : public ECS::EntitySystem {
 public:

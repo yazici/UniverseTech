@@ -9,6 +9,13 @@ void TransformComponent::SetPosition(const glm::vec3 &pos) {
 	SetPosition(pos.x, pos.y, pos.z);
 }
 
+void TransformComponent::SetRotation(const glm::dvec3 &angleAxis) {
+	auto degrees = glm::length(angleAxis);
+	auto axis = glm::normalize(angleAxis);
+	if(degrees != 0.0 && glm::length(axis) != 0.0)
+		m_Rotation = glm::angleAxis(glm::radians(degrees), axis);
+}
+
 glm::vec3 TransformComponent::TransformLocalToWS(glm::vec3 localPos) {
 	return glm::vec3(GetModelMat() * glm::vec4(localPos, 1));
 }
@@ -41,27 +48,6 @@ void TransformComponent::SetPosition(double x, double y, double z) {
 	m_dPos.z = z;
 }
 
-void TransformComponent::SetPitch(float p) {
-	if(p < 0)
-		p += 360.f;
-	if(p > 360)
-		p -= 360.f;
-
-}
-
-void TransformComponent::SetYaw(float y) {
-	glm::vec3 euler = glm::vec3(0.0, y, 0.0);
-	Rotate(euler);
-}
-
-void TransformComponent::SetRoll(float r) {
-	if(r < 0)
-		r += 360.f;
-	if(r > 360)
-		r -= 360.f;
-
-}
-
 void TransformComponent::SetScale(const glm::vec3 &scale) {
 	m_Scale.x = scale.x;
 	m_Scale.y = scale.y;
@@ -70,28 +56,24 @@ void TransformComponent::SetScale(const glm::vec3 &scale) {
 
 void TransformComponent::Rotate(glm::vec3 axis, float degrees) {
 	auto rotQ = glm::angleAxis(glm::radians(degrees), axis);
-	
-	m_Rotation = m_Rotation * rotQ;
-
-	glm::mat3 m = glm::mat3(m_Rotation);
-
-	m_Right = m[0];
-	m_Up = m[1];
-	m_Forward = m[2];
-
+	Rotate(rotQ);
 }
 
 void TransformComponent::Rotate(glm::vec3 euler) {
 	auto rotQ = glm::quat(glm::radians(euler));
+	Rotate(rotQ);
+}
 
-	m_Rotation = m_Rotation * rotQ;
-	
+void TransformComponent::Rotate(glm::quat q) {
+	// TODO: This is not working!!!
+	// FIXME: I am BROKEN
+
+	m_Rotation = m_Rotation * q;
+
 	glm::mat3 m = glm::mat3(m_Rotation);
-
 	m_Right = m[0];
 	m_Up = m[1];
 	m_Forward = m[2];
-
 }
 
 void TransformComponent::RotateToTarget(glm::vec3 target) {
@@ -113,6 +95,12 @@ void TransformComponent::MoveForward(double distance) {
 
 void TransformComponent::MoveForward(float distance) {
 	m_dPos += glm::normalize(m_Forward) * distance;
+}
+
+void TransformComponent::MoveWorld(glm::dvec3 velocity) {
+	m_dPos += velocity;
+
+	//std::cout << "Position now: " << m_dPos.x << ", " << m_dPos.y << ", " << m_dPos.z << std::endl;
 }
 
 void TransformComponent::MoveRelative(glm::dvec3 velocity) {
