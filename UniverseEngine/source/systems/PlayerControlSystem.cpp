@@ -30,11 +30,11 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 		isFullStop = event.value == 1.f;
 		break;
 	case UniInput::ButtonBoostUp:
-		if(m_BoostFactor < 1024.f)
+		if(m_BoostFactor < 1024.f * 8.f)
 			m_BoostFactor *= 2.0f;
 		break;
 	case UniInput::ButtonBoostDown:
-		if(m_BoostFactor > 1.f / 1024.f)
+		if(m_BoostFactor > 1.f / 1024.f * 8.f)
 			m_BoostFactor /= 2.0f;
 		break;
 	case UniInput::ButtonRollLeft:

@@ -620,6 +620,12 @@ void UniEngine::setupDescriptorSetLayout() {
 }
 
 void UniEngine::preparePipelines() {
+
+	auto wfmode = VK_POLYGON_MODE_FILL;
+	if(m_useWireframe)
+		wfmode = VK_POLYGON_MODE_LINE;
+	
+
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
 		vks::initializers::pipelineInputAssemblyStateCreateInfo(
 			VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -628,7 +634,7 @@ void UniEngine::preparePipelines() {
 
 	VkPipelineRasterizationStateCreateInfo rasterizationState =
 		vks::initializers::pipelineRasterizationStateCreateInfo(
-			VK_POLYGON_MODE_FILL,
+			wfmode,
 			VK_CULL_MODE_NONE, // TODO: debug for backface culling!
 			VK_FRONT_FACE_CLOCKWISE,
 			0);
@@ -1144,8 +1150,8 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay *overlay) {
 			buildCommandBuffers();
 			updateUniformBuffersScreen();
 		}
-		if(overlay->checkBox("MSAA", &m_useMSAA)) {
-			buildCommandBuffers();
+		if(overlay->checkBox("wireframe", &m_useWireframe)) {
+			ToggleWireframe();
 		}
 		if(vulkanDevice->features.sampleRateShading) {
 			if(overlay->checkBox("Sample rate shading", &m_useSampleShading)) {

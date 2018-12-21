@@ -311,7 +311,7 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	m_UniformBufferData.tessLevel = 0.75f;
 
 	m_UniformBufferData.viewportDim = glm::vec2((float)engine.width, (float)engine.height);
-	m_UniformBufferData.tessellatedEdgeSize = 4.f;
+	m_UniformBufferData.tessellatedEdgeSize = 20.f;
 
 	m_UniformBufferData.hasOcean = m_HasOcean;
 	

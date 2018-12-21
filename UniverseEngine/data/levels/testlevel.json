@@ -17,7 +17,7 @@
                 "maxHeight": 0.0008,
                 "maxDepth": 0.0008,
                 "gridSize": 200,
-                "hasOcean": true,
+                "hasOcean": false,
                 "density":  5515.3
             }
         ]
