@@ -1,0 +1,6 @@
+- CLOD algorithm adjustments
+ - Calculate LOD levels required to fit clipmap grid to planet-wrapping grid.
+ - Create Geometry Clipmap grid as single mesh, starting at 1x1m resolution.
+ - Tesselate grid by 8-tri fan squares to avoid cracks at resolution boundaries.
+ - Calculate degrees of arc per meter at circumference of planet.
+ - In vertex shader quantise grid positions by degrees of arc per meter * current grid square scale.
