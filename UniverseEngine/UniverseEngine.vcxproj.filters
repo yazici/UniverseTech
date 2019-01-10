@@ -318,6 +318,12 @@
     <None Include="data\shaders\compileshaders.py">
       <Filter>Tools</Filter>
     </None>
+    <None Include="data\shaders\unirayplanet.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\unirayplanet.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\textures\terrain-ramp.png">

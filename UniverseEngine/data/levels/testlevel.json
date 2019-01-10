@@ -3,7 +3,7 @@
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
-            "position": [ 0, 0, -7000000.0 ],
+            "position": [0, 0, -22000.0],
             "rotation": [0, 0, 0]
         },
         "sceneObjects": [
@@ -13,10 +13,9 @@
                 "position": [ 0.0, 0.0, 0.0 ],
                 "rotation": [ 0, 0, 0 ],
                 "enabled": true,
-                "radius": 6000000.0,
-                "maxHeight": 0.0008,
-                "maxDepth": 0.0008,
-                "gridSize": 200,
+                "radius": 6000.0,
+                "maxHeight": 0.03,
+                "maxDepth": 0.1,
                 "hasOcean": false,
                 "density":  5515.3
             }

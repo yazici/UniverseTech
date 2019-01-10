@@ -635,8 +635,8 @@ void UniEngine::preparePipelines() {
 	VkPipelineRasterizationStateCreateInfo rasterizationState =
 		vks::initializers::pipelineRasterizationStateCreateInfo(
 			wfmode,
-			VK_CULL_MODE_NONE, // TODO: debug for backface culling!
-			VK_FRONT_FACE_CLOCKWISE,
+			VK_CULL_MODE_FRONT_BIT, // TODO: debug for backface culling!
+			VK_FRONT_FACE_COUNTER_CLOCKWISE,
 			0);
 
 	VkPipelineColorBlendAttachmentState blendAttachmentState =
