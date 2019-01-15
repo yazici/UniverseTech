@@ -380,6 +380,7 @@
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
     </CustomBuild>
     <None Include="data\shaders\compileshaders.py" />
+    <None Include="data\shaders\csg.glsl" />
     <None Include="data\shaders\deferredmultisampling\debug.frag" />
     <None Include="data\shaders\deferredmultisampling\debug.vert" />
     <CustomBuild Include="data\shaders\deferredmultisampling\deferred.frag">

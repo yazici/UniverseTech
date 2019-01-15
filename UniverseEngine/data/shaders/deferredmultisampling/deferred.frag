@@ -60,6 +60,7 @@ vec3 calculateLighting(vec3 pos, vec3 normal, vec4 albedo)
 
 		// Attenuation
 		float atten = ubo.lights[i].radius / (pow(dist, 2.0) + 1.0);
+		//atten = 1.0;
 
 		// Diffuse part
 		vec3 N = normalize(normal);
@@ -67,30 +68,31 @@ vec3 calculateLighting(vec3 pos, vec3 normal, vec4 albedo)
 		vec3 diff = ubo.lights[i].color * albedo.rgb * NdotL * atten;
 
 		// Specular part
-		vec3 R = reflect(-L, N);
+		vec3 R = reflect(L, N);
 		float NdotR = max(0.0, dot(R, V));
 		vec3 spec = ubo.lights[i].color * albedo.a * pow(NdotR, 8.0) * atten;
 
-		result += diff + spec;	
+		result += diff + spec;
+
 	}
 
-	// cheeky hard-coded directional light for testing.
-
-	vec3 N = normalize(normal);
-	vec3 L = normalize(vec3(0, -1, 0));
-
-	vec3 V = (ubo.viewPos.xyz * vec3(1, -1, 1)) - pos;
-	V = normalize(V);
-
-	vec3 diffuse = max(dot(N, L), 0.0) * albedo.rgb;
-
-
-	vec3 R = normalize(reflect(L, N));
-	float specFactor = dot(R, V);
-	specFactor = pow(specFactor, 8.0);
-	vec3 specular = max(0.0, specFactor * albedo.a) * vec3(1);
-	result += diffuse + specular;
-
+//	// cheeky hard-coded directional light for testing.
+//
+//	vec3 N = normalize(normal);
+//	vec3 L = normalize(vec3(0, -1, 0));
+//
+//	vec3 V = (ubo.viewPos.xyz * vec3(1, -1, 1)) - pos;
+//	V = normalize(V);
+//
+//	vec3 diffuse = max(dot(N, L), 0.0) * albedo.rgb;
+//
+//
+//	vec3 R = normalize(reflect(L, N));
+//	float specFactor = dot(R, V);
+//	specFactor = pow(specFactor, 8.0);
+//	vec3 specular = max(0.0, specFactor * albedo.a) * vec3(1);
+//	result += diffuse + specular;
+//
 	return result;
 }
 
@@ -99,7 +101,7 @@ void main()
 	ivec2 attDim = textureSize(samplerPosition);
 	ivec2 UV = ivec2(inUV * attDim);
 	
-	#define ambient 0.35
+	#define ambient 0.15
 
 	// Ambient part
 	vec4 alb = resolve(samplerAlbedo, UV);

@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
-//#include "noise.glsl"
+#include "noise.glsl"
 	
 layout(location = 0) in vec2 inUV;
 	
@@ -29,36 +29,40 @@ layout (location = 2) out vec4 outAlbedo;
 
 const float EPSILON = 1.0;
 
-float map(float value, float inMin, float inMax, float outMin, float outMax) {
-  return outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin);
-}
 
-vec2 map(vec2 value, vec2 inMin, vec2 inMax, vec2 outMin, vec2 outMax) {
-  return outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin);
-}
 
-vec3 map(vec3 value, vec3 inMin, vec3 inMax, vec3 outMin, vec3 outMax) {
-  return outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin);
-}
+float fNoise(in vec3 pos){
+	const mat3 m = mat3( 0.00,  0.80,  0.60,
+                    -0.80,  0.36, -0.48,
+                    -0.60, -0.48,  0.64 );
 
-vec4 map(vec4 value, vec4 inMin, vec4 inMax, vec4 outMin, vec4 outMax) {
-  return outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin);
+	float f = 0.0;
+	vec3 q = 8.0*pos;
+    f  = 0.5000*snoise( q );
+    f += 0.2500*snoise( q );
+    f += 0.1250*snoise( q );
+    f += 0.0625*snoise( q );
+	return f;
 }
+  
+
 
 
 float sphere(in vec3 pos, in vec3 centre, float radius){
     return distance(pos, centre) - radius;
 }
 
+float planet(in vec3 pos, in vec3 centre, float radius){
+    vec3 n = normalize(pos);
+	float datum = sphere(pos, centre, radius);
+	float d = fNoise(n) * ubo.radius * ubo.maxHeight;
+	return datum + d;
+}
 
 void scene(in vec3 pos, out float dist, out float oid){
     
-    //pos.z = mod(pos.z + 50.0, 100.0) - 50.0; 
-    vec3 n = normalize(pos);
-    float displacement = sin(16.0 * n.x) * sin(11.0 * n.y) * sin(8.0 * n.z) * ubo.maxHeight * ubo.radius;
-	float fs = sphere(pos, vec3(0.0), ubo.radius);
-	float ds = fs + displacement;
-	dist = ds;
+    //pos.z = mod(pos.z + 50.0, 100.0) - 50.0;
+	dist = planet(pos, vec3(0), ubo.radius);
 	oid = 1.0;
 
 }
@@ -73,7 +77,7 @@ void raymarch(in vec3 start, in vec3 dir, out float dist, out float oid){
     float distance_travelled = 0.0;
     const int NUM_STEPS = 4096;
     const float MIN_HIT_DISTANCE = EPSILON;
-    const float MAX_TRACE_DISTANCE = 100000.0;
+    const float MAX_TRACE_DISTANCE = 10000000.0;
     
     for(int i = 0; i < NUM_STEPS; i++){
         vec3 current_pos = start + dir * distance_travelled;
@@ -99,7 +103,8 @@ void raymarch(in vec3 start, in vec3 dir, out float dist, out float oid){
 
 vec3 calcNormal( in vec3 p ) // for function f(p)
 {
-    const float h = EPSILON; // or some other value
+	float camDist = distance(ubo.camPos.xyz, p);
+    const float h = EPSILON * (camDist / 100.0); // or some other value
     #define ZERO int(min(ubo.radius,0)) // or any other non constant and
 	                         // cheap expression that is guaranteed
                                  // to evaluate to zero
@@ -117,11 +122,13 @@ vec3 calcNormal( in vec3 p ) // for function f(p)
 vec3 calcNormal6( in vec3 p ) // for function f(p)
 {
     const float eps = EPSILON; // or some other value
-    const vec2 h = vec2(eps,0);
+	float camDist = distance(ubo.camPos.xyz, p);
+    const vec2 h = vec2(eps * log2(camDist),0);
     return normalize( vec3(scene(p+h.xyy) - scene(p-h.xyy),
                            scene(p+h.yxy) - scene(p-h.yxy),
                            scene(p+h.yyx) - scene(p-h.yyx) ) );
 }
+
 
 
 /**
@@ -170,11 +177,11 @@ vec3 lookupColour(in vec3 pos) {
 
 	return vec3(red, blue, green);
 }
-  
+
+
 
 void main()
 {
-
 
     vec3 camPos = ubo.camPos.xyz;
     vec3 start = camPos;
@@ -186,11 +193,28 @@ void main()
 	float oid = -1;
 
 	raymarch(start, worldDir, dist, oid);
-	bool hit = oid > -1;
+	bool hit = oid > -0.5;
 
-	vec3 pos = start + worldDir * dist;
-	vec3 norm = hit ? calcNormal6(pos) : vec3(0);
-    vec3 colour = hit ? lookupColour(pos) : vec3(0.3);
+	if(!hit) discard; // ignore if no hit
+
+	vec3 bgc = 0.1*vec3(0.8,0.9,1.0); //*(0.5 + 0.3*worldDir.y);
+	vec3 colour = bgc;
+
+	vec3 pos = worldDir * 100000.0;
+	vec3 norm = vec3(0);
+
+	if(hit){
+
+		pos = start + worldDir * dist;
+		norm = calcNormal(pos);
+		//float occ = calcAO( pos, norm );
+		colour = lookupColour(pos);
+	}
+
+
+	//if(hit) colour *= occ;
+
+	//	colour = hit ? vec3(clamp(fNoise(normalize(pos) * 4) + 0.8, 0, 1)) : vec3(1.0);
     // Output to screen
 
 	outAlbedo = vec4(colour, 1.0);
