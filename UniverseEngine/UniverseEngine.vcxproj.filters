@@ -321,6 +321,12 @@
     <None Include="data\shaders\csg.glsl">
       <Filter>shaders</Filter>
     </None>
+    <None Include="data\shaders\omnishader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\omnishader.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\textures\terrain-ramp.png">

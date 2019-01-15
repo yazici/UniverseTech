@@ -23,9 +23,7 @@ layout(binding = 0) uniform UBO {
 } ubo;
 
 		
-layout (location = 0) out vec4 outPosition;
-layout (location = 1) out vec4 outNormal;
-layout (location = 2) out vec4 outAlbedo;
+layout (location = 0) out vec4 outColour;
 
 const float EPSILON = 1.0;
 
@@ -217,9 +215,6 @@ void main()
 	//	colour = hit ? vec3(clamp(fNoise(normalize(pos) * 4) + 0.8, 0, 1)) : vec3(1.0);
     // Output to screen
 
-	outAlbedo = vec4(colour, 1.0);
-	//outAlbedo = vec4(vec3(0.6), 1.0);
-	outNormal = vec4(norm, 1.0);
-	outPosition = vec4(pos, 1.0);
+	outColour = vec4(colour, 1.0);
 
 }

@@ -64,7 +64,7 @@ public:
 		glm::mat4 projection;
 		glm::mat4 view;
 		glm::mat4 model;
-	} uboVS, uboOffscreenVS;
+	} uboForward;
 
 	struct UboModelMatDynamic {
 		glm::mat4 *model = nullptr;
@@ -84,23 +84,18 @@ public:
 	} uboFragmentLights;
 
 	struct {
-		vks::Buffer vsFullScreen;
-		vks::Buffer vsOffscreen;
+		vks::Buffer vsForward;
 		vks::Buffer fsLights;
 		vks::Buffer modelViews;
 	} uniformBuffers;
 
 	struct {
-		VkPipeline deferred;				// Deferred lighting calculation
-		VkPipeline deferredNoMSAA;			// Deferred lighting calculation with explicit MSAA resolve
-		VkPipeline offscreen;				// (Offscreen) scene rendering (fill G-Buffers)
-		VkPipeline offscreenSampleShading;	// (Offscreen) scene rendering (fill G-Buffers) with sample shading rate enabled
-		VkPipeline debug;					// G-Buffers debug display
+		VkPipeline forward;				// Forward rendering pipeline
+		VkPipeline debug;					// debug display
 	} pipelines;
 
 	struct {
-		VkPipelineLayout deferred;
-		VkPipelineLayout offscreen;
+		VkPipelineLayout forward;
 	} pipelineLayouts;
 
 	VkDescriptorSet m_descriptorSet;
@@ -113,19 +108,9 @@ public:
 		VkImageView view;
 		VkFormat format;
 	};
-	struct FrameBuffer {
-		int32_t width, height;
-		VkFramebuffer frameBuffer;
-		FrameBufferAttachment position, normal, albedo;
-		FrameBufferAttachment depth;
-		VkRenderPass renderPass;
-	} offScreenFrameBuf;
 
 
 	void getEnabledFeatures() override;
-	void createAttachment(VkFormat format, VkImageUsageFlagBits usage, FrameBufferAttachment *attachment);
-	void prepareOffscreenFramebuffer();
-	void buildDeferredCommandBuffer();
 	void buildCommandBuffers() override;
 	void loadAssets();
 	void setupVertexDescriptions();
@@ -136,7 +121,6 @@ public:
 	size_t getDynamicAlignment();
 	void prepareUniformBuffers();
 	void updateUniformBuffersScreen();
-	void updateUniformBufferDeferredMatrices();
 	void updateUniformBufferDeferredLights();
 	void updateDynamicUniformBuffers();
 	void draw();
@@ -161,10 +145,8 @@ public:
 	// One sampler for the frame buffer color attachments
 	VkSampler m_colorSampler;
 
-	VkCommandBuffer m_offScreenCmdBuffer = VK_NULL_HANDLE;
+	VkCommandBuffer m_forwardCommandBuffer = VK_NULL_HANDLE;
 
-	// Semaphore used to synchronize between offscreen and final scene rendering
-	VkSemaphore m_offscreenSemaphore = VK_NULL_HANDLE;
 
 private:
 	std::shared_ptr<UniScene> m_CurrentScene;
