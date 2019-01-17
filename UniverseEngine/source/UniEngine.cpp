@@ -64,9 +64,9 @@ void UniEngine::Shutdown() {
 	vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
 
 	// Uniform buffers
-	uniformBuffers.vsForward.destroy();
-	uniformBuffers.modelViews.destroy();
-	uniformBuffers.fsLights.destroy();
+	m_uniformBuffers.vsForward.destroy();
+	m_uniformBuffers.modelViews.destroy();
+	m_uniformBuffers.fsLights.destroy();
 
 	vkFreeCommandBuffers(device, cmdPool, 1, &m_forwardCommandBuffer);
 
@@ -206,8 +206,8 @@ void UniEngine::prepare() {
 	std::cout << "initialize scene assets..." << std::endl;
 	loadAssets();
 	
-	std::cout << "Initialize vertex descriptions..." << std::endl;
-	setupVertexDescriptions();
+	//std::cout << "Initialize vertex descriptions..." << std::endl;
+	//setupVertexDescriptions();
 	
 	std::cout << "Initialize uniform buffers..." << std::endl;
 	prepareUniformBuffers();
@@ -471,7 +471,7 @@ void UniEngine::prepareUniformBuffers() {
 	VK_CHECK_RESULT(vulkanDevice->createBuffer(
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		&uniformBuffers.vsForward,
+		&m_uniformBuffers.vsForward,
 		sizeof(uboForward)));
 
 	auto models = m_CurrentScene->GetModels();
@@ -480,24 +480,24 @@ void UniEngine::prepareUniformBuffers() {
 	uboModelMatDynamic.model = (glm::mat4 *)alignedAlloc(bufferSize, dynamicAlignment);
 	assert(uboModelMatDynamic.model);
 
-	// Deferred vertex shader dynamic
+	// vertex shader dynamic
 	VK_CHECK_RESULT(vulkanDevice->createBuffer(
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 
-		&uniformBuffers.modelViews, bufferSize));
+		&m_uniformBuffers.modelViews, bufferSize));
 
 
-	// Deferred fragment shader
+	// fragment shader
 	VK_CHECK_RESULT(vulkanDevice->createBuffer(
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		&uniformBuffers.fsLights,
+		&m_uniformBuffers.fsLights,
 		sizeof(uboFragmentLights)));
 
 	// Map persistent
-	VK_CHECK_RESULT(uniformBuffers.vsForward.map());
-	VK_CHECK_RESULT(uniformBuffers.modelViews.map());
-	VK_CHECK_RESULT(uniformBuffers.fsLights.map());
+	VK_CHECK_RESULT(m_uniformBuffers.vsForward.map());
+	VK_CHECK_RESULT(m_uniformBuffers.modelViews.map());
+	VK_CHECK_RESULT(m_uniformBuffers.fsLights.map());
 
 	// Update
 	updateUniformBuffersScreen();
@@ -507,25 +507,25 @@ void UniEngine::prepareUniformBuffers() {
 
 void UniEngine::setupDescriptorSetLayout() {
 	// Deferred shading layout
-	std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings =
+	m_setLayoutBindings =
 	{
-		// Binding 0 : Vertex shader uniform buffer
+		// Binding 0 : uniform buffer
 		vks::initializers::descriptorSetLayoutBinding(
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			VK_SHADER_STAGE_VERTEX_BIT,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 			0),
-		// Binding 1 : Fragment shader uniform buffer
+		// Binding 1 : lights uniform buffer
 		vks::initializers::descriptorSetLayoutBinding(
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-			VK_SHADER_STAGE_FRAGMENT_BIT,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 			1),
 
 	};
 
 	VkDescriptorSetLayoutCreateInfo descriptorLayout =
 		vks::initializers::descriptorSetLayoutCreateInfo(
-			setLayoutBindings.data(),
-			static_cast<uint32_t>(setLayoutBindings.size()));
+			m_setLayoutBindings.data(),
+			static_cast<uint32_t>(m_setLayoutBindings.size()));
 
 	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &m_descriptorSetLayout));
 
@@ -654,7 +654,6 @@ void UniEngine::setupDescriptorPool() {
 }
 
 void UniEngine::setupDescriptorSets() {
-	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 
 	// Textured quad descriptor set
 	VkDescriptorSetAllocateInfo allocInfo =
@@ -666,22 +665,22 @@ void UniEngine::setupDescriptorSets() {
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSet));
 
 
-	writeDescriptorSets = {
+	m_writeDescriptorSets = {
 		// Binding 0 : Vertex shader uniform buffer
 		vks::initializers::writeDescriptorSet(
 			m_descriptorSet,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			0,
-			&uniformBuffers.vsForward.descriptor),
+			&m_uniformBuffers.vsForward.descriptor),
 		// Binding 1 : Fragment shader uniform buffer
 		vks::initializers::writeDescriptorSet(
 			m_descriptorSet,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			1,
-			&uniformBuffers.fsLights.descriptor),
+			&m_uniformBuffers.fsLights.descriptor),
 	};
 
-	vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+	vkUpdateDescriptorSets(device, static_cast<uint32_t>(m_writeDescriptorSets.size()), m_writeDescriptorSets.data(), 0, nullptr);
 
 	// Models
 	auto models = m_CurrentScene->GetModels();
@@ -701,13 +700,13 @@ void UniEngine::setupDescriptorSets() {
 				model->m_DescriptorSet,
 				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 				0,
-				&uniformBuffers.vsForward.descriptor),
+				&m_uniformBuffers.vsForward.descriptor),
 			// Binding 1 : Vertex shader uniform buffer
 			vks::initializers::writeDescriptorSet(
 				model->m_DescriptorSet,
 				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
 				1,
-				&uniformBuffers.modelViews.descriptor),
+				&m_uniformBuffers.modelViews.descriptor),
 		};
 		vkUpdateDescriptorSets(device, static_cast<uint32_t>(modelWriteDescriptorSets.size()), modelWriteDescriptorSets.data(), 0, nullptr);
 	});
@@ -799,7 +798,7 @@ void UniEngine::updateUniformBuffersScreen() {
 	uboForward.projection = GetScene()->GetCameraComponent()->matrices.projection;
 	uboForward.view = GetScene()->GetCameraComponent()->matrices.view;
 	uboForward.model = glm::mat4(1.f);
-	memcpy(uniformBuffers.vsForward.mapped, &uboForward, sizeof(uboForward));
+	memcpy(m_uniformBuffers.vsForward.mapped, &uboForward, sizeof(uboForward));
 }
 
 // Update fragment shader light position uniform block
@@ -809,7 +808,7 @@ void UniEngine::updateUniformBufferDeferredLights() {
 	uint32_t lightCount = 0;
 	GetScene()->m_World->each<TransformComponent, LightComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<LightComponent> light) {
 		//std::cout << "Found a light! " << lightCount;
-		if(light->enabled && lightCount < 256) {
+		if(light->enabled && lightCount < MAX_LIGHT_COUNT) {
 			auto lPos = glm::vec4(transform->TransformLocalToWS(transform->m_dPos), 0);
 			auto lCol = light->color;
 			uboFragmentLights.lights[lightCount].color = lCol;
@@ -829,7 +828,7 @@ void UniEngine::updateUniformBufferDeferredLights() {
 
 	//std::cout << "Enabled lights: " << lightCount << std::endl;
 
-	memcpy(uniformBuffers.fsLights.mapped, &uboFragmentLights, sizeof(uboFragmentLights));
+	memcpy(m_uniformBuffers.fsLights.mapped, &uboFragmentLights, sizeof(uboFragmentLights));
 }
 
 void UniEngine::updateDynamicUniformBuffers() {
@@ -843,11 +842,11 @@ void UniEngine::updateDynamicUniformBuffers() {
 		index++;
 	});
 
-	memcpy(uniformBuffers.modelViews.mapped, uboModelMatDynamic.model, uniformBuffers.modelViews.size);
+	memcpy(m_uniformBuffers.modelViews.mapped, uboModelMatDynamic.model, m_uniformBuffers.modelViews.size);
 	// Flush to make changes visible to the host 
 	VkMappedMemoryRange memoryRange = vks::initializers::mappedMemoryRange();
-	memoryRange.memory = uniformBuffers.modelViews.memory;
-	memoryRange.size = uniformBuffers.modelViews.size;
+	memoryRange.memory = m_uniformBuffers.modelViews.memory;
+	memoryRange.size = m_uniformBuffers.modelViews.size;
 	vkFlushMappedMemoryRanges(device, 1, &memoryRange);
 }
 

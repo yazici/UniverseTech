@@ -66,12 +66,16 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
 			0),
-		// Binding 1 : Noise layer storage buffer
+		// Binding 1 : uniform buffer
+		vks::initializers::descriptorSetLayoutBinding(
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
+			1),
+		// Binding 2 : Noise layer storage buffer
 		vks::initializers::descriptorSetLayoutBinding(
 			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-			1),
-
+			2),
 	};
 
 	VkDescriptorSetLayoutCreateInfo descriptorLayout =
@@ -169,8 +173,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 
 	std::vector<VkDescriptorPoolSize> poolSizes =
 	{
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
-		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2),
+		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2),
 		vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1),
 	};
 
@@ -192,19 +195,24 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 
 	VK_CHECK_RESULT(vkAllocateDescriptorSets(device, &allocInfo, &m_DescriptorSet));
 
-	std::vector<VkWriteDescriptorSet> writeDescriptorSets =
-	{
+	std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
 		// Binding 0: Vertex shader uniform buffer
 		vks::initializers::writeDescriptorSet(
 			m_DescriptorSet,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			0,
 			&GetBuffer("uniform")->descriptor),
-		// Binding 1: Noise layer storage buffer
+		// Binding 1: Vertex shader uniform buffer
+		vks::initializers::writeDescriptorSet(
+			m_DescriptorSet,
+			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			1,
+			&engine.m_uniformBuffers.fsLights.descriptor),
+		// Binding 2: Noise layer storage buffer
 		vks::initializers::writeDescriptorSet(
 			m_DescriptorSet,
 			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			1,
+			2,
 			&GetBuffer("noiselayers")->descriptor),
 
 	};

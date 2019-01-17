@@ -3,7 +3,7 @@
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
-            "position": [0, 0, -22000.0],
+            "position": [0, 0, -2200.0],
             "rotation": [0, 0, 0]
         },
         "sceneObjects": [
@@ -13,7 +13,7 @@
                 "position": [ 0.0, 0.0, 0.0 ],
                 "rotation": [ 0, 0, 0 ],
                 "enabled": true,
-                "radius": 6000.0,
+                "radius": 600.0,
                 "maxHeight": 0.03,
                 "maxDepth": 0.1,
                 "hasOcean": false,
@@ -22,9 +22,9 @@
             {
                 "type": "light",
                 "name": "light-sun",
-                "position": [ 3000.0, 0, -5000.0 ],
-                "radius": 150000.0,
-                "color": [ 200, 200, 200, 1 ],
+                "position": [ 0.0, 1000, -400.0 ],
+                "radius": 50000.0,
+                "color": [ 1, 1, 1, 1 ],
                 "on": true
             }
         ]

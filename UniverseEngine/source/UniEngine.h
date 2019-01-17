@@ -21,6 +21,7 @@
 // todo: check if hardware supports sample number (or select max. supported)
 #define SAMPLE_COUNT VK_SAMPLE_COUNT_8_BIT
 
+#define MAX_LIGHT_COUNT 1000
 
 // forward declarations
 class UniMaterial;
@@ -78,7 +79,7 @@ public:
 	};
 
 	struct {
-		Light lights[256];
+		Light lights[MAX_LIGHT_COUNT];
 		glm::vec4 viewPos;
 		uint32_t numLights;
 	} uboFragmentLights;
@@ -87,7 +88,7 @@ public:
 		vks::Buffer vsForward;
 		vks::Buffer fsLights;
 		vks::Buffer modelViews;
-	} uniformBuffers;
+	} m_uniformBuffers;
 
 	struct {
 		VkPipeline forward;				// Forward rendering pipeline
@@ -100,6 +101,9 @@ public:
 
 	VkDescriptorSet m_descriptorSet;
 	VkDescriptorSetLayout m_descriptorSetLayout;
+
+	std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
+	std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
 
 	// Framebuffer for offscreen rendering
 	struct FrameBufferAttachment {

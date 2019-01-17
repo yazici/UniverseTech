@@ -346,6 +346,26 @@ vec2 worley(vec3 P, float jitter, bool manhattanDistance) {
 
 }
 
+float fbm(int octaves, in vec3 pos){
+	// Properties
+	float lacunarity = 2.0;
+	float gain = 0.5;
+	//
+	// Initial values
+	float amplitude = 0.5;
+	float frequency = 1.;
+
+	float n = 0.0;
+	//
+	// Loop of octaves
+	for (int i = 0; i < octaves; i++) {
+		n += amplitude * snoise(frequency*pos);
+		frequency *= lacunarity;
+		amplitude *= gain;
+	}
+	return n;
+}
+
   
  float fractalNoise(int start, int octaves, vec3 pos){
 
@@ -359,17 +379,14 @@ vec2 worley(vec3 P, float jitter, bool manhattanDistance) {
 		v = snoise(pos);
 	}
 
-	float ampFractal = 1.0;
 
 	while(++i < octaves + start){
-		ampFractal += amplitude;
 		pos *= lacunarity;
 		amplitude *= gain;
 		if(i >= start){
 			v += snoise(pos) * amplitude;
 		}
 	}
-	v *= (1.0 / ampFractal);
 	return v;
  }
 
