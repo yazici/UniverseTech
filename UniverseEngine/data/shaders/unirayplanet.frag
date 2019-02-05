@@ -46,7 +46,7 @@ float sphere(in vec3 pos, in vec3 centre, float radius){
 float planet(in vec3 pos, in vec3 centre, float radius){
     vec3 n = normalize(pos);
     float datum = sphere(pos, centre, radius);
-    float d = fbm(6, n);
+    float d = fbm(4, n);
     d = (d + 1.0) / 2.0;
 	d = clamp(d, 0, 1);
 	return datum + d * ubo.radius * ubo.maxHeight;
