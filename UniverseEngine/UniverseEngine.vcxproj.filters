@@ -370,8 +370,12 @@
     <CustomBuild Include="data\shaders\unirayplanet.vert">
       <Filter>shaders</Filter>
     </CustomBuild>
-    <CustomBuild Include="data\shaders\omnishader.frag" />
-    <CustomBuild Include="data\shaders\omnishader.vert" />
+    <CustomBuild Include="data\shaders\omnishader.frag">
+      <Filter>shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="data\shaders\omnishader.vert">
+      <Filter>shaders</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\levels\testlevel.json">

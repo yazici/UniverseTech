@@ -9,8 +9,6 @@ Currently built as a Visual Studio 2017 Win 10 x64 project, with AVX and multith
 
 ![Demo scene screenshot](screenshots/current.png)
 
-![Debug overlay screenshot](screenshots/debug.png)
-
 
 Base engine capabilities in current version:
 
@@ -20,10 +18,8 @@ Base engine capabilities in current version:
 - JSON file format for level data.
 - Continuous level of detail procedural planet generator.
 - Entity Component System architecture for data-driven behaviour models.
-- Deferred shading and lighting model with MSAA.
+- Forward shading model with ray-marching / sphere-tracing support for SDF.
 - GUI overlay with input handling.
-- GBuffer debug visualisation.
 - Multithreading.
 - Input management.
 - Windows, Mac, Linux, iOS and Android support in-engine (but project needs work to compile targets).
-
