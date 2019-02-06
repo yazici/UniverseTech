@@ -231,72 +231,72 @@ void UniEngine::SetupInput() {
                             [this]() { paused = !paused; });
 
   m_InputManager->OnRelease(UniInput::ButtonExperiment, [this]() {
-    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+    SceneManager()->EmitEvent<InputEvent>(
         {UniInput::ButtonExperiment, 1.0f});
   });
 
   m_InputManager->OnRelease(UniInput::ButtonBoostUp, [this]() {
-    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+    SceneManager()->EmitEvent<InputEvent>(
         {UniInput::ButtonBoostUp, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonBoostDown, [this]() {
-    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+    SceneManager()->EmitEvent<InputEvent>(
         {UniInput::ButtonBoostDown, 1.0f});
   });
 
   m_InputManager->OnPress(UniInput::ButtonRollLeft, [this]() {
-    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+    SceneManager()->EmitEvent<InputEvent>(
         {UniInput::ButtonRollLeft, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonRollLeft, [this]() {
-    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+    SceneManager()->EmitEvent<InputEvent>(
         {UniInput::ButtonRollLeft, 0.0f});
   });
   m_InputManager->OnPress(UniInput::ButtonRollRight, [this]() {
-    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+    SceneManager()->EmitEvent<InputEvent>(
         {UniInput::ButtonRollRight, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonRollRight, [this]() {
-    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+    SceneManager()->EmitEvent<InputEvent>(
         {UniInput::ButtonRollRight, 0.0f});
   });
 
   m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](
                                                                float oldValue,
                                                                float newValue) {
-        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        SceneManager()->EmitEvent<InputEvent>(
             {UniInput::AxisYaw, newValue});
   });
   m_InputManager->RegisterFloatCallback(UniInput::AxisPitch, [this](
                                                                  float oldValue,
                                                                  float
                                                                      newValue) {
-        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        SceneManager()->EmitEvent<InputEvent>(
             {UniInput::AxisPitch, newValue});
   });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisThrust, [this](float oldValue, float newValue) {
-        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        SceneManager()->EmitEvent<InputEvent>(
             {UniInput::AxisThrust, newValue});
       });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisReverse, [this](float oldValue, float newValue) {
-        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        SceneManager()->EmitEvent<InputEvent>(
             {UniInput::AxisThrust, -newValue});
       });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisStrafe, [this](float oldValue, float newValue) {
-        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        SceneManager()->EmitEvent<InputEvent>(
             {UniInput::AxisStrafe, -newValue});
       });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisAscend, [this](float oldValue, float newValue) {
-        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        SceneManager()->EmitEvent<InputEvent>(
             {UniInput::AxisAscend, -newValue});
       });
   m_InputManager->RegisterBoolCallback(
       UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) {
-        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        SceneManager()->EmitEvent<InputEvent>(
             {UniInput::ButtonRightClick, newValue ? 1.f : 0.f});
       });
 }
@@ -937,9 +937,9 @@ void UniEngine::viewChanged() {
 }
 
 void UniEngine::windowResized() {
-  SceneManager()->CurrentScene()->GetCameraComponent()->aspect =
+  SceneManager()->CurrentCamera()->aspect =
       (float)width / (float)height;
-  SceneManager()->CurrentScene()->GetCameraComponent()->CalculateProjection();
+  SceneManager()->CurrentCamera()->CalculateProjection();
 }
 
 void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
@@ -948,7 +948,7 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
       ToggleWireframe();
     }
     if (overlay->checkBox("Pause camera position", &m_CamPaused)) {
-      SceneManager()->CurrentScene()->m_World->emit<CameraPauseEvent>(
+      SceneManager()->EmitEvent<CameraPauseEvent>(
           {m_CamPaused});
     }
 

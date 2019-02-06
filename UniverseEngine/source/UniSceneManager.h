@@ -27,4 +27,16 @@ class UniSceneManager {
   std::shared_ptr<UniScene> CurrentScene();
   void Tick(float frameTimer);
   bool CheckNewScene();
+
+  ECS::ComponentHandle<CameraComponent> CurrentCamera() {
+    return CurrentScene()->GetCameraComponent();
+  }
+
+  template <typename T>
+  void EmitEvent(const T& event);
 };
+
+template <typename T>
+void UniSceneManager::EmitEvent(const T& event) {
+  CurrentScene()->m_World->emit<T>(event);
+}
