@@ -1,6 +1,6 @@
 ﻿{
     "level": {
-        "name": "Test Level",
+        "name": "Second Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
             "position": [0, 0, -2200.0],

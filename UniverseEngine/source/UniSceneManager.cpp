@@ -1,16 +1,21 @@
 #include "UniSceneManager.h"
 #include "UniEngine.h"
 
-void UniSceneManager::LoadScene(std::string sceneName) {
+
+void UniSceneManager::Initialise() {
   std::cout << "Initialising new scene." << std::endl;
   m_CurrentScene = std::make_shared<UniScene>();
-  m_CurrentScene->Initialize(m_Engine);
+  m_CurrentScene->Initialize();
+}
+
+void UniSceneManager::LoadScene(std::string sceneName) {
   std::cout << "Loading assets for scene: " << sceneName << std::endl;
   LoadAssets(sceneName);
   std::cout << "Finished loading new scene." << std::endl;
 
   m_UpdateScene = false;
   m_NextScene = "";
+
 }
 
 void UniSceneManager::UnloadCurrentScene() {
@@ -37,11 +42,17 @@ std::shared_ptr<UniScene> UniSceneManager::CurrentScene() {
 }
 
 void UniSceneManager::Tick(float frameTimer) {
+  CurrentScene()->Tick(frameTimer);
+}
+
+
+bool UniSceneManager::CheckNewScene() {
   if (m_UpdateScene && !m_NextScene.empty()) {
     UnloadCurrentScene();
+    Initialise();
     LoadScene(m_NextScene);
-    return;
+    return true;
   }
 
-  CurrentScene()->Tick(frameTimer);
+  return false;
 }

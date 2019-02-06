@@ -15,7 +15,7 @@ public:
 
 	ECS::ComponentHandle<CameraComponent> GetCameraComponent() { return m_CurrentCamera->m_Entity->get<CameraComponent>(); }
 
-	void Initialize(UniEngine* engine);
+	void Initialize();
 
 	void Load(std::string filename);
 

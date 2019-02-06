@@ -22,7 +22,10 @@ UniScene::~UniScene() {
 	m_World->destroyWorld();
 }
 
-void UniScene::Initialize(UniEngine* engine) {
+void UniScene::Initialize() {
+
+    UniEngine& engine = UniEngine::GetInstance();
+
 	m_World = ECS::World::createWorld();
 	m_World->registerSystem(new MovementSystem());
 	m_World->registerSystem(new CameraSystem());
@@ -33,7 +36,7 @@ void UniScene::Initialize(UniEngine* engine) {
 	
 
 	m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
-	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine->width / (float)engine->height, 50.f, 0.1f, 100000000.f);
+	m_CurrentCamera->AddComponent<CameraComponent>(m_CurrentCamera->GetTransform(), (float)engine.width / (float)engine.height, 50.f, 0.1f, 100000000.f);
 	//m_CurrentCamera->AddComponent<MovementComponent>();
 	m_CurrentCamera->AddComponent<PlayerControlComponent>();
 	m_CurrentCamera->AddComponent<PhysicsComponent>(5000.0);

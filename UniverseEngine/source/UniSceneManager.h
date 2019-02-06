@@ -7,8 +7,6 @@
 
 #include "UniScene.h"
 
-class UniEngine;
-
 class UniSceneManager {
  private:
   bool m_UpdateScene = false;
@@ -18,12 +16,9 @@ class UniSceneManager {
   UniSceneManager() = default;
   ~UniSceneManager() = default;
 
-  UniSceneManager(UniEngine* engine) { m_Engine = engine; }
-
-  UniEngine* m_Engine;
-
   std::shared_ptr<UniScene> m_CurrentScene;
 
+  void Initialise();
   void LoadScene(std::string sceneName);
   void UnloadCurrentScene();
   void LoadAssets(std::string sceneName);
@@ -31,4 +26,5 @@ class UniSceneManager {
   void Shutdown();
   std::shared_ptr<UniScene> CurrentScene();
   void Tick(float frameTimer);
+  bool CheckNewScene();
 };

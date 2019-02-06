@@ -65,7 +65,7 @@ UniEngine::~UniEngine() {
 }
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
-  m_SceneManager = std::make_shared<UniSceneManager>(this);
+  m_SceneManager = std::make_shared<UniSceneManager>();
 
   title = "Universe Tech Test";
   paused = false;
@@ -188,7 +188,7 @@ void UniEngine::prepare() {
   std::cout << "Initialize engine..." << std::endl;
 
   std::cout << "Initialize scenegraph..." << std::endl;
-  SceneManager()->LoadScene("testlevel");
+  SceneManager()->Initialise();
 
   std::cout << "Initialize input manager..." << std::endl;
   SetupInput();
@@ -196,8 +196,8 @@ void UniEngine::prepare() {
   std::cout << "Initialize base engine..." << std::endl;
   VulkanExampleBase::prepare();
 
-  // std::cout << "Initialize vertex descriptions..." << std::endl;
-  // setupVertexDescriptions();
+  std::cout << "Load level data..." << std::endl;
+  SceneManager()->LoadScene("testlevel");
 
   std::cout << "Initialize uniform buffers..." << std::endl;
   prepareUniformBuffers();
@@ -919,9 +919,15 @@ void UniEngine::render() {
 
   draw();
   updateUniformBufferDeferredLights();
-  if (!paused)
+  if (!paused) {
     SceneManager()->Tick(frameTimer);
+  }
   updateDynamicUniformBuffers();
+
+  if(SceneManager()->CheckNewScene()){
+    m_InputManager.reset();
+    SetupInput();
+  }
 
 
 }
