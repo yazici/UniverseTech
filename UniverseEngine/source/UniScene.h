@@ -19,6 +19,8 @@ public:
 
 	void Load(std::string filename);
 
+	void Unload();
+
 	template <class T> std::shared_ptr<T> Make(std::shared_ptr<T> so);
 	template<class _Ty0, class... _Types> std::shared_ptr<_Ty0> Make(glm::vec3 pos, _Types&&... _Args);
 

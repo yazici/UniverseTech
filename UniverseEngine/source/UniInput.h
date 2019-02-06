@@ -59,7 +59,8 @@ public:
 		AxisStrafe,
 		AxisAscend,
 		ButtonBoostUp,
-		ButtonBoostDown
+		ButtonBoostDown,
+        ButtonExperiment
 	};
 
 	struct PointerPos {

@@ -43,9 +43,10 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 	case UniInput::ButtonRollRight:
 		m_InputRotation.z = -event.value;
 		break;
-
-	}
-
+    case UniInput::ButtonExperiment:
+        UniEngine::GetInstance().RequestScene("testlevel2");
+        break;
+    }
 }
 
 void PlayerControlSystem::tick(ECS::World* world, float deltaTime) {

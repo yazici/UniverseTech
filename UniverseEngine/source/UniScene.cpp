@@ -215,6 +215,16 @@ void UniScene::Load(std::string filename) {
 	std::cout << "Scene fully loaded." << std::endl;
 }
 
+void UniScene::Unload() {
+	// Meshes
+	auto models = GetModels();
+	for_each(models.begin(), models.end(), [](std::shared_ptr<UniModel> model) {
+		model->m_Model.destroy();
+		model->m_Texture.destroy();
+		model->m_NormalMap.destroy();
+	});
+}
+
 void UniScene::Tick(float deltaTime) {
 	m_World->tick(deltaTime);
 	//m_BodyTest->Update();

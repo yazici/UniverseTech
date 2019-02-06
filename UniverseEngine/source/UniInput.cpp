@@ -43,6 +43,7 @@ void UniInput::Initialize(int height, int width) {
 	m_InputMap->MapBool(ButtonToggleUI, keyboardId, gainput::KeyU);
 
 	m_InputMap->MapBool(ButtonQuit, keyboardId, gainput::KeyEscape);
+    m_InputMap->MapBool(ButtonExperiment, keyboardId, gainput::KeyX);
 
 	m_InputMap->MapBool(ButtonPause, keyboardId, gainput::KeyP);
 	m_InputMap->MapBool(ButtonPause, padId, gainput::PadButtonStart);
