@@ -5,7 +5,7 @@
 #include "UniInput.h"
 #include "UniMaterial.h"
 #include "UniModel.h"
-#include "UniScene.h"
+#include "UniSceneManager.h"
 #include "components/Components.h"
 #include "systems/events.h"
 #include "vks/VulkanTools.h"
@@ -38,9 +38,8 @@ void alignedFree(void* data) {
 void UniEngine::Shutdown() {
   std::cout << "Shutting down..." << std::endl;
 
-  m_CurrentScene->Unload();
-  m_CurrentScene.reset();
-
+  SceneManager()->Shutdown();
+  
   // Clean up used Vulkan resources
   // Note : Inherited destructor cleans up resources stored in base class
 
@@ -66,7 +65,7 @@ UniEngine::~UniEngine() {
 }
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
-  m_CurrentScene = std::make_shared<UniScene>();
+  m_SceneManager = std::make_shared<UniSceneManager>(this);
 
   title = "Universe Tech Test";
   paused = false;
@@ -189,16 +188,13 @@ void UniEngine::prepare() {
   std::cout << "Initialize engine..." << std::endl;
 
   std::cout << "Initialize scenegraph..." << std::endl;
-  m_CurrentScene->Initialize(this);
+  SceneManager()->LoadScene("testlevel");
 
   std::cout << "Initialize input manager..." << std::endl;
   SetupInput();
 
   std::cout << "Initialize base engine..." << std::endl;
   VulkanExampleBase::prepare();
-
-  std::cout << "initialize scene assets..." << std::endl;
-  loadAssets();
 
   // std::cout << "Initialize vertex descriptions..." << std::endl;
   // setupVertexDescriptions();
@@ -235,98 +231,76 @@ void UniEngine::SetupInput() {
                             [this]() { paused = !paused; });
 
   m_InputManager->OnRelease(UniInput::ButtonExperiment, [this]() {
-    m_CurrentScene->m_World->emit<InputEvent>(
+    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
         {UniInput::ButtonExperiment, 1.0f});
   });
 
   m_InputManager->OnRelease(UniInput::ButtonBoostUp, [this]() {
-    m_CurrentScene->m_World->emit<InputEvent>({UniInput::ButtonBoostUp, 1.0f});
+    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        {UniInput::ButtonBoostUp, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonBoostDown, [this]() {
-    m_CurrentScene->m_World->emit<InputEvent>(
+    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
         {UniInput::ButtonBoostDown, 1.0f});
   });
 
   m_InputManager->OnPress(UniInput::ButtonRollLeft, [this]() {
-    m_CurrentScene->m_World->emit<InputEvent>({UniInput::ButtonRollLeft, 1.0f});
+    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        {UniInput::ButtonRollLeft, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonRollLeft, [this]() {
-    m_CurrentScene->m_World->emit<InputEvent>({UniInput::ButtonRollLeft, 0.0f});
+    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+        {UniInput::ButtonRollLeft, 0.0f});
   });
   m_InputManager->OnPress(UniInput::ButtonRollRight, [this]() {
-    m_CurrentScene->m_World->emit<InputEvent>(
+    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
         {UniInput::ButtonRollRight, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonRollRight, [this]() {
-    m_CurrentScene->m_World->emit<InputEvent>(
+    SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
         {UniInput::ButtonRollRight, 0.0f});
   });
 
   m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](
                                                                float oldValue,
                                                                float newValue) {
-    m_CurrentScene->m_World->emit<InputEvent>({UniInput::AxisYaw, newValue});
+        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+            {UniInput::AxisYaw, newValue});
   });
   m_InputManager->RegisterFloatCallback(UniInput::AxisPitch, [this](
                                                                  float oldValue,
                                                                  float
                                                                      newValue) {
-    m_CurrentScene->m_World->emit<InputEvent>({UniInput::AxisPitch, newValue});
+        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
+            {UniInput::AxisPitch, newValue});
   });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisThrust, [this](float oldValue, float newValue) {
-        m_CurrentScene->m_World->emit<InputEvent>(
+        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
             {UniInput::AxisThrust, newValue});
       });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisReverse, [this](float oldValue, float newValue) {
-        m_CurrentScene->m_World->emit<InputEvent>(
+        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
             {UniInput::AxisThrust, -newValue});
       });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisStrafe, [this](float oldValue, float newValue) {
-        m_CurrentScene->m_World->emit<InputEvent>(
+        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
             {UniInput::AxisStrafe, -newValue});
       });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisAscend, [this](float oldValue, float newValue) {
-        m_CurrentScene->m_World->emit<InputEvent>(
+        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
             {UniInput::AxisAscend, -newValue});
       });
   m_InputManager->RegisterBoolCallback(
       UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) {
-        m_CurrentScene->m_World->emit<InputEvent>(
+        SceneManager()->CurrentScene()->m_World->emit<InputEvent>(
             {UniInput::ButtonRightClick, newValue ? 1.f : 0.f});
       });
 }
 
-void UniEngine::loadAssets(std::string assetName) {
-  m_CurrentScene->Load(getAssetPath() + "levels/" + assetName + ".json");
-}
-
-void UniEngine::loadAssets() {
-  loadAssets(m_NextScene);
-  m_NextScene = "";
-}
-
-void UniEngine::SwapScene(std::string assetName) {
-  std::cout << "Swapping to scene: " << assetName << std::endl;
-  std::cout << "Unloading current scene." << std::endl;
-  m_CurrentScene->Unload();
-  m_CurrentScene.reset();
-  m_InputManager.reset();
-  std::cout << "Initialising new scene." << std::endl;
-  m_CurrentScene = std::make_shared<UniScene>();
-  m_CurrentScene->Initialize(this);
-  SetupInput();
-  std::cout << "Loading assets for scene: " << assetName << std::endl;
-  loadAssets(assetName);
-  std::cout << "Finished loading new scene." << std::endl;
-}
-
-void UniEngine::RequestScene(std::string assetName) {
-  m_NextScene = assetName;
-}
 
 void UniEngine::setupVertexDescriptions() {
   // Binding description
@@ -538,7 +512,7 @@ void UniEngine::prepareUniformBuffers() {
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &m_uniformBuffers.vsForward, sizeof(uboForward)));
 
-  auto models = m_CurrentScene->GetModels();
+  auto models = SceneManager()->CurrentScene()->GetModels();
   auto dynamicAlignment = getDynamicAlignment();
   size_t bufferSize =
       std::max(static_cast<int>(models.size()), 1) * dynamicAlignment;
@@ -680,8 +654,8 @@ void UniEngine::preparePipelines() {
 }
 
 void UniEngine::setupDescriptorPool() {
-  auto modelCount = static_cast<uint32_t>(
-                        std::max((int)m_CurrentScene->GetModels().size(), 1)) *
+  auto modelCount = static_cast<uint32_t>(std::max(
+          (int)SceneManager()->CurrentScene()->GetModels().size(), 1)) *
                     2;
 
   std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -726,7 +700,7 @@ void UniEngine::setupDescriptorSets() {
                          m_writeDescriptorSets.data(), 0, nullptr);
 
   // Models
-  auto models = m_CurrentScene->GetModels();
+  auto models = SceneManager()->CurrentScene()->GetModels();
   for_each(models.begin(), models.end(),
            [allocInfo, this](std::shared_ptr<UniModel> model) {
              VkResult res = (vkAllocateDescriptorSets(device, &allocInfo,
@@ -805,9 +779,12 @@ void UniEngine::buildCommandBuffers() {
     //	vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
     //}
 
-    GetScene()->GetCameraComponent()->aspect =
+    SceneManager()->CurrentScene()->GetCameraComponent()->aspect =
         (float)viewport.width / (float)viewport.height;
-    GetScene()->GetCameraComponent()->CalculateProjection();
+    SceneManager()
+        ->CurrentScene()
+        ->GetCameraComponent()
+        ->CalculateProjection();
 
     // Final composition as full screen quad
     vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -817,7 +794,7 @@ void UniEngine::buildCommandBuffers() {
     auto dynamicAlignment = getDynamicAlignment();
     int index = 0;
 
-    auto models = m_CurrentScene->GetModels();
+    auto models = SceneManager()->CurrentScene()->GetModels();
     for_each(
         models.begin(), models.end(),
         [this, &index, dynamicAlignment, i](std::shared_ptr<UniModel> model) {
@@ -850,8 +827,10 @@ void UniEngine::buildCommandBuffers() {
 void UniEngine::updateUniformBuffersScreen() {
   uboForward.model = glm::mat4(1.0f);
 
-  uboForward.projection = GetScene()->GetCameraComponent()->matrices.projection;
-  uboForward.view = GetScene()->GetCameraComponent()->matrices.view;
+  uboForward.projection =
+      SceneManager()->CurrentScene()->GetCameraComponent()->matrices.projection;
+  uboForward.view =
+      SceneManager()->CurrentScene()->GetCameraComponent()->matrices.view;
   uboForward.model = glm::mat4(1.f);
   memcpy(m_uniformBuffers.vsForward.mapped, &uboForward, sizeof(uboForward));
 }
@@ -860,7 +839,9 @@ void UniEngine::updateUniformBuffersScreen() {
 void UniEngine::updateUniformBufferDeferredLights() {
   // each scene light into uboFragmentLights.lights
   uint32_t lightCount = 0;
-  GetScene()->m_World->each<TransformComponent, LightComponent>(
+  SceneManager()
+      ->CurrentScene()
+      ->m_World->each<TransformComponent, LightComponent>(
       [&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform,
           ECS::ComponentHandle<LightComponent> light) {
         // std::cout << "Found a light! " << lightCount;
@@ -882,7 +863,9 @@ void UniEngine::updateUniformBufferDeferredLights() {
       });
 
   uboFragmentLights.viewPos =
-      glm::vec4(GetScene()->GetCameraComponent()->GetPosition(), 0.0f) *
+      glm::vec4(
+          SceneManager()->CurrentScene()->GetCameraComponent()->GetPosition(),
+          0.0f) *
       glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
   uboFragmentLights.numLights = lightCount;
 
@@ -895,7 +878,7 @@ void UniEngine::updateUniformBufferDeferredLights() {
 void UniEngine::updateDynamicUniformBuffers() {
   int index = 0;
   auto dynamicAlignment = getDynamicAlignment();
-  auto models = m_CurrentScene->GetModels();
+  auto models = SceneManager()->CurrentScene()->GetModels();
   for_each(models.begin(), models.end(),
            [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
              glm::mat4* modelMat =
@@ -937,13 +920,10 @@ void UniEngine::render() {
   draw();
   updateUniformBufferDeferredLights();
   if (!paused)
-    m_CurrentScene->Tick(frameTimer);
+    SceneManager()->Tick(frameTimer);
   updateDynamicUniformBuffers();
 
-  if (!m_NextScene.empty()) {
-    SwapScene(m_NextScene);
-    m_NextScene = "";
-  }
+
 }
 
 void UniEngine::viewChanged() {
@@ -951,8 +931,9 @@ void UniEngine::viewChanged() {
 }
 
 void UniEngine::windowResized() {
-  GetScene()->GetCameraComponent()->aspect = (float)width / (float)height;
-  GetScene()->GetCameraComponent()->CalculateProjection();
+  SceneManager()->CurrentScene()->GetCameraComponent()->aspect =
+      (float)width / (float)height;
+  SceneManager()->CurrentScene()->GetCameraComponent()->CalculateProjection();
 }
 
 void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
@@ -961,10 +942,12 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
       ToggleWireframe();
     }
     if (overlay->checkBox("Pause camera position", &m_CamPaused)) {
-      GetScene()->m_World->emit<CameraPauseEvent>({m_CamPaused});
+      SceneManager()->CurrentScene()->m_World->emit<CameraPauseEvent>(
+          {m_CamPaused});
     }
 
-    GetScene()
+    SceneManager()
+        ->CurrentScene()
         ->m_World
         ->each<PlayerControlComponent, TransformComponent, PhysicsComponent>(
             [&](ECS::Entity* ent,
@@ -1075,11 +1058,14 @@ void UniEngine::UnRegisterMaterial(std::shared_ptr<UniMaterial> mat) {
 }
 
 void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
-  for (const auto& so : GetScene()->m_SceneObjects) {
+  for (const auto& so : SceneManager()->CurrentScene()->m_SceneObjects) {
     if (so->GetComponent<UniPlanet>()) {
       if (overlay->header(so->GetName().c_str())) {
-        auto camPos =
-            GetScene()->GetCameraObject()->GetTransform()->GetPosition();
+        auto camPos = SceneManager()
+                          ->CurrentScene()
+                          ->GetCameraObject()
+                          ->GetTransform()
+                          ->GetPosition();
         auto transform = so->GetComponent<TransformComponent>();
         camPos = transform->TransformWSToLocal(camPos);
         auto altitude = so->GetComponent<UniPlanet>()->GetAltitude(camPos);
@@ -1089,3 +1075,4 @@ void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
     }
   }
 }
+

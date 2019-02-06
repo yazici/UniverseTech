@@ -265,6 +265,7 @@
     <ClInclude Include="source\UniMaterial.h" />
     <ClInclude Include="source\UniModel.h" />
     <ClInclude Include="source\UniScene.h" />
+    <ClInclude Include="source\UniSceneManager.h" />
     <ClInclude Include="source\UniSceneObject.h" />
     <ClInclude Include="source\vks\benchmark.hpp" />
     <ClInclude Include="source\vks\camera.hpp" />
@@ -295,6 +296,7 @@
     <ClCompile Include="source\UniMaterial.cpp" />
     <ClCompile Include="source\UniModel.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
+    <ClCompile Include="source\UniSceneManager.cpp" />
     <ClCompile Include="source\UniSceneObject.cpp" />
     <ClCompile Include="source\vks\VulkanAndroid.cpp" />
     <ClCompile Include="source\vks\VulkanDebug.cpp" />

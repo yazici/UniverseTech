@@ -1,6 +1,7 @@
 #include "PlayerControlSystem.h"
 #include "../UniEngine.h"
 #include "../UniInput.h"
+#include "../UniSceneManager.h"
 
 void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 	//std::cout << "Got an input event!" << std::endl;
@@ -44,7 +45,7 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 		m_InputRotation.z = -event.value;
 		break;
     case UniInput::ButtonExperiment:
-        UniEngine::GetInstance().RequestScene("testlevel2");
+        UniEngine::GetInstance().SceneManager()->RequestNewScene("testlevel2");
         break;
     }
 }

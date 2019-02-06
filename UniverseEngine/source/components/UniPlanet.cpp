@@ -1,6 +1,7 @@
 #include "UniPlanet.h"
 #include "../UniEngine.h"
 #include "../UniScene.h"
+#include "../UniSceneManager.h"
 #include <assert.h>
 #include <iostream>
 #include "glm/gtx/quaternion.hpp"
@@ -288,7 +289,7 @@ void UniPlanet::UpdateBuffers() {
 
 void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 	auto& engine = UniEngine::GetInstance();
-	auto camera = engine.GetScene()->GetCameraComponent();
+	auto camera = engine.SceneManager()->CurrentScene()->GetCameraComponent();
 
 	//// Pass transformations to the shader
 	m_UniformBufferData.modelMat = modelMat;

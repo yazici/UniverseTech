@@ -204,6 +204,9 @@
     <ClInclude Include="source\3dmaths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\UniSceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -286,6 +289,9 @@
     </ClCompile>
     <ClCompile Include="source\components\PlayerControl.cpp">
       <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniSceneManager.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

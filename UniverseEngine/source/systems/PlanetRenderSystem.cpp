@@ -3,6 +3,7 @@
 #include "../components/Transform.h"
 #include "../UniEngine.h"
 #include "../UniScene.h"
+#include "../UniSceneManager.h"
 #define GLM_FORCE_RADIANS
 #define GLM_ENABLE_EXPERIMENTAL
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -29,7 +30,7 @@ void PlanetRenderSystem::receive(ECS::World* world, const PlanetZEvent& event) {
 void PlanetRenderSystem::tick(ECS::World* world, float deltaTime) {
 
 	world->each<UniPlanet>([&](ECS::Entity* entity, ECS::ComponentHandle<UniPlanet> planet) {
-		auto cam = UniEngine::GetInstance().GetScene()->GetCameraComponent();
+		auto cam = UniEngine::GetInstance().SceneManager()->CurrentScene()->GetCameraComponent();
 		auto transform = entity->get<TransformComponent>();
 		
 		auto camPos = transform->TransformWSToLocal(cam->GetPosition());

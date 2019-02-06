@@ -25,7 +25,7 @@
 // forward declarations
 class UniMaterial;
 class UniModel;
-class UniScene;
+class UniSceneManager;
 class UniInput;
 
 class UniEngine final : public VulkanExampleBase {
@@ -147,7 +147,7 @@ class UniEngine final : public VulkanExampleBase {
   VkCommandBuffer m_forwardCommandBuffer = VK_NULL_HANDLE;
 
  private:
-  std::shared_ptr<UniScene> m_CurrentScene;
+  std::shared_ptr<UniSceneManager> m_SceneManager;
   std::shared_ptr<UniInput> m_InputManager;
 
   std::vector<std::shared_ptr<UniMaterial>> m_MaterialInstances;
@@ -155,7 +155,9 @@ class UniEngine final : public VulkanExampleBase {
   float m_PlanetZOffset = 0;
 
  public:
-  std::shared_ptr<UniScene> GetScene() { return m_CurrentScene; }
+  std::shared_ptr<UniSceneManager> SceneManager() {
+    return m_SceneManager;
+  }
   void windowResized() override;
   std::shared_ptr<UniInput> GetInputManager() { return m_InputManager; }
   void SetupInput();
@@ -164,8 +166,5 @@ class UniEngine final : public VulkanExampleBase {
 
   void updateOverlay() override;
   void OnUpdateUserUIOverlay(vks::UIOverlay* overlay);
-  void SwapScene(std::string assetName);
-  void RequestScene(std::string assetName);
 
-  std::string m_NextScene = "testlevel";
 };
