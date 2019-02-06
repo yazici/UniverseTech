@@ -82,7 +82,7 @@ public:
 	std::map<Button, std::vector<std::function<void()>>> m_KeyDownCallbacks;
 	std::map<Button, std::vector<std::function<void()>>> m_KeyUpCallbacks;
 
-	void Initialize(int height, int width);
+	void Initialize();
 
 	void Tick();
 

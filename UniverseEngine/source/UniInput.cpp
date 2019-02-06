@@ -12,7 +12,11 @@ UniInput::~UniInput() {
 
 }
 
-void UniInput::Initialize(int height, int width) {
+void UniInput::Initialize() {
+
+    auto height = UniEngine::GetInstance().height;
+    auto width = UniEngine::GetInstance().width;
+
 	m_InputManager.SetDisplaySize(width, height);
 	
 	m_InputManager.CreateDevice<gainput::InputDeviceKeyboard>(gainput::InputDevice::DV_RAW);

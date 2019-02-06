@@ -223,7 +223,7 @@ void UniEngine::prepare() {
 
 void UniEngine::SetupInput() {
   m_InputManager = std::make_shared<UniInput>();
-  m_InputManager->Initialize(height, width);
+  m_InputManager->Initialize();
 
   m_InputManager->OnPress(UniInput::ButtonQuit,
                           [this]() { m_QuitMessageReceived = true; });
