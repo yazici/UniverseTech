@@ -6,34 +6,14 @@
 #include "UniMaterial.h"
 #include "UniModel.h"
 #include "UniSceneManager.h"
+#include "UniSceneRenderer.h"
 #include "components/Components.h"
 #include "systems/events.h"
 #include "vks/VulkanTools.h"
 
 #define ENABLE_VALIDATION true
 
-// Wrapper functions for aligned memory allocation
-// There is currently no standard for this in C++ that works across all
-// platforms and vendors, so we abstract this
-void* alignedAlloc(size_t size, size_t alignment) {
-  void* data = nullptr;
-#if defined(_MSC_VER) || defined(__MINGW32__)
-  data = _aligned_malloc(size, alignment);
-#else
-  int res = posix_memalign(&data, alignment, size);
-  if (res != 0)
-    data = nullptr;
-#endif
-  return data;
-}
 
-void alignedFree(void* data) {
-#if defined(_MSC_VER) || defined(__MINGW32__)
-  _aligned_free(data);
-#else
-  free(data);
-#endif
-}
 
 void UniEngine::Shutdown() {
   std::cout << "Shutting down..." << std::endl;
@@ -52,10 +32,7 @@ void UniEngine::Shutdown() {
 
   vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
 
-  // Uniform buffers
-  m_uniformBuffers.vsForward.destroy();
-  m_uniformBuffers.modelViews.destroy();
-  m_uniformBuffers.fsLights.destroy();
+  SceneRenderer()->ShutDown();
 
   vkFreeCommandBuffers(device, cmdPool, 1, &m_forwardCommandBuffer);
 }
@@ -66,6 +43,7 @@ UniEngine::~UniEngine() {
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
   m_SceneManager = std::make_shared<UniSceneManager>();
+  m_SceneRenderer = std::make_shared<UniSceneRenderer>();
 
   title = "Universe Tech Test";
   paused = false;
@@ -199,8 +177,7 @@ void UniEngine::prepare() {
   std::cout << "Load level data..." << std::endl;
   SceneManager()->LoadScene("testlevel");
 
-  std::cout << "Initialize uniform buffers..." << std::endl;
-  prepareUniformBuffers();
+  SceneRenderer()->Initialise();
 
   std::cout << "Initialize descriptor set layouts..." << std::endl;
   setupDescriptorSetLayout();
@@ -301,7 +278,7 @@ void UniEngine::SetupInput() {
       });
 }
 
-
+// TODO: Move this into UniModel material so models can use it.
 void UniEngine::setupVertexDescriptions() {
   // Binding description
   vertices.bindingDescriptions.resize(1);
@@ -503,45 +480,7 @@ void UniEngine::setupVertexDescriptions() {
 //&m_colorSampler));
 //}
 
-// Prepare and initialize uniform buffer containing shader uniforms
-void UniEngine::prepareUniformBuffers() {
-  // Fullscreen vertex shader
-  VK_CHECK_RESULT(vulkanDevice->createBuffer(
-      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-      &m_uniformBuffers.vsForward, sizeof(uboForward)));
 
-  auto models = SceneManager()->CurrentScene()->GetModels();
-  auto dynamicAlignment = getDynamicAlignment();
-  size_t bufferSize =
-      std::max(static_cast<int>(models.size()), 1) * dynamicAlignment;
-  uboModelMatDynamic.model =
-      (glm::mat4*)alignedAlloc(bufferSize, dynamicAlignment);
-  assert(uboModelMatDynamic.model);
-
-  // vertex shader dynamic
-  VK_CHECK_RESULT(vulkanDevice->createBuffer(
-      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-      &m_uniformBuffers.modelViews, bufferSize));
-
-  // fragment shader
-  VK_CHECK_RESULT(vulkanDevice->createBuffer(
-      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-      &m_uniformBuffers.fsLights, sizeof(uboFragmentLights)));
-
-  // Map persistent
-  VK_CHECK_RESULT(m_uniformBuffers.vsForward.map());
-  VK_CHECK_RESULT(m_uniformBuffers.modelViews.map());
-  VK_CHECK_RESULT(m_uniformBuffers.fsLights.map());
-
-  // Update
-  updateUniformBuffersScreen();
-  updateUniformBufferDeferredLights();
-  updateDynamicUniformBuffers();
-}
 
 void UniEngine::setupDescriptorSetLayout() {
   // Deferred shading layout
@@ -675,6 +614,8 @@ void UniEngine::setupDescriptorPool() {
                                          &descriptorPool));
 }
 
+
+// TODO: move this and prior pool layout setup to scenerenderer
 void UniEngine::setupDescriptorSets() {
   // Textured quad descriptor set
   VkDescriptorSetAllocateInfo allocInfo =
@@ -786,33 +727,33 @@ void UniEngine::buildCommandBuffers() {
         ->GetCameraComponent()
         ->CalculateProjection();
 
-    // Final composition as full screen quad
-    vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-                      pipelines.forward);
-    vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
+    //// Final composition as full screen quad
+    //vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                  pipelines.forward);
+    //vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
 
-    auto dynamicAlignment = getDynamicAlignment();
-    int index = 0;
+    //auto dynamicAlignment = getDynamicAlignment();
+    //int index = 0;
 
-    auto models = SceneManager()->CurrentScene()->GetModels();
-    for_each(
-        models.begin(), models.end(),
-        [this, &index, dynamicAlignment, i](std::shared_ptr<UniModel> model) {
-          VkDeviceSize offsets[1] = {0};
-          uint32_t dynamicOffset =
-              index * static_cast<uint32_t>(dynamicAlignment);
-          vkCmdBindDescriptorSets(drawCmdBuffers[i],
-                                  VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                  pipelineLayouts.forward, 0, 1,
-                                  &model->m_DescriptorSet, 1, &dynamicOffset);
-          vkCmdBindVertexBuffers(drawCmdBuffers[i], VERTEX_BUFFER_BIND_ID, 1,
-                                 &model->m_Model.vertices.buffer, offsets);
-          vkCmdBindIndexBuffer(drawCmdBuffers[i], model->m_Model.indices.buffer,
-                               0, VK_INDEX_TYPE_UINT32);
-          vkCmdDrawIndexed(drawCmdBuffers[i], model->m_Model.indexCount, 1, 0,
-                           0, 0);
-          index++;
-        });
+    //auto models = SceneManager()->CurrentScene()->GetModels();
+    //for_each(
+    //    models.begin(), models.end(),
+    //    [this, &index, dynamicAlignment, i](std::shared_ptr<UniModel> model) {
+    //      VkDeviceSize offsets[1] = {0};
+    //      uint32_t dynamicOffset =
+    //          index * static_cast<uint32_t>(dynamicAlignment);
+    //      vkCmdBindDescriptorSets(drawCmdBuffers[i],
+    //                              VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                              pipelineLayouts.forward, 0, 1,
+    //                              &model->m_DescriptorSet, 1, &dynamicOffset);
+    //      vkCmdBindVertexBuffers(drawCmdBuffers[i], VERTEX_BUFFER_BIND_ID, 1,
+    //                             &model->m_Model.vertices.buffer, offsets);
+    //      vkCmdBindIndexBuffer(drawCmdBuffers[i], model->m_Model.indices.buffer,
+    //                           0, VK_INDEX_TYPE_UINT32);
+    //      vkCmdDrawIndexed(drawCmdBuffers[i], model->m_Model.indexCount, 1, 0,
+    //                       0, 0);
+    //      index++;
+    //    });
 
     for (const auto& material : m_MaterialInstances) {
       material->AddToCommandBuffer(drawCmdBuffers[i]);
@@ -824,80 +765,7 @@ void UniEngine::buildCommandBuffers() {
   }
 }
 
-void UniEngine::updateUniformBuffersScreen() {
-  uboForward.model = glm::mat4(1.0f);
 
-  uboForward.projection =
-      SceneManager()->CurrentScene()->GetCameraComponent()->matrices.projection;
-  uboForward.view =
-      SceneManager()->CurrentScene()->GetCameraComponent()->matrices.view;
-  uboForward.model = glm::mat4(1.f);
-  memcpy(m_uniformBuffers.vsForward.mapped, &uboForward, sizeof(uboForward));
-}
-
-// Update light position uniform block
-void UniEngine::updateUniformBufferDeferredLights() {
-  // each scene light into uboFragmentLights.lights
-  uint32_t lightCount = 0;
-  SceneManager()
-      ->CurrentScene()
-      ->m_World->each<TransformComponent, LightComponent>(
-      [&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform,
-          ECS::ComponentHandle<LightComponent> light) {
-        // std::cout << "Found a light! " << lightCount;
-        if (light->enabled && lightCount < MAX_LIGHT_COUNT) {
-          auto lPos =
-              glm::vec4(transform->TransformLocalToWS(transform->m_dPos), 0);
-          auto lCol = light->color;
-          uboFragmentLights.lights[lightCount].color = lCol;
-          uboFragmentLights.lights[lightCount].radius = light->radius;
-          uboFragmentLights.lights[lightCount].position = lPos;
-          lightCount++;
-          // std::cout << ", radius: " << light->radius;
-          // std::cout << ", pos: " << lPos.x << ", " << lPos.y << ", " <<
-          // lPos.z << ". "; std::cout << ", col: " << lCol.r << ", " << lCol.g
-          // << ", " << lCol.b << ", " << lCol.a << ". " << std::endl;
-        } else {
-          std::cout << "Light is disabled!" << std::endl;
-        }
-      });
-
-  uboFragmentLights.viewPos =
-      glm::vec4(
-          SceneManager()->CurrentScene()->GetCameraComponent()->GetPosition(),
-          0.0f) *
-      glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
-  uboFragmentLights.numLights = lightCount;
-
-  // std::cout << "Enabled lights: " << lightCount << std::endl;
-
-  memcpy(m_uniformBuffers.fsLights.mapped, &uboFragmentLights,
-         sizeof(uboFragmentLights));
-}
-
-void UniEngine::updateDynamicUniformBuffers() {
-  int index = 0;
-  auto dynamicAlignment = getDynamicAlignment();
-  auto models = SceneManager()->CurrentScene()->GetModels();
-  for_each(models.begin(), models.end(),
-           [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
-             glm::mat4* modelMat =
-                 (glm::mat4*)(((uint64_t)uboModelMatDynamic.model +
-                               (index * dynamicAlignment)));
-             *modelMat = model->GetTransform()->GetModelMat();
-             // std::cout << "Updating model matrix index: " << index <<
-             // std::endl;
-             index++;
-           });
-
-  memcpy(m_uniformBuffers.modelViews.mapped, uboModelMatDynamic.model,
-         m_uniformBuffers.modelViews.size);
-  // Flush to make changes visible to the host
-  VkMappedMemoryRange memoryRange = vks::initializers::mappedMemoryRange();
-  memoryRange.memory = m_uniformBuffers.modelViews.memory;
-  memoryRange.size = m_uniformBuffers.modelViews.size;
-  vkFlushMappedMemoryRanges(device, 1, &memoryRange);
-}
 
 void UniEngine::draw() {
   VulkanExampleBase::prepareFrame();
@@ -918,11 +786,12 @@ void UniEngine::render() {
   m_InputManager->Tick();
 
   draw();
-  updateUniformBufferDeferredLights();
+
+  SceneRenderer()->Render();
+
   if (!paused) {
     SceneManager()->Tick(frameTimer);
   }
-  updateDynamicUniformBuffers();
 
   if(SceneManager()->CheckNewScene()){
     m_InputManager.reset();
@@ -933,7 +802,7 @@ void UniEngine::render() {
 }
 
 void UniEngine::viewChanged() {
-  updateUniformBuffersScreen();
+  SceneRenderer()->ViewChanged();
 }
 
 void UniEngine::windowResized() {

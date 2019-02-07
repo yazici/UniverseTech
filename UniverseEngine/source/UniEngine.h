@@ -20,12 +20,12 @@
 // todo: check if hardware supports sample number (or select max. supported)
 #define SAMPLE_COUNT VK_SAMPLE_COUNT_8_BIT
 
-#define MAX_LIGHT_COUNT 1000
 
 // forward declarations
 class UniMaterial;
 class UniModel;
 class UniSceneManager;
+class UniSceneRenderer;
 class UniInput;
 
 class UniEngine final : public VulkanExampleBase {
@@ -49,41 +49,12 @@ class UniEngine final : public VulkanExampleBase {
       vks::VERTEX_COMPONENT_TANGENT,
   });
 
-  std::vector<std::shared_ptr<UniModel>> m_models;
-
   struct {
     VkPipelineVertexInputStateCreateInfo inputState;
     std::vector<VkVertexInputBindingDescription> bindingDescriptions;
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
   } vertices;
 
-  struct {
-    glm::mat4 projection;
-    glm::mat4 view;
-    glm::mat4 model;
-  } uboForward;
-
-  struct UboModelMatDynamic {
-    glm::mat4* model = nullptr;
-  } uboModelMatDynamic;
-
-  struct Light {
-    glm::vec4 position;
-    glm::vec3 color;
-    float radius;
-  };
-
-  struct {
-    Light lights[MAX_LIGHT_COUNT];
-    glm::vec4 viewPos;
-    uint32_t numLights;
-  } uboFragmentLights;
-
-  struct {
-    vks::Buffer vsForward;
-    vks::Buffer fsLights;
-    vks::Buffer modelViews;
-  } m_uniformBuffers;
 
   struct {
     VkPipeline forward;  // Forward rendering pipeline
@@ -110,18 +81,12 @@ class UniEngine final : public VulkanExampleBase {
 
   void getEnabledFeatures() override;
   void buildCommandBuffers() override;
-  void loadAssets();
-  void loadAssets(std::string assetName);
   void setupVertexDescriptions();
   void setupDescriptorPool();
   void setupDescriptorSetLayout();
   void setupDescriptorSets();
   void preparePipelines();
   size_t getDynamicAlignment();
-  void prepareUniformBuffers();
-  void updateUniformBuffersScreen();
-  void updateUniformBufferDeferredLights();
-  void updateDynamicUniformBuffers();
   void draw();
   void prepare() override;
   void render() override;
@@ -149,15 +114,16 @@ class UniEngine final : public VulkanExampleBase {
  private:
   std::shared_ptr<UniSceneManager> m_SceneManager;
   std::shared_ptr<UniInput> m_InputManager;
+  std::shared_ptr<UniSceneRenderer> m_SceneRenderer;
+
 
   std::vector<std::shared_ptr<UniMaterial>> m_MaterialInstances;
   bool m_CamPaused = false;
   float m_PlanetZOffset = 0;
 
  public:
-  std::shared_ptr<UniSceneManager> SceneManager() {
-    return m_SceneManager;
-  }
+  std::shared_ptr<UniSceneManager> SceneManager() { return m_SceneManager; }
+  std::shared_ptr<UniSceneRenderer> SceneRenderer() { return m_SceneRenderer; }
   void windowResized() override;
   std::shared_ptr<UniInput> GetInputManager() { return m_InputManager; }
   void SetupInput();

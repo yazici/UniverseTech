@@ -1,4 +1,5 @@
 #include "UniMaterial.h"
+#include "UniSceneRenderer.h"
 #include <array>
 #include "UniEngine.h"
 
@@ -207,7 +208,7 @@ void PlanetMaterial::SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateI
 			m_DescriptorSet,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 			1,
-			&engine.m_uniformBuffers.fsLights.descriptor),
+      &engine.SceneRenderer()->m_uniformBuffers.fsLights.descriptor),
 		// Binding 2: Noise layer storage buffer
 		vks::initializers::writeDescriptorSet(
 			m_DescriptorSet,

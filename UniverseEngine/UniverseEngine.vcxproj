@@ -267,6 +267,7 @@
     <ClInclude Include="source\UniScene.h" />
     <ClInclude Include="source\UniSceneManager.h" />
     <ClInclude Include="source\UniSceneObject.h" />
+    <ClInclude Include="source\UniSceneRenderer.h" />
     <ClInclude Include="source\vks\benchmark.hpp" />
     <ClInclude Include="source\vks\camera.hpp" />
     <ClInclude Include="source\vks\frustum.hpp" />
@@ -298,6 +299,7 @@
     <ClCompile Include="source\UniScene.cpp" />
     <ClCompile Include="source\UniSceneManager.cpp" />
     <ClCompile Include="source\UniSceneObject.cpp" />
+    <ClCompile Include="source\UniSceneRenderer.cpp" />
     <ClCompile Include="source\vks\VulkanAndroid.cpp" />
     <ClCompile Include="source\vks\VulkanDebug.cpp" />
     <ClCompile Include="source\vks\vulkanexamplebase.cpp" />
