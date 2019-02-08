@@ -1,6 +1,7 @@
 #include "UniSceneManager.h"
 #include "UniEngine.h"
 
+std::vector<std::string> scenelist = {"testlevel", "testlevel2"};
 
 void UniSceneManager::Initialise() {
   std::cout << "Initialising new scene." << std::endl;
@@ -32,6 +33,17 @@ void UniSceneManager::RequestNewScene(std::string sceneName) {
   m_UpdateScene = true;
   m_NextScene = sceneName;
 }
+
+void UniSceneManager::CycleScenes() {
+  m_CurrentSceneIdx++;
+  if (m_CurrentSceneIdx >= scenelist.size())
+    m_CurrentSceneIdx = 0;
+
+  m_NextScene = scenelist.at(m_CurrentSceneIdx);
+  m_UpdateScene = true;
+
+}
+
 
 void UniSceneManager::Shutdown() {
   UnloadCurrentScene();

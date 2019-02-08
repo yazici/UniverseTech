@@ -12,6 +12,8 @@ class UniSceneManager {
   bool m_UpdateScene = false;
   std::string m_NextScene = "";
 
+  size_t m_CurrentSceneIdx = 0;
+
  public:
   UniSceneManager() = default;
   ~UniSceneManager() = default;
@@ -23,6 +25,7 @@ class UniSceneManager {
   void UnloadCurrentScene();
   void LoadAssets(std::string sceneName);
   void RequestNewScene(std::string sceneName);
+  void CycleScenes();
   void Shutdown();
   std::shared_ptr<UniScene> CurrentScene();
   void Tick(float frameTimer);

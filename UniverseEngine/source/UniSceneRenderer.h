@@ -14,7 +14,7 @@
 #include "vks/VulkanTexture.hpp"
 #include "vks/vulkanexamplebase.h"
 
-#define MAX_LIGHT_COUNT 10000
+#define MAX_LIGHT_COUNT 1000
 
 class UniSceneManager;
 
@@ -40,7 +40,7 @@ class UniSceneRenderer {
     Light lights[MAX_LIGHT_COUNT];
     glm::vec4 viewPos;
     uint32_t numLights;
-  } uboFragmentLights;
+  } uboLights;
 
   struct {
     vks::Buffer vsForward;
@@ -64,4 +64,6 @@ public:
   std::shared_ptr<UniSceneManager> SceneManager();
   void updateUniformBufferDeferredLights();
   void updateDynamicUniformBuffers();
+
+  void UpdateCamera(float width, float height);
 };

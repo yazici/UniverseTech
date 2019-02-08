@@ -45,7 +45,7 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 		m_InputRotation.z = -event.value;
 		break;
     case UniInput::ButtonExperiment:
-        UniEngine::GetInstance().SceneManager()->RequestNewScene("testlevel2");
+        UniEngine::GetInstance().SceneManager()->CycleScenes();
         break;
     }
 }

@@ -69,7 +69,7 @@ void UniSceneRenderer::prepareUniformBuffers() {
       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-      &m_uniformBuffers.fsLights, sizeof(uboFragmentLights)));
+      &m_uniformBuffers.fsLights, sizeof(uboLights)));
 
   // Map persistent
   VK_CHECK_RESULT(m_uniformBuffers.vsForward.map());
@@ -84,12 +84,12 @@ void UniSceneRenderer::prepareUniformBuffers() {
 
 void UniSceneRenderer::Render() {
 
-  // updateUniformBufferDeferredLights();
-  // updateDynamicUniformBuffers();
+  updateUniformBufferDeferredLights();
+  updateDynamicUniformBuffers();
 }
 
 void UniSceneRenderer::ViewChanged() {
-  // updateUniformBuffersScreen();
+  updateUniformBuffersScreen();
 }
 
 
@@ -123,10 +123,9 @@ void UniSceneRenderer::updateUniformBufferDeferredLights() {
               auto lPos = glm::vec4(
                   transform->TransformLocalToWS(transform->m_dPos), 0);
               auto lCol = light->color;
-              uboFragmentLights.lights[lightCount].color = lCol;
-              uboFragmentLights.lights[lightCount].radius = light->radius;
-              uboFragmentLights.lights[lightCount].position = lPos;
-              lightCount++;
+              uboLights.lights[lightCount].color = lCol;
+              uboLights.lights[lightCount].radius = light->radius;
+              uboLights.lights[lightCount].position = lPos;
               // std::cout << ", radius: " << light->radius;
               // std::cout << ", pos: " << lPos.x << ", " << lPos.y << ", " <<
               // lPos.z << ". "; std::cout << ", col: " << lCol.r << ", " <<
@@ -135,19 +134,20 @@ void UniSceneRenderer::updateUniformBufferDeferredLights() {
             } else {
               std::cout << "Light is disabled!" << std::endl;
             }
+            lightCount++;
           });
 
-  uboFragmentLights.viewPos =
+  uboLights.viewPos =
       glm::vec4(
           SceneManager()->CurrentScene()->GetCameraComponent()->GetPosition(),
           0.0f) *
       glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f);
-  uboFragmentLights.numLights = lightCount;
+  uboLights.numLights = lightCount;
 
-  // std::cout << "Enabled lights: " << lightCount << std::endl;
+  //std::cout << "Enabled lights: " << lightCount << std::endl;
 
-  memcpy(m_uniformBuffers.fsLights.mapped, &uboFragmentLights,
-         sizeof(uboFragmentLights));
+  memcpy(m_uniformBuffers.fsLights.mapped, &uboLights,
+         sizeof(uboLights));
 }
 
 void UniSceneRenderer::updateDynamicUniformBuffers() {
@@ -173,4 +173,9 @@ void UniSceneRenderer::updateDynamicUniformBuffers() {
   memoryRange.memory = m_uniformBuffers.modelViews.memory;
   memoryRange.size = m_uniformBuffers.modelViews.size;
   vkFlushMappedMemoryRanges(engine.GetDevice(), 1, &memoryRange);
+}
+
+void UniSceneRenderer::UpdateCamera(float width, float height) {
+  SceneManager()->CurrentScene()->GetCameraComponent()->aspect = width / height;
+  SceneManager()->CurrentScene()->GetCameraComponent()->CalculateProjection();
 }

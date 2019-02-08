@@ -279,7 +279,7 @@ void main()
 
     if(!hit) discard; // ignore if no hit
 
-    vec3 bgc = 0*vec3(0.8,0.9,1.0); //*(0.5 + 0.3*worldDir.y);
+    vec3 bgc = 0.2*vec3(0.8,0.9,1.0); //*(0.5 + 0.3*worldDir.y);
     vec3 colour = bgc;
 
     vec3 pos = worldDir * 100000.0;
@@ -294,7 +294,6 @@ void main()
 
         colour = calculateLighting(pos, norm, vec4(colour, 1.));
 
-        //colour += vec3(0.3);
     }
 
 
