@@ -22,7 +22,6 @@
 
 
 // forward declarations
-class UniMaterial;
 class UniModel;
 class UniSceneManager;
 class UniSceneRenderer;
@@ -40,37 +39,6 @@ class UniEngine final : public VulkanExampleBase {
  public:
   static UniEngine& GetInstance();
 
-  // Vertex layout for the models
-  vks::VertexLayout vertexLayout = vks::VertexLayout({
-      vks::VERTEX_COMPONENT_POSITION,
-      vks::VERTEX_COMPONENT_UV,
-      vks::VERTEX_COMPONENT_COLOR,
-      vks::VERTEX_COMPONENT_NORMAL,
-      vks::VERTEX_COMPONENT_TANGENT,
-  });
-
-  struct {
-    VkPipelineVertexInputStateCreateInfo inputState;
-    std::vector<VkVertexInputBindingDescription> bindingDescriptions;
-    std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-  } vertices;
-
-
-  struct {
-    VkPipeline forward;  // Forward rendering pipeline
-    VkPipeline debug;    // debug display
-  } pipelines;
-
-  struct {
-    VkPipelineLayout forward;
-  } pipelineLayouts;
-
-  VkDescriptorSet m_descriptorSet;
-  VkDescriptorSetLayout m_descriptorSetLayout;
-
-  std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
-  std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
-
   // Framebuffer for offscreen rendering
   struct FrameBufferAttachment {
     VkImage image;
@@ -80,12 +48,6 @@ class UniEngine final : public VulkanExampleBase {
   };
 
   void getEnabledFeatures() override;
-  void buildCommandBuffers() override;
-  void setupVertexDescriptions();
-  void setupDescriptorPool();
-  void setupDescriptorSetLayout();
-  void setupDescriptorSets();
-  void preparePipelines();
   size_t getDynamicAlignment();
   void draw();
   void prepare() override;
@@ -93,9 +55,6 @@ class UniEngine final : public VulkanExampleBase {
   void viewChanged() override;
   void OnUpdateUIOverlay(vks::UIOverlay* overlay) override;
   void ToggleWireframe();
-
-  void RegisterMaterial(std::shared_ptr<UniMaterial> mat);
-  void UnRegisterMaterial(std::shared_ptr<UniMaterial> mat);
 
   VkDevice GetDevice() { return device; }
   VkQueue GetQueue() { return queue; }
@@ -116,13 +75,11 @@ class UniEngine final : public VulkanExampleBase {
   std::shared_ptr<UniInput> m_InputManager;
   std::shared_ptr<UniSceneRenderer> m_SceneRenderer;
 
-
-  std::vector<std::shared_ptr<UniMaterial>> m_MaterialInstances;
   bool m_CamPaused = false;
   float m_PlanetZOffset = 0;
 
  public:
-  std::shared_ptr<UniSceneManager> SceneManager() { return m_SceneManager; }
+  std::shared_ptr<UniSceneManager> SceneManager(){ return m_SceneManager; }
   std::shared_ptr<UniSceneRenderer> SceneRenderer() { return m_SceneRenderer; }
   void windowResized() override;
   std::shared_ptr<UniInput> GetInputManager() { return m_InputManager; }
@@ -132,5 +89,10 @@ class UniEngine final : public VulkanExampleBase {
 
   void updateOverlay() override;
   void OnUpdateUserUIOverlay(vks::UIOverlay* overlay);
+
+  VkRenderPass &GetRenderPass() { return renderPass; }
+
+  std::vector<VkCommandBuffer> &GetCommandBuffers() { return drawCmdBuffers; }
+  std::vector<VkFramebuffer> &GetFrameBuffers() {return frameBuffers; }
 
 };

@@ -6,6 +6,8 @@
 #include <string.h>
 
 #include "UniScene.h"
+ 
+class UniSceneRenderer;
 
 class UniSceneManager {
  private:
@@ -13,6 +15,8 @@ class UniSceneManager {
   std::string m_NextScene = "";
 
   size_t m_CurrentSceneIdx = 0;
+
+  std::shared_ptr<UniSceneRenderer> m_renderer;
 
  public:
   UniSceneManager() = default;

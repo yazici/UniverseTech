@@ -28,9 +28,6 @@
     <Filter Include="Source Files\imgui">
       <UniqueIdentifier>{a94b768c-1579-4fd7-b0e2-b7126863ee5e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shaders\scenerendering">
-      <UniqueIdentifier>{53319fb8-6da1-44fa-95e1-9e5eb742bcdd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shaders\deferredmulti">
       <UniqueIdentifier>{b05c8669-3195-4f56-b5f9-abb5a7c6427f}</UniqueIdentifier>
     </Filter>
@@ -48,6 +45,9 @@
     </Filter>
     <Filter Include="Systems">
       <UniqueIdentifier>{e2618317-bb2a-42b3-9c04-57c27cb912d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Materials">
+      <UniqueIdentifier>{6ceb814f-1b2d-4af8-9440-086b5bd377ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -210,6 +210,12 @@
     <ClInclude Include="source\UniSceneRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\materials\PlanetMaterial.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="source\materials\ModelMaterial.h">
+      <Filter>Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -299,6 +305,12 @@
     <ClCompile Include="source\UniSceneRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\materials\PlanetMaterial.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="source\materials\ModelMaterial.cpp">
+      <Filter>Materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UniverseEngine.rc">
@@ -306,12 +318,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\shaders\scenerendering\scene.frag">
-      <Filter>shaders\scenerendering</Filter>
-    </None>
-    <None Include="data\shaders\scenerendering\scene.vert">
-      <Filter>shaders\scenerendering</Filter>
-    </None>
     <None Include="data\shaders\deferredmultisampling\debug.frag">
       <Filter>shaders\deferredmulti</Filter>
     </None>

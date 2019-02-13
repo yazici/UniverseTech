@@ -1,11 +1,23 @@
 #include "UniModel.h"
-
+#include "UniEngine.h"
+#include "UniSceneRenderer.h"
 
 UniModel::UniModel(std::string n) {
 	m_Name = n;
 	m_ModelCreateInfo.center = glm::vec3(0, 0, 0);
 	m_ModelCreateInfo.scale = glm::vec3(1.f);
 	m_ModelCreateInfo.uvscale = glm::vec2(1.f);
+}
+
+void UniModel::Destroy() {
+  std::cout << "Destroying planet..." << std::endl;
+
+  auto renderer = UniEngine::GetInstance().SceneRenderer();
+  renderer->UnRegisterMaterial(m_Material);
+  m_Material.reset();
+  m_Model.destroy();
+  m_Texture.destroy();
+  m_NormalMap.destroy();
 }
 
 UniModel::UniModel(std::string n, const std::string &modelpath, const std::string &texturePath, const std::string &normalMapPath) {
@@ -16,6 +28,13 @@ UniModel::UniModel(std::string n, const std::string &modelpath, const std::strin
 	m_ModelPath = modelpath;
 	m_TexturePath = texturePath;
 	m_NormalMapPath = normalMapPath;
+
+  auto renderer = UniEngine::GetInstance().SceneRenderer();
+
+  m_Material = std::static_pointer_cast<ModelMaterial>(
+      ModelMaterialFactory::create("model", "testmodel"));
+
+  renderer->RegisterMaterial(m_Material);
 }
 
 void UniModel::SetScale(float scale /*= 1.f*/) {

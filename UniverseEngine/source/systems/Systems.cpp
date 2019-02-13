@@ -7,7 +7,7 @@ void MovementSystem::tick(ECS::World* world, float deltaTime) {
 	world->each<TransformComponent, MovementComponent>([&](ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<MovementComponent> movement) {
 		
 		//movement->ApplyDrag(deltaTime);
-		std::cout << "ARGH. Movement system is moving!!!" << std::endl;
+		//std::cout << "ARGH. Movement system is moving!!!" << std::endl;
 		
 		if(!movement->HasTarget()) {
 			transform->Rotate(movement->m_Rotation * deltaTime);

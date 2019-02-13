@@ -8,18 +8,6 @@
         },
         "sceneObjects": [
             {
-                "type": "planet",
-                "name": "Daddy's World",
-                "position": [ 0.0, 0.0, 0.0 ],
-                "rotation": [ 0, 0, 0 ],
-                "enabled": true,
-                "radius": 200.0,
-                "maxHeight": 0.03,
-                "maxDepth": 0.1,
-                "hasOcean": false,
-                "density": 5515.3
-            },
-            {
                 "type": "light",
                 "name": "light-sun",
                 "position": [ 1100.0, 300, 400.0 ],

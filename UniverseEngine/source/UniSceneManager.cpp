@@ -1,4 +1,5 @@
 #include "UniSceneManager.h"
+#include "UniSceneRenderer.h"
 #include "UniEngine.h"
 
 std::vector<std::string> scenelist = {"testlevel", "testlevel2"};
@@ -7,6 +8,9 @@ void UniSceneManager::Initialise() {
   std::cout << "Initialising new scene." << std::endl;
   m_CurrentScene = std::make_shared<UniScene>();
   m_CurrentScene->Initialize();
+
+  m_renderer = UniEngine::GetInstance().SceneRenderer();
+
 }
 
 void UniSceneManager::LoadScene(std::string sceneName) {
@@ -55,6 +59,8 @@ std::shared_ptr<UniScene> UniSceneManager::CurrentScene() {
 
 void UniSceneManager::Tick(float frameTimer) {
   CurrentScene()->Tick(frameTimer);
+  m_renderer->Tick(frameTimer);
+  
 }
 
 

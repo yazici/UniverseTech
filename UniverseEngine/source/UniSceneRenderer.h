@@ -17,18 +17,19 @@
 #define MAX_LIGHT_COUNT 1000
 
 class UniSceneManager;
+class UniMaterial;
 
 class UniSceneRenderer {
- public:
+ protected:
   struct {
     glm::mat4 projection;
     glm::mat4 view;
     glm::mat4 model;
-  } uboForward;
+  } m_uboForward;
 
   struct UboModelMatDynamic {
     glm::mat4* model = nullptr;
-  } uboModelMatDynamic;
+  } m_uboModelMatDynamic;
 
   struct Light {
     glm::vec4 position;
@@ -48,22 +49,86 @@ class UniSceneRenderer {
     vks::Buffer modelViews;
   } m_uniformBuffers;
 
-public:
+  struct {
+    uint32_t time_seconds = 0;
+    uint32_t time_millis = 0;
+  } m_TimeConstants;
+
+  VkDescriptorSet m_descriptorSet;
+  VkDescriptorSetLayout m_descriptorSetLayout;
+
+  std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
+  std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
+
+  struct {
+    VkPipeline forward;  // Forward rendering pipeline
+    VkPipeline debug;    // debug display
+  } m_pipelines;
+
+  struct {
+    VkPipelineLayout forward;
+  } m_pipelineLayouts;
+
+  VkRenderPass m_renderPass;
+
+  std::vector<std::shared_ptr<UniMaterial>> m_materialInstances;
+
+  VkDescriptorPool m_descriptorPool;
+
+  VkClearColorValue m_defaultClearColor = {{0.025f, 0.025f, 0.025f, 1.0f}};
+
+  // Vertex layout for the models
+  vks::VertexLayout m_vertexLayout = vks::VertexLayout({
+      vks::VERTEX_COMPONENT_POSITION,
+      vks::VERTEX_COMPONENT_UV,
+      vks::VERTEX_COMPONENT_COLOR,
+      vks::VERTEX_COMPONENT_NORMAL,
+      vks::VERTEX_COMPONENT_TANGENT,
+  });
+
+  struct {
+    VkPipelineVertexInputStateCreateInfo inputState;
+    std::vector<VkVertexInputBindingDescription> bindingDescriptions;
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+  } m_vertices;
+
+ public:
   UniSceneRenderer() = default;
   ~UniSceneRenderer() = default;
 
-	void Initialise();
+  void Initialise();
   void ShutDown();
+  void Tick(uint32_t millis);
+  void Tick(float delta) { Tick(static_cast<uint32_t>(1000 * delta));}
 
-  void prepareUniformBuffers();
+	void SetupVertexDescriptions();
+  void PrepareUniformBuffers();
 
   void Render();
   void ViewChanged();
   void updateUniformBuffersScreen();
 
   std::shared_ptr<UniSceneManager> SceneManager();
-  void updateUniformBufferDeferredLights();
-  void updateDynamicUniformBuffers();
+  void UpdateUniformBufferDeferredLights();
+  void UpdateDynamicUniformBuffers();
 
   void UpdateCamera(float width, float height);
+  void SetupDescriptorSetLayout();
+  void PreparePipelines();
+  void SetupDescriptorPool();
+  void SetupDescriptorSets();
+  void BuildCommandBuffers();
+  void RegisterMaterial(std::shared_ptr<UniMaterial> mat);
+  void UnRegisterMaterial(std::shared_ptr<UniMaterial> mat);
+
+  vks::VertexLayout GetVertexLayout() { return m_vertexLayout; }
+
+  void AddTimeDelta(uint32_t millis) {
+    millis += m_TimeConstants.time_millis;
+    m_TimeConstants.time_seconds += millis / 1000;
+    m_TimeConstants.time_millis = millis % 1000;
+  }
+
+  std::string GetShader(std::string shader);
+  VkDescriptorSet *GetDescriptorSet();
 };

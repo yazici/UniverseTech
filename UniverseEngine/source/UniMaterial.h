@@ -1,98 +1,39 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <map>
-#include "vks/VulkanBuffer.hpp"
 #include "factory.h"
-#include "vks/VulkanTexture.hpp"
+#include "vks/VulkanBuffer.hpp"
 #include "vks/VulkanModel.hpp"
+#include "vks/VulkanTexture.hpp"
 
+class UniSceneRenderer;
 
 class UniMaterial {
-public:
+ public:
 
-	struct {
-		VkPipelineVertexInputStateCreateInfo inputState;
-		std::vector<VkVertexInputBindingDescription> bindingDescriptions;
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
-	} m_VertexDescription;
+  UniMaterial() = default;
+  virtual void Destroy();
+  virtual ~UniMaterial() { Destroy(); }
 
-	// Vertex layout for the models
-	vks::VertexLayout m_VertexLayout = vks::VertexLayout({
-		vks::VERTEX_COMPONENT_POSITION,
-		vks::VERTEX_COMPONENT_UV,
-		vks::VERTEX_COMPONENT_COLOR,
-		vks::VERTEX_COMPONENT_NORMAL,
-		vks::VERTEX_COMPONENT_TANGENT,
-		});
+  VkPipeline m_Pipeline;
 
-	UniMaterial() = default;
-	virtual void Destroy();
-	virtual ~UniMaterial() { Destroy(); }
-	
-	VkPipeline m_Pipeline;
-	VkPipelineLayout m_PipelineLayout;
-	VkPipeline m_OceanPipeline;
-	VkPipelineLayout m_OceanPipelineLayout;
-	VkDescriptorSet m_DescriptorSet;
-	VkDescriptorSetLayout m_DescriptorSetLayout;
-	VkDescriptorPool m_DescriptorPool;
+  std::map<std::string, std::shared_ptr<vks::Buffer>> m_Buffers;
+  std::shared_ptr<vks::Buffer> GetBuffer(std::string buffer);
+  void SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer);
 
-	std::map<std::string, std::shared_ptr<vks::Buffer>> m_Buffers;
-	std::shared_ptr<vks::Buffer> GetBuffer(std::string buffer);
-	void SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer);
+  std::map<std::string, std::string> m_Shaders;
+  std::string GetShader(std::string name) { return m_Shaders.at(name); }
+  void SetShader(std::string name, std::string shader) {
+    m_Shaders[name] = shader;
+  }
+  void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
+  virtual void SetupMaterial(
+      VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
+  virtual uint32_t AddToCommandBuffer(VkCommandBuffer& cmdBuffer, uint32_t index, VkPipelineLayout layout) = 0;
 
+  std::shared_ptr<UniSceneRenderer> SceneRenderer();
 
-	std::map<std::string, std::string> m_Shaders;
-	std::string GetShader(std::string name) { return m_Shaders.at(name); }
-	void SetShader(std::string name, std::string shader) { m_Shaders[name] = shader; }
-
-	virtual void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo) = 0;
-	virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) = 0;
+protected:
+  std::string m_Name;
+  uint32_t m_IndexCount;
 };
-
-
-class PlanetMaterial : public UniMaterial {
-public:
-	struct SpecializationData {
-		// Sets the displacement used in the tessellation shader
-		bool isDisplaced = true;
-	} m_SpecializationData;
-
-
-	virtual ~PlanetMaterial() { Destroy(); }
-
-	// Vertex layout for the models
-	vks::VertexLayout m_VertexLayout = vks::VertexLayout({
-		vks::VERTEX_COMPONENT_POSITION
-	});
-
-	void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo) override;
-	void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) override;
-
-	std::vector<std::shared_ptr<vks::Texture>> m_Textures;
-
-	void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
-	void SetOceanIndexCount(uint32_t count = 0) { m_OceanIndexCount = count; }
-	void SetNoiseLayerCount(uint32_t c) { m_PushConstants.noiseLayers = c; }
-	void SetTime(float t) { m_PushConstants.time += t; }
-	void Destroy() override;
-
-private:
-	std::string m_Name;
-	uint32_t m_IndexCount;
-	uint32_t m_OceanIndexCount;
-
-	bool m_RenderOcean = false;
-
-	struct {
-		uint32_t noiseLayers = 0;
-		float time = 0.0f;
-	} m_PushConstants;
-
-public:
-	PlanetMaterial() = default;
-	PlanetMaterial(std::string name, bool hasOcean = false);
-
-};
-
-using MaterialFactory = Factory<std::string, std::shared_ptr<UniMaterial>>::Initializer<std::string, bool>;

@@ -2,7 +2,7 @@
 
 #include "../vks/VulkanBuffer.hpp"
 #include "../vks/VulkanTexture.hpp"
-#include "../UniMaterial.h"
+#include "../materials/PlanetMaterial.h"
 #include "../vks/frustum.hpp"
 #include "../3dmaths.h"
 

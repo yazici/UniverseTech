@@ -1,0 +1,50 @@
+﻿{
+    "level": {
+        "name": "Test Level",
+        "origin": [ 0, 0, 0 ],
+        "playerStart": {
+            "position": [0, 0, -2200.0],
+            "rotation": [0, 0, 0]
+        },
+        "sceneObjects": [
+            {
+                "type": "planet",
+                "name": "Céleste's World",
+                "position": [ 0.0, 0.0, 0.0 ],
+                "rotation": [ 0, 0, 0 ],
+                "enabled": true,
+                "radius": 600.0,
+                "maxHeight": 0.03,
+                "maxDepth": 0.1,
+                "hasOcean": false,
+                "density": 5515.3
+            },
+            {
+                "type": "light",
+                "name": "light-sun",
+                "position": [ 0.0, 1000, -400.0 ],
+                "radius": 50000.0,
+                "color": [ 1, 1, 1, 1 ],
+                "on": true
+            },
+            {
+                "type": "model",
+                "name": "Armor",
+                "mesh": "models/armor/armor.dae",
+                "texture": "models/armor/color",
+                "normal": "models/armor/normal",
+                "position": [ 0.0, 0.0, -2150.0 ],
+                "rotation": [ 0.0, 180.0, 0 ],
+                "createScale": [ 1, 1, 1 ],
+                "createUVScale": [ 1, 1 ],
+                "components": {
+                    "movement": {
+                        "velocity": [ 0, 0, 5 ],
+                        "rotation": [ 0, -90, 0 ]
+
+                    }
+                }
+            }
+        ]
+    }
+}

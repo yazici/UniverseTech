@@ -170,21 +170,6 @@ void UniEngine::prepare() {
 
   SceneRenderer()->Initialise();
 
-  std::cout << "Initialize descriptor set layouts..." << std::endl;
-  setupDescriptorSetLayout();
-
-  std::cout << "Initialize pipelines..." << std::endl;
-  preparePipelines();
-
-  /*std::cout << "Initialize descriptor pool..." << std::endl;
-  setupDescriptorPool();
-
-  std::cout << "Initialize descriptor sets..." << std::endl;
-  setupDescriptorSets();*/
-
-  std::cout << "Initialize command buffers..." << std::endl;
-  buildCommandBuffers();
-
   prepared = true;
   std::cout << "Initialization complete." << std::endl;
 }
@@ -268,52 +253,6 @@ void UniEngine::SetupInput() {
             {UniInput::ButtonRightClick, newValue ? 1.f : 0.f});
       });
 }
-
-//// TODO: Move this into UniModel material so models can use it.
-//void UniEngine::setupVertexDescriptions() {
-//  // Binding description
-//  vertices.bindingDescriptions.resize(1);
-//  vertices.bindingDescriptions[0] =
-//      vks::initializers::vertexInputBindingDescription(
-//          VERTEX_BUFFER_BIND_ID, vertexLayout.stride(),
-//          VK_VERTEX_INPUT_RATE_VERTEX);
-//
-//  // Attribute descriptions
-//  vertices.attributeDescriptions.resize(5);
-//  // Location 0: Position
-//  vertices.attributeDescriptions[0] =
-//      vks::initializers::vertexInputAttributeDescription(
-//          VERTEX_BUFFER_BIND_ID, 0, VK_FORMAT_R32G32B32_SFLOAT, 0);
-//  // Location 1: Texture coordinates
-//  vertices.attributeDescriptions[1] =
-//      vks::initializers::vertexInputAttributeDescription(
-//          VERTEX_BUFFER_BIND_ID, 1, VK_FORMAT_R32G32_SFLOAT, sizeof(float) * 3);
-//  // Location 2: Color
-//  vertices.attributeDescriptions[2] =
-//      vks::initializers::vertexInputAttributeDescription(
-//          VERTEX_BUFFER_BIND_ID, 2, VK_FORMAT_R32G32B32_SFLOAT,
-//          sizeof(float) * 5);
-//  // Location 3: Normal
-//  vertices.attributeDescriptions[3] =
-//      vks::initializers::vertexInputAttributeDescription(
-//          VERTEX_BUFFER_BIND_ID, 3, VK_FORMAT_R32G32B32_SFLOAT,
-//          sizeof(float) * 8);
-//  // Location 4: Tangent
-//  vertices.attributeDescriptions[4] =
-//      vks::initializers::vertexInputAttributeDescription(
-//          VERTEX_BUFFER_BIND_ID, 4, VK_FORMAT_R32G32B32_SFLOAT,
-//          sizeof(float) * 11);
-//
-//  vertices.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
-//  vertices.inputState.vertexBindingDescriptionCount =
-//      static_cast<uint32_t>(vertices.bindingDescriptions.size());
-//  vertices.inputState.pVertexBindingDescriptions =
-//      vertices.bindingDescriptions.data();
-//  vertices.inputState.vertexAttributeDescriptionCount =
-//      static_cast<uint32_t>(vertices.attributeDescriptions.size());
-//  vertices.inputState.pVertexAttributeDescriptions =
-//      vertices.attributeDescriptions.data();
-//}
 
 //// Prepare a new framebuffer for offscreen rendering
 //// The contents of this framebuffer are then
@@ -473,279 +412,14 @@ void UniEngine::SetupInput() {
 
 
 
-void UniEngine::setupDescriptorSetLayout() {
-  // Deferred shading layout
-  m_setLayoutBindings = {
-      // Binding 0 : uniform buffer
-      vks::initializers::descriptorSetLayoutBinding(
-          VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0),
-      // Binding 1 : lights uniform buffer
-      vks::initializers::descriptorSetLayoutBinding(
-          VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 1),
 
-  };
-
-  VkDescriptorSetLayoutCreateInfo descriptorLayout =
-      vks::initializers::descriptorSetLayoutCreateInfo(
-          m_setLayoutBindings.data(),
-          static_cast<uint32_t>(m_setLayoutBindings.size()));
-
-  VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout,
-                                              nullptr, &m_descriptorSetLayout));
-
-  VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
-      vks::initializers::pipelineLayoutCreateInfo(&m_descriptorSetLayout, 1);
-
-  VK_CHECK_RESULT(vkCreatePipelineLayout(device, &pPipelineLayoutCreateInfo,
-                                         nullptr, &pipelineLayouts.forward));
-}
-
-void UniEngine::preparePipelines() {
-  auto wfmode = VK_POLYGON_MODE_FILL;
-  if (m_useWireframe)
-    wfmode = VK_POLYGON_MODE_LINE;
-
-  VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
-      vks::initializers::pipelineInputAssemblyStateCreateInfo(
-          VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
-
-  VkPipelineRasterizationStateCreateInfo rasterizationState =
-      vks::initializers::pipelineRasterizationStateCreateInfo(
-          wfmode,
-          VK_CULL_MODE_FRONT_BIT,  // TODO: debug for backface culling!
-          VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
-
-  VkPipelineColorBlendAttachmentState blendAttachmentState =
-      vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE);
-
-  VkPipelineColorBlendStateCreateInfo colorBlendState =
-      vks::initializers::pipelineColorBlendStateCreateInfo(
-          1, &blendAttachmentState);
-
-  VkPipelineDepthStencilStateCreateInfo depthStencilState =
-      vks::initializers::pipelineDepthStencilStateCreateInfo(
-          VK_FALSE, VK_FALSE, VK_COMPARE_OP_LESS_OR_EQUAL);
-
-  VkPipelineViewportStateCreateInfo viewportState =
-      vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
-
-  VkPipelineMultisampleStateCreateInfo multisampleState =
-      vks::initializers::pipelineMultisampleStateCreateInfo(
-          VK_SAMPLE_COUNT_1_BIT, 0);
-
-  std::vector<VkDynamicState> dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT,
-                                                     VK_DYNAMIC_STATE_SCISSOR};
-  VkPipelineDynamicStateCreateInfo dynamicState =
-      vks::initializers::pipelineDynamicStateCreateInfo(
-          dynamicStateEnables.data(),
-          static_cast<uint32_t>(dynamicStateEnables.size()), 0);
-
-
-  VkGraphicsPipelineCreateInfo pipelineCreateInfo =
-      vks::initializers::pipelineCreateInfo(pipelineLayouts.forward, renderPass,
-                                            0);
-
-  VkPipelineVertexInputStateCreateInfo emptyInputState{};
-  emptyInputState.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  emptyInputState.vertexAttributeDescriptionCount = 0;
-  emptyInputState.pVertexAttributeDescriptions = nullptr;
-  emptyInputState.vertexBindingDescriptionCount = 0;
-  emptyInputState.pVertexBindingDescriptions = nullptr;
-  pipelineCreateInfo.pVertexInputState = &emptyInputState;
-
-  pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
-  pipelineCreateInfo.pRasterizationState = &rasterizationState;
-  pipelineCreateInfo.pColorBlendState = &colorBlendState;
-  pipelineCreateInfo.pMultisampleState = &multisampleState;
-  pipelineCreateInfo.pViewportState = &viewportState;
-  pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-  pipelineCreateInfo.pDynamicState = &dynamicState;
-  pipelineCreateInfo.renderPass = renderPass;
-
-  std::cout << "Doing material pipelines..." << std::endl;
-
-  for (auto& material : m_MaterialInstances) {
-    material->SetupMaterial(pipelineCreateInfo);
-  }
-}
-
-//void UniEngine::setupDescriptorPool() {
-//  auto modelCount = static_cast<uint32_t>(std::max(
-//          (int)SceneManager()->CurrentScene()->GetModels().size(), 1)) *
-//                    2;
-//
-//  std::vector<VkDescriptorPoolSize> poolSizes = {
-//      vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-//                                            3 * modelCount + 1),
-//      vks::initializers::descriptorPoolSize(
-//          VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2 * modelCount + 1),
-//      vks::initializers::descriptorPoolSize(
-//          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5 * modelCount + 5 + 5)};
-//
-//  VkDescriptorPoolCreateInfo descriptorPoolInfo =
-//      vks::initializers::descriptorPoolCreateInfo(
-//          static_cast<uint32_t>(poolSizes.size()), poolSizes.data(),
-//          static_cast<uint32_t>(modelCount / 2 + 5));
-//
-//  VK_CHECK_RESULT(vkCreateDescriptorPool(device, &descriptorPoolInfo, nullptr,
-//                                         &descriptorPool));
-//}
-
-
-//// TODO: move this and prior pool layout setup to scenerenderer
-//void UniEngine::setupDescriptorSets() {
-//  // Textured quad descriptor set
-//  VkDescriptorSetAllocateInfo allocInfo =
-//      vks::initializers::descriptorSetAllocateInfo(descriptorPool,
-//                                                   &m_descriptorSetLayout, 1);
-//
-//  VK_CHECK_RESULT(
-//      vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSet));
-//
-//  m_writeDescriptorSets = {
-//      // Binding 0 : Vertex shader uniform buffer
-//      vks::initializers::writeDescriptorSet(
-//          m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0,
-//          &m_uniformBuffers.vsForward.descriptor),
-//      // Binding 1 : Fragment shader uniform buffer
-//      vks::initializers::writeDescriptorSet(
-//          m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1,
-//          &m_uniformBuffers.fsLights.descriptor),
-//  };
-//
-//  vkUpdateDescriptorSets(device,
-//                         static_cast<uint32_t>(m_writeDescriptorSets.size()),
-//                         m_writeDescriptorSets.data(), 0, nullptr);
-//
-//  // Models
-//  auto models = SceneManager()->CurrentScene()->GetModels();
-//  for_each(models.begin(), models.end(),
-//           [allocInfo, this](std::shared_ptr<UniModel> model) {
-//             VkResult res = (vkAllocateDescriptorSets(device, &allocInfo,
-//                                                      &model->m_DescriptorSet));
-//             if (res != VK_SUCCESS) {
-//               std::cout << "Fatal : VkResult is \""
-//                         << vks::tools::errorString(res) << "\" in " << __FILE__
-//                         << " at line " << __LINE__ << std::endl;
-//               assert(res == VK_SUCCESS);
-//             }
-//
-//             std::vector<VkWriteDescriptorSet> modelWriteDescriptorSets = {
-//                 // Binding 0: Vertex shader uniform buffer
-//                 vks::initializers::writeDescriptorSet(
-//                     model->m_DescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-//                     0, &m_uniformBuffers.vsForward.descriptor),
-//                 // Binding 1 : Vertex shader uniform buffer
-//                 vks::initializers::writeDescriptorSet(
-//                     model->m_DescriptorSet,
-//                     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1,
-//                     &m_uniformBuffers.modelViews.descriptor),
-//             };
-//             vkUpdateDescriptorSets(
-//                 device, static_cast<uint32_t>(modelWriteDescriptorSets.size()),
-//                 modelWriteDescriptorSets.data(), 0, nullptr);
-//           });
-//}
-
-void UniEngine::buildCommandBuffers() {
-  VkCommandBufferBeginInfo cmdBufInfo =
-      vks::initializers::commandBufferBeginInfo();
-
-  VkClearValue clearValues[2];
-  clearValues[0].color = defaultClearColor;
-  clearValues[1].depthStencil = {1.0f, 0};
-
-  VkRenderPassBeginInfo renderPassBeginInfo =
-      vks::initializers::renderPassBeginInfo();
-  renderPassBeginInfo.renderPass = renderPass;
-  renderPassBeginInfo.renderArea.offset.x = 0;
-  renderPassBeginInfo.renderArea.offset.y = 0;
-  renderPassBeginInfo.renderArea.extent.width = width;
-  renderPassBeginInfo.renderArea.extent.height = height;
-  renderPassBeginInfo.clearValueCount = 2;
-  renderPassBeginInfo.pClearValues = clearValues;
-
-  for (int32_t i = 0; i < drawCmdBuffers.size(); ++i) {
-    // Set target frame buffer
-    renderPassBeginInfo.framebuffer = frameBuffers[i];
-
-    VK_CHECK_RESULT(vkBeginCommandBuffer(drawCmdBuffers[i], &cmdBufInfo));
-
-    vkCmdBeginRenderPass(drawCmdBuffers[i], &renderPassBeginInfo,
-                         VK_SUBPASS_CONTENTS_INLINE);
-
-    VkViewport viewport =
-        vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
-    vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
-
-    VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
-    vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
-
-    
-    //uint32_t dummy = 0;
-    //vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-    //                        pipelineLayouts.forward, 0, 1, &m_descriptorSet, 0,
-    //                        nullptr);
-
-    // if(m_debugDisplay) {
-    //	vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-    //pipelines.debug); 	vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
-    //	// Move viewport to display final composition in lower right corner
-    //	viewport.x = viewport.width * 0.5f;
-    //	viewport.y = viewport.height * 0.5f;
-    //	viewport.width = (float)width * 0.5f;
-    //	viewport.height = (float)height * 0.5f;
-    //	vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
-    //}
-
-    SceneRenderer()->UpdateCamera((float)viewport.width,
-                                  (float)viewport.height);
-
-    //// Final composition as full screen quad
-    //vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-    //                  pipelines.forward);
-    //vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
-
-    //auto dynamicAlignment = getDynamicAlignment();
-    //int index = 0;
-
-    //auto models = SceneManager()->CurrentScene()->GetModels();
-    //for_each(
-    //    models.begin(), models.end(),
-    //    [this, &index, dynamicAlignment, i](std::shared_ptr<UniModel> model) {
-    //      VkDeviceSize offsets[1] = {0};
-    //      uint32_t dynamicOffset =
-    //          index * static_cast<uint32_t>(dynamicAlignment);
-    //      vkCmdBindDescriptorSets(drawCmdBuffers[i],
-    //                              VK_PIPELINE_BIND_POINT_GRAPHICS,
-    //                              pipelineLayouts.forward, 0, 1,
-    //                              &model->m_DescriptorSet, 1, &dynamicOffset);
-    //      vkCmdBindVertexBuffers(drawCmdBuffers[i], VERTEX_BUFFER_BIND_ID, 1,
-    //                             &model->m_Model.vertices.buffer, offsets);
-    //      vkCmdBindIndexBuffer(drawCmdBuffers[i], model->m_Model.indices.buffer,
-    //                           0, VK_INDEX_TYPE_UINT32);
-    //      vkCmdDrawIndexed(drawCmdBuffers[i], model->m_Model.indexCount, 1, 0,
-    //                       0, 0);
-    //      index++;
-    //    });
-
-    for (const auto& material : m_MaterialInstances) {
-      material->AddToCommandBuffer(drawCmdBuffers[i]);
-    }
-
-    vkCmdEndRenderPass(drawCmdBuffers[i]);
-
-    VK_CHECK_RESULT(vkEndCommandBuffer(drawCmdBuffers[i]));
-  }
-}
 
 
 
 void UniEngine::draw() {
   VulkanExampleBase::prepareFrame();
+
+  SceneRenderer()->BuildCommandBuffers();
 
   // Scene rendering
   // Submit work
@@ -790,9 +464,9 @@ void UniEngine::windowResized() {
 
 void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
   if (overlay->header("Settings")) {
-    if (overlay->checkBox("wireframe", &m_useWireframe)) {
+    /*if (overlay->checkBox("wireframe", &m_useWireframe)) {
       ToggleWireframe();
-    }
+    }*/
     if (overlay->checkBox("Pause camera position", &m_CamPaused)) {
       SceneManager()->EmitEvent<CameraPauseEvent>(
           {m_CamPaused});
@@ -811,10 +485,6 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
                             glm::length(physics->m_Velocity));
             });
   }
-}
-
-void UniEngine::ToggleWireframe() {
-  preparePipelines();
 }
 
 void UniEngine::handleWMMessages(MSG& msg) {
@@ -863,24 +533,24 @@ void UniEngine::updateOverlay() {
 
   ImGui::End();
 
-  ImGui::SetNextWindowPos(ImVec2(width - 170.f, 10.f));
-  ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiSetCond_FirstUseEver);
-  ImGui::Begin("Current position:", nullptr,
-               ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
-                   ImGuiWindowFlags_NoMove);
-
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,
-                      ImVec2(0.0f, 5.0f * UIOverlay->scale));
-#endif
-  ImGui::PushItemWidth(110.0f * UIOverlay->scale);
-  OnUpdateUserUIOverlay(UIOverlay);
-  ImGui::PopItemWidth();
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-  ImGui::PopStyleVar();
-#endif
-
-  ImGui::End();
+//  ImGui::SetNextWindowPos(ImVec2(width - 170.f, 10.f));
+//  ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiSetCond_FirstUseEver);
+//  ImGui::Begin("Current position:", nullptr,
+//               ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
+//                   ImGuiWindowFlags_NoMove);
+//
+//#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+//  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,
+//                      ImVec2(0.0f, 5.0f * UIOverlay->scale));
+//#endif
+//  /*ImGui::PushItemWidth(110.0f * UIOverlay->scale);
+//  OnUpdateUserUIOverlay(UIOverlay);
+//  ImGui::PopItemWidth();*/
+//#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+//  ImGui::PopStyleVar();
+//#endif
+//
+//  ImGui::End();
 
   ImGui::PopStyleVar();
   ImGui::Render();
@@ -894,20 +564,6 @@ void UniEngine::updateOverlay() {
 #endif
 }
 
-void UniEngine::RegisterMaterial(std::shared_ptr<UniMaterial> mat) {
-  m_MaterialInstances.push_back(mat);
-}
-
-void UniEngine::UnRegisterMaterial(std::shared_ptr<UniMaterial> mat) {
-  int i = 0;
-  while (i < m_MaterialInstances.size()) {
-    if (m_MaterialInstances[i] == mat) {
-      m_MaterialInstances.erase(m_MaterialInstances.begin() + i);
-      i = 0;
-    }
-    i++;
-  }
-}
 
 void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
   for (const auto& so : SceneManager()->CurrentScene()->m_SceneObjects) {

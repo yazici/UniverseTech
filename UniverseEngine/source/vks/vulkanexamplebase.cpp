@@ -207,7 +207,7 @@ void VulkanExampleBase::prepare()
 		// Virtual function call for example to customize overlay creation
 		OnSetupUIOverlay(overlayCreateInfo);
 		// Load default shaders if not specified by example
-		if (overlayCreateInfo.shaders.size() == 0) {
+		if (overlayCreateInfo.shaders.empty()) {
 			overlayCreateInfo.shaders = {
 				loadShader(getAssetPath() + "shaders/base/uioverlay.vert.spv", VK_SHADER_STAGE_VERTEX_BIT),
 				loadShader(getAssetPath() + "shaders/base/uioverlay.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT),

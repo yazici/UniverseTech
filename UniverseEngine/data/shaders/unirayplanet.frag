@@ -33,6 +33,11 @@ layout (binding = 1) uniform UBOLIGHT
     int numLights;
 } uboLights;
 
+layout(push_constant) uniform PushConsts {
+	uint time_seconds;
+	uint time_millis;
+	uint noise_layers;
+} pc;
         
 layout (location = 0) out vec4 outColour;
 

@@ -63,6 +63,5 @@ void PlanetRenderSystem::tick(ECS::World* world, float deltaTime) {
 		planet->UpdateMesh();
 		planet->UpdateBuffers();
 		planet->UpdateUniformBuffers(modelMat);
-		planet->UpdateTime(deltaTime);
 	});
 }
