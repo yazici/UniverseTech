@@ -74,12 +74,16 @@
     </CustomBuildAfterTargets>
     <CustomBuildBeforeTargets>
     </CustomBuildBeforeTargets>
+    <IncludePath>$(VULKAN_SDK)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CustomBuildAfterTargets>
     </CustomBuildAfterTargets>
     <CustomBuildBeforeTargets>
     </CustomBuildBeforeTargets>
+    <IncludePath>$(VULKAN_SDK)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -100,7 +104,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\libs\vulkan;..\libs\assimp;..\libs\gainput;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\assimp;..\libs\gainput;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -166,7 +170,7 @@
       </EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\libs\vulkan;..\libs\assimp;..\libs\gainput;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\libs\assimp;..\libs\gainput;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -244,6 +248,8 @@
     <ClCompile Include="source\components\Transform.cpp" />
     <ClCompile Include="source\components\UniPlanet.cpp" />
     <ClCompile Include="source\FastNoise.cpp" />
+    <ClCompile Include="source\materials\ModelMaterial.cpp" />
+    <ClCompile Include="source\materials\PlanetMaterial.cpp" />
     <ClCompile Include="source\systems\GravitySystem.cpp" />
     <ClCompile Include="source\systems\PhysicsSystem.cpp" />
     <ClCompile Include="source\systems\PlanetRenderSystem.cpp" />
@@ -252,6 +258,8 @@
     <ClCompile Include="source\UniFrustum.cpp" />
     <ClInclude Include="source\factory.h" />
     <ClInclude Include="source\FastNoise.h" />
+    <ClInclude Include="source\materials\ModelMaterial.h" />
+    <ClInclude Include="source\materials\PlanetMaterial.h" />
     <ClInclude Include="source\systems\events.h" />
     <ClInclude Include="source\systems\GravitySystem.h" />
     <ClInclude Include="source\systems\PhysicsSystem.h" />
@@ -437,8 +445,6 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compiling shader %(Identity)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
     </CustomBuild>
-    <None Include="data\shaders\scenerendering\scene.frag" />
-    <None Include="data\shaders\scenerendering\scene.vert" />
     <CustomBuild Include="data\shaders\uniplanet.frag">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">glslc -o %(Identity).spv %(Identity)</Command>
