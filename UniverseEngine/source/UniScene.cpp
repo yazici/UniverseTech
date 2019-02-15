@@ -1,12 +1,13 @@
 #include "UniScene.h"
 #include <cmath>
-#include <memory>
-#include "UniEngine.h"
-#include "systems/Systems.h"
-#include "UniSceneRenderer.h"
 #include <iosfwd>
+#include <memory>
 #include <nlohmann/json.hpp>
+#include "UniEngine.h"
+#include "UniSceneRenderer.h"
+#include "Materials.h"
 #include "components/Components.h"
+#include "systems/Systems.h"
 
 using json = nlohmann::json;
 
@@ -35,7 +36,7 @@ void UniScene::Initialize() {
   m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
   m_CurrentCamera->AddComponent<CameraComponent>(
       m_CurrentCamera->GetTransform(),
-      (float)engine.width / (float)engine.height, 50.f, 0.1f, 100000000.f);
+      (float)engine.width / (float)engine.height, 50.f, 0.01f, 1000.f);
   // m_CurrentCamera->AddComponent<MovementComponent>();
   m_CurrentCamera->AddComponent<PlayerControlComponent>();
   m_CurrentCamera->AddComponent<PhysicsComponent>(5000.0);
@@ -55,15 +56,105 @@ void UniScene::Load(std::string filename) {
   auto level = data["level"];
   m_Name = level["name"];
 
+  std::map<std::string, std::shared_ptr<UniMaterial>> loadedMaterials;
+
+  for (const auto& so : level.at("materials")) {
+    std::string soType = so.at("type");
+
+    if (soType == "model material") {
+      std::cout << "Loading model material: " << so.at("name") << std::endl;
+      // 	m_Name = jsonData["name"];
+      std::string materialID = so.at("name");
+
+      std::string texturePath = "";
+      if (so.find("textureMap") != so.end())
+        texturePath = so.at("textureMap");
+
+      std::string normalPath = "";
+      if (so.find("normalMap") != so.end())
+        normalPath = so.at("normalMap");
+
+      std::string metallicPath = "";
+      if (so.find("metallicMap") != so.end())
+        metallicPath = so.at("metallicMap");
+
+      std::string glossPath = "";
+      if (so.find("glossMap") != so.end())
+        glossPath = so.at("glossMap");
+
+      std::string specularPath = "";
+      if (so.find("specularMap") != so.end())
+        specularPath = so.at("specularMap");
+
+      std::string emissivePath = "";
+      if (so.find("emissiveMap") != so.end())
+        emissivePath = so.at("emissiveMap");
+
+      std::string aoPath = "";
+      if (so.find("aoMap") != so.end())
+        aoPath = so.at("aoMap");
+
+      glm::vec3 baseColour = glm::vec3(1);
+      if (so.find("colour") != so.end()) {
+        auto bc = so.at("colour");
+        baseColour = glm::vec3(bc[0], bc[1], bc[2]);
+      }
+
+      glm::vec3 emissiveColour = glm::vec3(0);
+      if (so.find("emissive") != so.end()) {
+        auto bc = so.at("emissive");
+        emissiveColour = glm::vec3(bc[0], bc[1], bc[2]);
+      }
+
+      float specular = 0.5f;
+      float metallic = 0.f;
+      float gloss = 1.f;
+
+      if (so.find("specular") != so.end()) {
+        specular = so.at("specular");
+      }
+
+      if (so.find("metallic") != so.end()) {
+        metallic = so.at("metallic");
+      }
+
+      if (so.find("gloss") != so.end()) {
+        gloss = so.at("gloss");
+      }
+
+      auto material = std::make_shared<ModelMaterial>(materialID);
+      material->LoadTexture("texture", texturePath);
+      material->LoadTexture("normal", normalPath);
+      material->LoadTexture("metallic", metallicPath);
+      material->LoadTexture("specular", specularPath);
+      material->LoadTexture("gloss", glossPath);
+      material->LoadTexture("emissive", emissivePath);
+      material->LoadTexture("ao", aoPath);
+      material->SetBaseColour(baseColour);
+      material->SetEmissiveColour(emissiveColour);
+      material->SetGloss(gloss);
+      material->SetMetallic(metallic);
+      material->SetSpecular(specular);
+
+      renderer->RegisterMaterial(material);
+
+      loadedMaterials.insert({materialID, material});
+    }
+  }
+
   for (const auto& so : level.at("sceneObjects")) {
     std::string soType = so.at("type");
+
     if (soType == "model") {
       std::cout << "Loading model: " << so.at("name") << std::endl;
-      // TODO: Load UniModel from JSON data.
       // 	m_Name = jsonData["name"];
       auto modelPath = so.at("mesh");
-      auto texturePath = so.at("texture");
-      auto normalMapPath = so.at("normal");
+      auto materialID = so.at("materialID");
+
+      if (loadedMaterials.find(materialID) == loadedMaterials.end()) {
+        throw std::runtime_error("Cannot load model with material id: " +
+                                 materialID);
+      }
 
       glm::vec3 mpos;
       if (so.find("position") != so.end()) {
@@ -71,11 +162,9 @@ void UniScene::Load(std::string filename) {
         mpos = glm::vec3(pos[0], pos[1], pos[2]);
       }
 
-      std::cout << "Creating model path: " << modelPath
-                << ", texture: " << texturePath
-                << ", normals: " << normalMapPath << std::endl;
+      std::cout << "Creating model path: " << modelPath << std::endl;
       auto model = Make<UniModel>(mpos, (std::string)so.at("name"), modelPath,
-                                  texturePath, normalMapPath);
+                                  materialID);
 
       if (so.find("rotation") != so.end()) {
         auto rot = so.at("rotation");
@@ -115,20 +204,28 @@ void UniScene::Load(std::string filename) {
       }
 
       model->SetCreateInfo(createOffset, createScale, createUVScale);
-      model->Load(renderer->GetVertexLayout(), engine.vulkanDevice, engine.GetQueue(),
-                  true);
+      model->Load(renderer->GetVertexLayout(), engine.vulkanDevice,
+                  engine.GetQueue(), true);
 
       if (so.find("enabled") != so.end()) {
         model->SetRendered(so.at("enabled"));
       }
-    }
 
+      std::shared_ptr<ModelMaterial> modelMat = std::dynamic_pointer_cast<ModelMaterial>(
+          loadedMaterials.at(materialID));
+
+      modelMat->RegisterModel(model);
+
+    }
+    
+    // TODO: render something to debug lighting positions
     if (soType == "light") {
       std::cout << "Loading light: " << so.at("name") << std::endl;
 
       glm::vec3 lpos;
       if (so.find("position") != so.end()) {
         auto pos = so.at("position");
+        std::cout << "Light data: " << pos << std::endl;
         lpos = glm::vec3(pos[0], pos[1], pos[2]);
       }
 

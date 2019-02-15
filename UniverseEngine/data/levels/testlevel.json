@@ -3,35 +3,62 @@
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
-            "position": [0, 0, -22.0],
-            "rotation": [0, 0, 0]
+            "position": [ 0, 1, -10 ],
+            "rotation": [ 0, 0, 0 ]
         },
+        "materials": [
+            {
+                "type": "model material",
+                "name": "armor material",
+                "colour": [ 0.560, 0.570, 0.580 ],
+                "metallic": 1.0,
+                "gloss": 0.75,
+                "textureMap": "models/armor/color",
+                "normalMap": "models/armor/normal"
+            }
+        ],
         "sceneObjects": [
             {
                 "type": "model",
                 "name": "Armor",
                 "mesh": "models/armor/armor.dae",
-                "texture": "models/armor/color",
-                "normal": "models/armor/normal",
+                "materialID": "armor material",
                 "position": [ 0.0, 0.0, 0.0 ],
-                "rotation": [ 0.0, 180.0, 0 ],
+                "rotation": [ 0.0, 0.0, 0.0 ],
                 "createScale": [ 1, 1, 1 ],
                 "createUVScale": [ 1, 1 ],
-                "components": {
-                    "movement": {
-                        "velocity": [ 0, 0, 5 ],
-                        "rotation": [ 0, -90, 0 ]
-
-                    }
-                },
                 "enabled": true
             },
             {
                 "type": "light",
-                "name": "light-sun",
-                "position": [ 0.0, 1000, -400.0 ],
-                "radius": 50000.0,
-                "color": [ 1, 1, 1, 1 ],
+                "name": "light-key",
+                "position": [ 6.0, 6.0, -10.0 ],
+                "radius": 100.0,
+                "color": [ 1.0, 0.7, 0.7, 1 ],
+                "on": true
+            },
+            {
+                "type": "light",
+                "name": "light-fill",
+                "position": [ -10.0, 2.0, -10.0 ],
+                "radius": 50.0,
+                "color": [ 1, 0.6, 0.3, 1 ],
+                "on": true
+            },
+            {
+                "type": "light",
+                "name": "light-fil2",
+                "position": [ 0.0, -8.0, 0.0 ],
+                "radius": 50.0,
+                "color": [ 1, 0.6, 0.3, 1 ],
+                "on": true
+            },
+            {
+                "type": "light",
+                "name": "light-rim",
+                "position": [ 0.0, 6.0, 10.0 ],
+                "radius": 50.0,
+                "color": [ 0.3, 0.3, 1, 1 ],
                 "on": true
             }
         ]

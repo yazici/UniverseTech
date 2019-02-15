@@ -24,7 +24,6 @@ class UniSceneRenderer {
   struct {
     glm::mat4 projection;
     glm::mat4 view;
-    glm::mat4 model;
   } m_uboForward;
 
   struct UboModelMatDynamic {
@@ -54,7 +53,6 @@ class UniSceneRenderer {
     uint32_t time_millis = 0;
   } m_TimeConstants;
 
-  VkDescriptorSet m_descriptorSet;
   VkDescriptorSetLayout m_descriptorSetLayout;
 
   std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
@@ -130,5 +128,4 @@ class UniSceneRenderer {
   }
 
   std::string GetShader(std::string shader);
-  VkDescriptorSet *GetDescriptorSet();
 };

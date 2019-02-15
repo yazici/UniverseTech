@@ -38,10 +38,10 @@ void UniPlanet::Destroy() {
 void UniPlanet::Initialize() {
   auto renderer = UniEngine::GetInstance().SceneRenderer();
 
-  m_Material = std::static_pointer_cast<PlanetMaterial>(
-      PlanetMaterialFactory::create("planet", "testworld", m_HasOcean));
+  //m_Material = std::static_pointer_cast<PlanetMaterial>(
+  //    PlanetMaterialFactory::create("planet", "testworld", m_HasOcean));
 
-  renderer->RegisterMaterial(m_Material);
+  //renderer->RegisterMaterial(m_Material);
 
   CreateGrid();
   CreateQuads();

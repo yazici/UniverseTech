@@ -89,7 +89,7 @@ namespace vks
 				{
 					for (auto ext : extensions)
 					{
-						supportedExtensions.push_back(ext.extensionName);
+						supportedExtensions.emplace_back(ext.extensionName);
 					}
 				}
 			}
@@ -305,7 +305,16 @@ namespace vks
 				enableDebugMarkers = true;
 			}
 
-			if (deviceExtensions.size() > 0)
+      //if (extensionSupported(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME)) {
+      //                    deviceExtensions.push_back(
+      //                        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+      //} else {
+      //  vks::tools::exitFatal(
+      //      "Selected GPU does not support dynamic texture indexing!",
+      //      VK_ERROR_FEATURE_NOT_PRESENT);
+      //}
+
+			if (!deviceExtensions.empty())
 			{
 				deviceCreateInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
 				deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();

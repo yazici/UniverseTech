@@ -1,6 +1,4 @@
 #include "UniModel.h"
-#include "UniEngine.h"
-#include "UniSceneRenderer.h"
 
 UniModel::UniModel(std::string n) {
 	m_Name = n;
@@ -12,29 +10,16 @@ UniModel::UniModel(std::string n) {
 void UniModel::Destroy() {
   std::cout << "Destroying planet..." << std::endl;
 
-  auto renderer = UniEngine::GetInstance().SceneRenderer();
-  renderer->UnRegisterMaterial(m_Material);
-  m_Material.reset();
   m_Model.destroy();
-  m_Texture.destroy();
-  m_NormalMap.destroy();
 }
 
-UniModel::UniModel(std::string n, const std::string &modelpath, const std::string &texturePath, const std::string &normalMapPath) {
+UniModel::UniModel(std::string n, const std::string &modelpath, const std::string &materialID) {
 	m_Name = n;
 	m_ModelCreateInfo.center = glm::vec3(0, 0, 0);
 	m_ModelCreateInfo.scale = glm::vec3(1.f);
 	m_ModelCreateInfo.uvscale = glm::vec2(1.f);
 	m_ModelPath = modelpath;
-	m_TexturePath = texturePath;
-	m_NormalMapPath = normalMapPath;
-
-  auto renderer = UniEngine::GetInstance().SceneRenderer();
-
-  m_Material = std::static_pointer_cast<ModelMaterial>(
-      ModelMaterialFactory::create("model", "testmodel"));
-
-  renderer->RegisterMaterial(m_Material);
+  m_MaterialID = materialID;
 }
 
 void UniModel::SetScale(float scale /*= 1.f*/) {
@@ -52,44 +37,6 @@ void UniModel::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue
 		m_Model.loadFromFile(getAssetPath() + m_ModelPath, layout, &m_ModelCreateInfo, device, copyQueue);
 	else
 		m_Model.loadFromFile(getAssetPath() + m_ModelPath, layout, 1.f, device, copyQueue);
-
-	// Textures
-	std::string texFormatSuffix;
-	VkFormat texFormat;
-	// Get supported compressed texture format
-	if(device->features.textureCompressionBC) {
-		texFormatSuffix = "_bc3_unorm";
-		texFormat = VK_FORMAT_BC3_UNORM_BLOCK;
-	} else if(device->features.textureCompressionASTC_LDR) {
-		texFormatSuffix = "_astc_8x8_unorm";
-		texFormat = VK_FORMAT_ASTC_8x8_UNORM_BLOCK;
-	} else if(device->features.textureCompressionETC2) {
-		texFormatSuffix = "_etc2_unorm";
-		texFormat = VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK;
-	} else {
-		vks::tools::exitFatal("Device does not support any compressed texture format!", VK_ERROR_FEATURE_NOT_PRESENT);
-	}
-
-	if(!m_TexturePath.empty()) {
-		m_Texture.loadFromFile(getAssetPath() + m_TexturePath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
-	} else {
-		std::vector<glm::vec4> buffer(4 * 4);
-		for(auto & i : buffer) {
-			i = glm::vec4(.6f, .6f, .6f, 1.f);
-		}
-		m_Texture.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec4), VK_FORMAT_R32G32B32A32_SFLOAT, 4, 4, device, copyQueue, VK_FILTER_LINEAR);
-	}
-
-	if(!m_NormalMapPath.empty()){
-		m_NormalMap.loadFromFile(getAssetPath() + m_NormalMapPath + texFormatSuffix + ".ktx", texFormat, device, copyQueue);
-	}
-	else {
-		std::vector<glm::vec4> buffer(4 * 4);
-		for(auto & i : buffer) {
-			i = glm::vec4(0.f, 0.f, 1.f, 0.f);
-		}
-		m_NormalMap.fromBuffer(buffer.data(), buffer.size() * sizeof(glm::vec4), VK_FORMAT_R32G32B32A32_SFLOAT, 4, 4, device, copyQueue, VK_FILTER_LINEAR);
-	}
 
 
 }

@@ -64,9 +64,7 @@ void main()
 	vec3 outWorldPos;
 
 	// Vertex position in world space
-	outWorldPos = vec3(ubdo.model * vec4(inPos, 1));
-	// GL to Vulkan coord space
-	outWorldPos.y = -outWorldPos.y;
+	outWorldPos = vec3(ubdo.model * vec4(inPos * vec3(1, -1, 1), 1));
 	
 	// Normal in world space
 	mat3 mNormal = transpose(inverse(mat3(ubdo.model)));

@@ -216,6 +216,9 @@
     <ClInclude Include="source\materials\ModelMaterial.h">
       <Filter>Materials</Filter>
     </ClInclude>
+    <ClInclude Include="source\Materials.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -337,6 +340,9 @@
       <Filter>Tools</Filter>
     </None>
     <None Include="data\shaders\csg.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="data\shaders\brdf.glsl">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

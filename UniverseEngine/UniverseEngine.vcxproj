@@ -258,6 +258,7 @@
     <ClCompile Include="source\UniFrustum.cpp" />
     <ClInclude Include="source\factory.h" />
     <ClInclude Include="source\FastNoise.h" />
+    <ClInclude Include="source\Materials.h" />
     <ClInclude Include="source\materials\ModelMaterial.h" />
     <ClInclude Include="source\materials\PlanetMaterial.h" />
     <ClInclude Include="source\systems\events.h" />
@@ -390,6 +391,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Identity).spv</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
     </CustomBuild>
+    <None Include="data\shaders\brdf.glsl" />
     <None Include="data\shaders\compileshaders.py" />
     <None Include="data\shaders\csg.glsl" />
     <None Include="data\shaders\deferredmultisampling\debug.frag" />
