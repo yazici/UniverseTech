@@ -19,6 +19,7 @@ Base engine capabilities in current version:
 - Continuous level of detail procedural planet generator.
 - Entity Component System architecture for data-driven behaviour models.
 - Forward shading model with ray-marching / sphere-tracing support for SDF.
+- Physically-based rendering pipeline based on Pixar / UE4 BDRF renderers.
 - GUI overlay with input handling.
 - Multithreading.
 - Input management.
