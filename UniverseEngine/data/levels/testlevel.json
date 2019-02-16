@@ -3,53 +3,58 @@
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
-            "position": [ 0, 1, -10 ],
+            "position": [ 0, 0, -1 ],
             "rotation": [ 0, 0, 0 ]
         },
         "materials": [
             {
                 "type": "model material",
-                "name": "armor material",
+                "name": "test material",
                 "colour": [ 0.560, 0.570, 0.580 ],
                 "metallic": 1.0,
                 "gloss": 0.75,
-                "textureMap": "models/armor/color",
-                "normalMap": "models/armor/normal"
+                "textureMap": "models/cerberus/albedo",
+                "normalMap": "models/cerberus/normal"
             }
         ],
         "sceneObjects": [
             {
                 "type": "model",
-                "name": "Armor",
-                "mesh": "models/armor/armor.dae",
-                "materialID": "armor material",
+                "name": "geosphere",
+                "mesh": "models/cerberus/cerberus.fbx",
+                "materialID": "test material",
                 "position": [ 0.0, 0.0, 0.0 ],
                 "rotation": [ 0.0, 0.0, 0.0 ],
-                "createScale": [ 1, 1, 1 ],
+                "createScale": [ 0.005, 0.005, 0.005 ],
                 "createUVScale": [ 1, 1 ],
-                "enabled": true
+                "enabled": true,
+                "components": {
+                    "movement": {
+                        "rotation": [ 0, 15, 0 ]
+                    }
+                }
             },
             {
                 "type": "light",
                 "name": "light-key",
-                "position": [ 6.0, 6.0, -10.0 ],
-                "radius": 100.0,
-                "color": [ 1.0, 0.7, 0.7, 1 ],
+                "position": [ 0, 2, -3.0 ],
+                "radius": 10.0,
+                "color": [ 1.0, 0.9, 0.5, 1 ],
                 "on": true
             },
             {
                 "type": "light",
                 "name": "light-fill",
                 "position": [ -10.0, 2.0, -10.0 ],
-                "radius": 50.0,
+                "radius": 5.0,
                 "color": [ 1, 0.6, 0.3, 1 ],
                 "on": true
             },
             {
                 "type": "light",
-                "name": "light-fil2",
+                "name": "light-fill2",
                 "position": [ 0.0, -8.0, 0.0 ],
-                "radius": 50.0,
+                "radius": 5.0,
                 "color": [ 1, 0.6, 0.3, 1 ],
                 "on": true
             },
@@ -57,8 +62,8 @@
                 "type": "light",
                 "name": "light-rim",
                 "position": [ 0.0, 6.0, 10.0 ],
-                "radius": 50.0,
-                "color": [ 0.3, 0.3, 1, 1 ],
+                "radius": 5.0,
+                "color": [ 0.6, 0.6, 1, 1 ],
                 "on": true
             }
         ]

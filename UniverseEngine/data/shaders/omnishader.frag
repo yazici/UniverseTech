@@ -45,8 +45,14 @@ layout(push_constant) uniform PushConsts {
 } pc;
 
 
-
 layout (location = 0) out vec4 outFragColor;
+
+float lambert(vec3 N, vec3 L){
+  vec3 nrmN = normalize(N);
+  vec3 nrmL = normalize(L);
+  float result = dot(nrmN, nrmL);
+  return max(result, 0.0);
+}
 
 void main() 
 {
@@ -55,16 +61,19 @@ void main()
 
 	// Calculate normal in tangent space
 	vec3 N = normalize(inNormal);
-	N.y = -N.y;
 	vec3 T = normalize(inTangent);
 	vec3 B = cross(N, T);
 	mat3 TBN = mat3(T, B, N);
 	vec3 tnorm = TBN * normalize(texture(samplerNormalMap, inUV).xyz * 2.0 - vec3(1.0));
-	
-	vec3 V = normalize(uboLights.viewPos.xyz - inPos.xyz);
 
-	float gloss = 0.6;
-	float roughness = 1.0 - gloss;
+	N = tnorm;
+	
+	vec3 camPos = uboLights.viewPos.xyz;
+	vec3 V = normalize(camPos - inPos.xyz);
+
+	float gloss = 0.3;
+	float roughness = 0.3;// - gloss;
+	float metallic = 0.7;
 
 	// Add striped pattern to roughness based on vertex position
 #ifdef ROUGHNESS_PATTERN
@@ -75,24 +84,27 @@ void main()
 	vec3 Lo = vec3(0.0);
 
 	for (int i = 0; i < uboLights.numLights; i++) {
+	//int i = 0;
 		Light light = uboLights.lights[i];
+		vec4 lPos = light.position;
 		float atten = light.radius / (pow(length(V), 2.0) + 1.0);
-		vec3 lightColour = normalize(light.color) * atten;
-		vec3 L = normalize(light.position - inPos).xyz;
-		Lo += BRDF(L, V, N, lightColour, albedo, 0.0, roughness);
+		vec3 lightColour = light.color;// * atten;
+		vec3 L = normalize(lPos - inPos).xyz;
+		
+		Lo += lambert(L, N) * lightColour * albedo;
+		Lo += clamp(BRDF(L, V, N, lightColour, albedo, metallic, roughness), vec3(0), vec3(1));
 
-		// TODO: also render some light debugging
 	};
 
 	// Combine with ambient
-	vec3 color = albedo * 0.8;
-	Lo.r = max(0.0, Lo.r);
-	Lo.g = max(0.0, Lo.g);
-	Lo.b = max(0.0, Lo.b);
+	vec3 color = vec3(0); //albedo * 0.02;
 	color += Lo;
 
 	// Gamma correct
+	//color = vec3(dot(N, L));
 	color = pow(color, vec3(0.4545));
+	//color = L;
+	
 	
 	outFragColor = vec4(color, 1.0);
 }

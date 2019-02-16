@@ -19,7 +19,7 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 		break;
 	case UniInput::AxisAscend:
 		//std::cout << "Ascending: " << event.value << std::endl;
-		m_InputDirection.y = event.value;
+		m_InputDirection.y = -event.value;
 		break;
 	case UniInput::AxisPitch:
 		m_InputRotation.x = event.value;

@@ -27,34 +27,34 @@ void UniMaterial::SetupMaterial(
 
 void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
   // Textures
-  std::string texFormatSuffix;
-  VkFormat texFormat;
+//  std::string texFormatSuffix;
+  VkFormat texFormat = VK_FORMAT_R8G8B8A8_UNORM;
 
   auto& engine = UniEngine::GetInstance();
   auto device = engine.vulkanDevice;
   auto copyQueue = engine.GetQueue();
 
-  // Get supported compressed texture format
-  if (device->features.textureCompressionBC) {
-    texFormatSuffix = "_bc3_unorm";
-    texFormat = VK_FORMAT_BC3_UNORM_BLOCK;
-  } else if (device->features.textureCompressionASTC_LDR) {
-    texFormatSuffix = "_astc_8x8_unorm";
-    texFormat = VK_FORMAT_ASTC_8x8_UNORM_BLOCK;
-  } else if (device->features.textureCompressionETC2) {
-    texFormatSuffix = "_etc2_unorm";
-    texFormat = VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK;
-  } else {
-    vks::tools::exitFatal(
-        "Device does not support any compressed texture format!",
-        VK_ERROR_FEATURE_NOT_PRESENT);
-  }
+  //// Get supported compressed texture format
+  //if (device->features.textureCompressionBC) {
+  //  texFormatSuffix = "_bc3_unorm";
+  //  texFormat = VK_FORMAT_BC3_UNORM_BLOCK;
+  //} else if (device->features.textureCompressionASTC_LDR) {
+  //  texFormatSuffix = "_astc_8x8_unorm";
+  //  texFormat = VK_FORMAT_ASTC_8x8_UNORM_BLOCK;
+  //} else if (device->features.textureCompressionETC2) {
+  //  texFormatSuffix = "_etc2_unorm";
+  //  texFormat = VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK;
+  //} else {
+  //  vks::tools::exitFatal(
+  //      "Device does not support any compressed texture format!",
+  //      VK_ERROR_FEATURE_NOT_PRESENT);
+  //}
 
   auto texture = std::make_shared<vks::Texture2D>();
 
   if (!texturePath.empty()) {
     texture->loadFromFile(
-        getAssetPath() + texturePath + texFormatSuffix + ".ktx", texFormat,
+        getAssetPath() + texturePath + ".ktx", texFormat,
         device, copyQueue);
   } else {
     std::vector<glm::vec4> buffer(4 * 4);

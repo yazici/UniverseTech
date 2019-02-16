@@ -58,21 +58,13 @@ void main()
 {
 	
 	
+	outNormal = inNormal;
+	outColor = inColor;
+	outTangent = inTangent;
 	outUV = inUV;
 	outUV.t = 1.0 - outUV.t;
-
-	vec3 outWorldPos;
-
-	// Vertex position in world space
-	outWorldPos = vec3(ubdo.model * vec4(inPos * vec3(1, -1, 1), 1));
+	gl_Position = ubo.projection * ubo.view * ubdo.model * vec4(inPos.xyz, 1.0);
 	
-	// Normal in world space
-	mat3 mNormal = transpose(inverse(mat3(ubdo.model)));
-	outNormal = mNormal * normalize(inNormal);	
-	outTangent = mNormal * normalize(inTangent);
-	
-	// Currently just vertex color
-	outColor = inColor;
-
-	gl_Position = ubo.projection * ubo.view * vec4(outWorldPos, 1);
+	vec4 pos = ubdo.model * vec4(inPos, 1.0);
+	outNormal = mat3(ubdo.model) * inNormal;
 }

@@ -45,16 +45,11 @@ vec3 BRDF(vec3 L, vec3 V, vec3 N, vec3 lightColor, vec3 albedo, float metallic, 
 		float rroughness = max(0.05, roughness);
 		// D = Normal distribution (Distribution of the microfacets)
 		float D = D_GGX(dotNH, roughness); 
-		D = max(0.0, D);
 		// G = Geometric shadowing term (Microfacets shadowing)
 		float G = G_SchlicksmithGGX(dotNL, dotNV, roughness);
-		G = max(0.0, G);
 		// F = Fresnel factor (Reflectance depending on angle of incidence)
 		vec3 F = F_Schlick(dotNV, albedo, metallic);
-		F.r = max(0.0, F.r);
-		F.g = max(0.0, F.g);
-		F.b = max(0.0, F.b);
-
+		
 		vec3 spec = D * F * G / (4.0 * dotNL * dotNV);
 
 		color += spec * dotNL * lightColor;

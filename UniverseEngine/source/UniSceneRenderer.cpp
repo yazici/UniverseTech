@@ -187,7 +187,7 @@ void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
               auto lCol = light->color;
               uboLights.lights[lightCount].color = lCol;
               uboLights.lights[lightCount].radius = light->radius;
-              uboLights.lights[lightCount].position = lPos;
+              uboLights.lights[lightCount].position = lPos * glm::vec4(1.f, -1.f, 1.f, 1.f);
               // std::cout << ", radius: " << light->radius;
               // std::cout << ", pos: " << lPos.x << ", " << lPos.y << ", " <<
               // lPos.z << ". "; std::cout << ", col: " << lCol.r << ", " <<
