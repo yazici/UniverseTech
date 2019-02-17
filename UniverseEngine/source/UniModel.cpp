@@ -8,7 +8,7 @@ UniModel::UniModel(std::string n) {
 }
 
 void UniModel::Destroy() {
-  std::cout << "Destroying planet..." << std::endl;
+  std::cout << "Destroying model..." << std::endl;
 
   m_Model.destroy();
 }
