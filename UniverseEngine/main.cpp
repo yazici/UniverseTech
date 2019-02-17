@@ -6,14 +6,14 @@
 
 template < typename C, typename T = std::char_traits<C> >
 struct basic_teebuf : public std::basic_streambuf<C, T> {
-	typedef std::basic_streambuf<C, T> streambuf_type;
-	typedef typename T::int_type int_type;
+	using streambuf_type = std::basic_streambuf<C, T>;
+	using int_type = typename T::int_type;
 
 	basic_teebuf(streambuf_type* buff_a, streambuf_type* buff_b)
 		: first(buff_a), second(buff_b) {}
 
 protected:
-	virtual int_type overflow(int_type c) {
+	int_type overflow(int_type c) override {
 		const int_type eof = T::eof();
 		if(T::eq_int_type(c, eof)) return T::not_eof(c);
 		else {
@@ -25,7 +25,7 @@ protected:
 		}
 	}
 
-	virtual int sync() {
+	int sync() override {
 		return !first->pubsync() && !second->pubsync() ? 0 : -1;
 	}
 
@@ -36,8 +36,8 @@ private:
 
 template < typename C, typename T = std::char_traits<C> >
 struct basic_teestream : public std::basic_ostream<C, T> {
-	typedef std::basic_ostream<C, T> stream_type;
-	typedef basic_teebuf<C, T> streambuff_type;
+	using stream_type = std::basic_ostream<C, T>;
+	using streambuff_type = basic_teebuf<C, T>;
 
 	basic_teestream(stream_type& first, stream_type& second)
 		: stream_type(&stmbuf), stmbuf(first.rdbuf(), second.rdbuf()) {}
@@ -50,8 +50,8 @@ struct basic_teestream : public std::basic_ostream<C, T> {
 private: streambuff_type stmbuf;
 };
 
-typedef basic_teebuf<char> teebuf;
-typedef basic_teestream<char> teestream;
+using teebuf = basic_teebuf<char>;
+using teestream = basic_teestream<char>;
 
 #include <fstream>
 #include <iomanip>
@@ -84,7 +84,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)									\
 	engine.setupWindow(hInstance, WndProc);													\
 	engine.prepare();																		\
 	engine.renderLoop();																	\
-    engine.Shutdown(); \
+  engine.Shutdown(); \
     /* system("pause");*/ \
     std::cout << std::endl ; \
     std::cout.rdbuf(stdoutbuf); \
