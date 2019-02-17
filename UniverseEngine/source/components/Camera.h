@@ -47,7 +47,7 @@ struct CameraComponent {
   void CalculateView(ECS::ComponentHandle<TransformComponent> transform) {
     auto mat = transform->GetModelMat();
 
-    m_Position = {mat[3].x, -mat[3].y, mat[3].z};
+    m_Position = {mat[3].x, mat[3].y, mat[3].z};
     auto forward = m_Position + transform->TransformLocalDirectionToWorldSpace(glm::vec3(0.0, 0.0, 1.0));
     //forward = glm::normalize(forward);
     auto up = glm::mat3(mat) * glm::vec3(0.0, 1.0, 0.0);
@@ -58,7 +58,7 @@ struct CameraComponent {
     }
     matrices.view = glm::lookAt(m_Position, target, up);
 
-    std::cout << "Camera view matrix: " << glm::to_string<glm::mat4>(matrices.view) << std::endl;
+    //std::cout << "Camera view matrix: " << glm::to_string<glm::mat4>(matrices.view) << std::endl;
 
   }
 
