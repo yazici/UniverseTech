@@ -20,7 +20,7 @@
         "sceneObjects": [
             {
                 "type": "model",
-                "name": "geosphere",
+                "name": "cerberus 1",
                 "mesh": "models/cerberus/cerberus.fbx",
                 "materialID": "test material",
                 "position": [ 0.0, 0.0, 0.0 ],
@@ -30,7 +30,39 @@
                 "enabled": true,
                 "components": {
                     "movement": {
-                        "rotation": [ 0, 15, 0 ]
+                        "rotation": [ 0, 0, 0 ]
+                    }
+                }
+            },
+            {
+                "type": "model",
+                "name": "cerberus 2",
+                "mesh": "models/cerberus/cerberus.fbx",
+                "materialID": "test material",
+                "position": [ 1.0, 0.0, 0.0 ],
+                "rotation": [ 0.0, 90.0, 0.0 ],
+                "createScale": [ 0.005, 0.005, 0.005 ],
+                "createUVScale": [ 1, 1 ],
+                "enabled": true,
+                "components": {
+                    "movement": {
+                        "rotation": [ 0, -5, 0 ]
+                    }
+                }
+            },
+            {
+                "type": "model",
+                "name": "cerberus 3",
+                "mesh": "models/cerberus/cerberus.fbx",
+                "materialID": "test material",
+                "position": [ -1.0, 0.0, 0.0 ],
+                "rotation": [ 0.0, 0.0, 0.0 ],
+                "createScale": [ 0.005, 0.005, 0.005 ],
+                "createUVScale": [ 1, 1 ],
+                "enabled": true,
+                "components": {
+                    "movement": {
+                        "rotation": [ 0, 5, 0 ]
                     }
                 }
             },
