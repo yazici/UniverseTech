@@ -41,7 +41,6 @@ layout (binding = 4) uniform sampler2D samplerNormalMap;
 layout(push_constant) uniform PushConsts {
 	uint time_seconds;
 	uint time_millis;
-	uint noise_layers;
 } pc;
 
 
@@ -71,8 +70,7 @@ void main()
 	vec3 camPos = uboLights.viewPos.xyz;
 	vec3 V = normalize(camPos - inPos.xyz);
 
-	float gloss = 0.3;
-	float roughness = 0.3;// - gloss;
+	float roughness = 0.3;
 	float metallic = 0.7;
 
 	// Add striped pattern to roughness based on vertex position

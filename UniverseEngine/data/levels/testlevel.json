@@ -12,7 +12,7 @@
                 "name": "test material",
                 "colour": [ 0.560, 0.570, 0.580 ],
                 "metallic": 1.0,
-                "gloss": 0.75,
+                "roughness": 0.75,
                 "textureMap": "models/cerberus/albedo",
                 "normalMap": "models/cerberus/normal"
             }

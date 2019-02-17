@@ -78,9 +78,9 @@ void UniScene::Load(std::string filename) {
       if (so.find("metallicMap") != so.end())
         metallicPath = so.at("metallicMap");
 
-      std::string glossPath = "";
-      if (so.find("glossMap") != so.end())
-        glossPath = so.at("glossMap");
+      std::string roughnessPath = "";
+      if (so.find("roughnessMap") != so.end())
+        roughnessPath = so.at("roughnessMap");
 
       std::string specularPath = "";
       if (so.find("specularMap") != so.end())
@@ -108,7 +108,7 @@ void UniScene::Load(std::string filename) {
 
       float specular = 0.5f;
       float metallic = 0.f;
-      float gloss = 1.f;
+      float roughness = 1.f;
 
       if (so.find("specular") != so.end()) {
         specular = so.at("specular");
@@ -118,8 +118,8 @@ void UniScene::Load(std::string filename) {
         metallic = so.at("metallic");
       }
 
-      if (so.find("gloss") != so.end()) {
-        gloss = so.at("gloss");
+      if (so.find("roughness") != so.end()) {
+        roughness = so.at("roughness");
       }
 
       auto material = std::make_shared<ModelMaterial>(materialID);
@@ -127,12 +127,12 @@ void UniScene::Load(std::string filename) {
       material->LoadTexture("normal", normalPath);
       material->LoadTexture("metallic", metallicPath);
       material->LoadTexture("specular", specularPath);
-      material->LoadTexture("gloss", glossPath);
+      material->LoadTexture("roughness", roughnessPath);
       material->LoadTexture("emissive", emissivePath);
       material->LoadTexture("ao", aoPath);
       material->SetBaseColour(baseColour);
       material->SetEmissiveColour(emissiveColour);
-      material->SetGloss(gloss);
+      material->SetRoughness(roughness);
       material->SetMetallic(metallic);
       material->SetSpecular(specular);
 

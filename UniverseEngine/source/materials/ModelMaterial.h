@@ -29,7 +29,7 @@ class ModelMaterial : public UniMaterial {
 
   bool m_hasTextureMap = false;
   bool m_hasNormalMap = false;
-  bool m_hasGlossMap = false;
+  bool m_hasRoughnessMap = false;
   bool m_hasSpecularMap = false;
   bool m_hasMetallicMap = false;
   bool m_hasEmissiveMap = false;

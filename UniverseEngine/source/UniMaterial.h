@@ -42,7 +42,7 @@ class UniMaterial {
   void SetBaseColour(float r, float g, float b) { m_baseColour = {r, g, b}; }
   void SetEmissiveColour(glm::vec3 bc) { m_emissiveColour = bc; }
   void SetEmissiveColour(float r, float g, float b) { m_emissiveColour = {r, g, b}; }
-  void SetGloss(float gloss) { m_gloss = gloss; }
+  void SetRoughness(float roughness) { m_roughness = roughness; }
   void SetMetallic(float metallic) { m_metallic = metallic; }
   void SetSpecular(float specular) { m_specular = specular; }
 
@@ -58,7 +58,7 @@ class UniMaterial {
 
   glm::vec3 m_baseColour = glm::vec3(1); // materials are white by default
   glm::vec3 m_emissiveColour = glm::vec3(0); // materials are not emissive by default
-  float m_gloss = 1.f; // materials are smooth by default
+  float m_roughness = 1.f; // materials are smooth by default
   float m_metallic = 0.f; // materials are not metallic by default
   float m_specular = 0.5f; // materials are plasticy by default
 

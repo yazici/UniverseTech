@@ -87,8 +87,8 @@ void ModelMaterial::LoadTexture(std::string name, std::string texturePath) {
   if (name == "metallic") {
     m_hasMetallicMap = true;
   }
-  if (name == "gloss") {
-    m_hasGlossMap = true;
+  if (name == "roughness") {
+    m_hasRoughnessMap = true;
   }
   if (name == "specular") {
     m_hasSpecularMap = true;
