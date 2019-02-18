@@ -105,7 +105,7 @@ void main()
 	// Combine with ambient
 	vec3 color = albedo * 0.08;
 	color += Lo;
-	color += emissive;
+	//color += emissive;
 
 	// Gamma correct
 	//color = vec3(dot(N, L));

@@ -55,7 +55,7 @@
                 "mesh": "models/spaceship02/Spaceship.obj",
                 "materialID": "spaceship02 material",
                 "position": [ -10.0, 0.0, 0.0 ],
-                "rotation": [ 0.0, 0.0, 0.0 ],
+                "rotation": [ 0.0, 90.0, 0.0 ],
                 "createScale": [ 0.02, 0.02, 0.02 ],
                 "createUVScale": [ 1, 1 ],
                 "enabled": true,
