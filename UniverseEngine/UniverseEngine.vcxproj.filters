@@ -345,6 +345,9 @@
     <None Include="data\shaders\brdf.glsl">
       <Filter>shaders</Filter>
     </None>
+    <None Include="data\levels\levelschema.json">
+      <Filter>Content</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\textures\terrain-ramp.png">
