@@ -56,7 +56,7 @@ float lambert(vec3 N, vec3 L){
 void main() 
 {
 
-	vec3 albedo = texture(samplerColorMap, inUV).rgb * inColor;
+	vec3 albedo = texture(samplerColorMap, inUV).rgb;// * inColor;
 
 	// Calculate normal in tangent space
 	vec3 N = normalize(inNormal);
@@ -85,8 +85,8 @@ void main()
 	//int i = 0;
 		Light light = uboLights.lights[i];
 		vec4 lPos = light.position;
-		float atten = light.radius / (pow(length(V), 2.0) + 1.0);
-		vec3 lightColour = light.color;// * atten;
+		float atten = light.radius / (pow(distance(lPos, inPos), 2.0) + 1.0);
+		vec3 lightColour = light.color * atten;
 		vec3 L = normalize(lPos - inPos).xyz;
 		
 		Lo += lambert(L, N) * lightColour * albedo;
@@ -95,13 +95,13 @@ void main()
 	};
 
 	// Combine with ambient
-	vec3 color = vec3(0); //albedo * 0.02;
+	vec3 color = albedo * 0.08;
 	color += Lo;
 
 	// Gamma correct
 	//color = vec3(dot(N, L));
 	color = pow(color, vec3(0.4545));
-	//color = L;
+	//color = N;
 	
 	
 	outFragColor = vec4(color, 1.0);
