@@ -146,6 +146,13 @@ void UniScene::Load(std::string filename) {
     std::string soType = so.at("type");
 
     if (soType == "model") {
+
+      if (so.find("enabled") != so.end()) {
+        if (so.at("enabled") == false) {
+          continue;
+        }
+      }
+
       std::cout << "Loading model: " << so.at("name") << std::endl;
       // 	m_Name = jsonData["name"];
       auto modelPath = so.at("mesh");

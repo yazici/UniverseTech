@@ -54,7 +54,7 @@ void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
 
   if (!texturePath.empty()) {
     texture->loadFromFile(
-        getAssetPath() + texturePath + ".ktx", texFormat,
+        getAssetPath() + texturePath, texFormat,
         device, copyQueue);
   } else {
     std::vector<glm::vec4> buffer(4 * 4);
