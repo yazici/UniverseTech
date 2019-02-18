@@ -13,3 +13,7 @@
 [submodule "external/stb"]
 	path = external/stb
 	url = https://github.com/nothings/stb
+[submodule "external/mango"]
+	path = external/mango
+	url = https://github.com/t0rakka/mango
+	branch = master
