@@ -1,0 +1,362 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://example.com/root.json",
+    "type": "object",
+    "title": "The Root Schema",
+    "required": [
+        "level"
+    ],
+    "properties": {
+        "level": {
+            "$id": "#/properties/level",
+            "type": "object",
+            "title": "The Level Schema",
+            "required": [
+                "name",
+                "origin",
+                "playerStart",
+                "materials",
+                "sceneObjects"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/level/properties/name",
+                    "type": "string",
+                    "title": "The Name Schema",
+                    "default": "",
+                    "examples": [
+                        "Test Level"
+                    ],
+                    "pattern": "^(.*)$"
+                },
+                "origin": {
+                    "$id": "#/properties/level/properties/origin",
+                    "type": "array",
+                    "title": "The Origin Schema",
+                    "items": {
+                        "$id": "#/properties/level/properties/origin/items",
+                        "type": "integer",
+                        "title": "The Items Schema",
+                        "default": 0,
+                        "examples": [
+                            0,
+                            0,
+                            0
+                        ]
+                    }
+                },
+                "playerStart": {
+                    "$id": "#/properties/level/properties/playerStart",
+                    "type": "object",
+                    "title": "The Playerstart Schema",
+                    "required": [
+                        "position",
+                        "rotation"
+                    ],
+                    "properties": {
+                        "position": {
+                            "$id": "#/properties/level/properties/playerStart/properties/position",
+                            "type": "array",
+                            "title": "The Position Schema",
+                            "items": {
+                                "$id": "#/properties/level/properties/playerStart/properties/position/items",
+                                "type": "integer",
+                                "title": "The Items Schema",
+                                "default": 0,
+                                "examples": [
+                                    0,
+                                    0,
+                                    -50
+                                ]
+                            }
+                        },
+                        "rotation": {
+                            "$id": "#/properties/level/properties/playerStart/properties/rotation",
+                            "type": "array",
+                            "title": "The Rotation Schema",
+                            "items": {
+                                "$id": "#/properties/level/properties/playerStart/properties/rotation/items",
+                                "type": "integer",
+                                "title": "The Items Schema",
+                                "default": 0,
+                                "examples": [
+                                    0,
+                                    0,
+                                    0
+                                ]
+                            }
+                        }
+                    }
+                },
+                "materials": {
+                    "$id": "#/properties/level/properties/materials",
+                    "type": "array",
+                    "title": "The Materials Schema",
+                    "items": {
+                        "$id": "#/properties/level/properties/materials/items",
+                        "type": "object",
+                        "title": "The Items Schema",
+                        "required": [
+                            "type",
+                            "name",
+                            "colour",
+                            "metallic",
+                            "roughness",
+                            "textureMap",
+                            "normalMap"
+                        ],
+                        "properties": {
+                            "type": {
+                                "$id": "#/properties/level/properties/materials/items/properties/type",
+                                "type": "string",
+                                "title": "The Type Schema",
+                                "default": "",
+                                "examples": [
+                                    "model material"
+                                ],
+                                "pattern": "^(.*)$"
+                            },
+                            "name": {
+                                "$id": "#/properties/level/properties/materials/items/properties/name",
+                                "type": "string",
+                                "title": "The Name Schema",
+                                "default": "",
+                                "examples": [
+                                    "test material"
+                                ],
+                                "pattern": "^(.*)$"
+                            },
+                            "colour": {
+                                "$id": "#/properties/level/properties/materials/items/properties/colour",
+                                "type": "array",
+                                "title": "The Colour Schema",
+                                "items": {
+                                    "$id": "#/properties/level/properties/materials/items/properties/colour/items",
+                                    "type": "number",
+                                    "title": "The Items Schema",
+                                    "default": 0.0,
+                                    "examples": [
+                                        0.56,
+                                        0.57,
+                                        0.58
+                                    ]
+                                }
+                            },
+                            "metallic": {
+                                "$id": "#/properties/level/properties/materials/items/properties/metallic",
+                                "type": "integer",
+                                "title": "The Metallic Schema",
+                                "default": 0,
+                                "examples": [
+                                    1
+                                ]
+                            },
+                            "roughness": {
+                                "$id": "#/properties/level/properties/materials/items/properties/roughness",
+                                "type": "number",
+                                "title": "The Roughness Schema",
+                                "default": 0.0,
+                                "examples": [
+                                    0.75
+                                ]
+                            },
+                            "textureMap": {
+                                "$id": "#/properties/level/properties/materials/items/properties/textureMap",
+                                "type": "string",
+                                "title": "The Texturemap Schema",
+                                "default": "",
+                                "examples": [
+                                    "models/cerberus/albedo"
+                                ],
+                                "pattern": "^(.*)$"
+                            },
+                            "normalMap": {
+                                "$id": "#/properties/level/properties/materials/items/properties/normalMap",
+                                "type": "string",
+                                "title": "The Normalmap Schema",
+                                "default": "",
+                                "examples": [
+                                    "models/cerberus/normal"
+                                ],
+                                "pattern": "^(.*)$"
+                            }
+                        }
+                    }
+                },
+                "sceneObjects": {
+                    "$id": "#/properties/level/properties/sceneObjects",
+                    "type": "array",
+                    "title": "The Sceneobjects Schema",
+                    "items": {
+                        "$id": "#/properties/level/properties/sceneObjects/items",
+                        "type": "object",
+                        "title": "The Items Schema",
+                        "required": [
+                            "type",
+                            "name",
+                            "mesh",
+                            "materialID",
+                            "position",
+                            "rotation",
+                            "createScale",
+                            "createUVScale",
+                            "enabled",
+                            "components"
+                        ],
+                        "properties": {
+                            "type": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/type",
+                                "type": "string",
+                                "title": "The Type Schema",
+                                "default": "",
+                                "examples": [
+                                    "model"
+                                ],
+                                "pattern": "^(.*)$"
+                            },
+                            "name": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/name",
+                                "type": "string",
+                                "title": "The Name Schema",
+                                "default": "",
+                                "examples": [
+                                    "cerberus 1"
+                                ],
+                                "pattern": "^(.*)$"
+                            },
+                            "mesh": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/mesh",
+                                "type": "string",
+                                "title": "The Mesh Schema",
+                                "default": "",
+                                "examples": [
+                                    "models/cerberus/cerberus.fbx"
+                                ],
+                                "pattern": "^(.*)$"
+                            },
+                            "materialID": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/materialID",
+                                "type": "string",
+                                "title": "The Materialid Schema",
+                                "default": "",
+                                "examples": [
+                                    "test material"
+                                ],
+                                "pattern": "^(.*)$"
+                            },
+                            "position": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/position",
+                                "type": "array",
+                                "title": "The Position Schema",
+                                "items": {
+                                    "$id": "#/properties/level/properties/sceneObjects/items/properties/position/items",
+                                    "type": "integer",
+                                    "title": "The Items Schema",
+                                    "default": 0,
+                                    "examples": [
+                                        0,
+                                        0,
+                                        0
+                                    ]
+                                }
+                            },
+                            "rotation": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/rotation",
+                                "type": "array",
+                                "title": "The Rotation Schema",
+                                "items": {
+                                    "$id": "#/properties/level/properties/sceneObjects/items/properties/rotation/items",
+                                    "type": "integer",
+                                    "title": "The Items Schema",
+                                    "default": 0,
+                                    "examples": [
+                                        0,
+                                        0,
+                                        0
+                                    ]
+                                }
+                            },
+                            "createScale": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/createScale",
+                                "type": "array",
+                                "title": "The Createscale Schema",
+                                "items": {
+                                    "$id": "#/properties/level/properties/sceneObjects/items/properties/createScale/items",
+                                    "type": "number",
+                                    "title": "The Items Schema",
+                                    "default": 0.0,
+                                    "examples": [
+                                        0.005,
+                                        0.005,
+                                        0.005
+                                    ]
+                                }
+                            },
+                            "createUVScale": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/createUVScale",
+                                "type": "array",
+                                "title": "The Createuvscale Schema",
+                                "items": {
+                                    "$id": "#/properties/level/properties/sceneObjects/items/properties/createUVScale/items",
+                                    "type": "integer",
+                                    "title": "The Items Schema",
+                                    "default": 0,
+                                    "examples": [
+                                        1,
+                                        1
+                                    ]
+                                }
+                            },
+                            "enabled": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/enabled",
+                                "type": "boolean",
+                                "title": "The Enabled Schema",
+                                "default": false,
+                                "examples": [
+                                    true
+                                ]
+                            },
+                            "components": {
+                                "$id": "#/properties/level/properties/sceneObjects/items/properties/components",
+                                "type": "object",
+                                "title": "The Components Schema",
+                                "required": [
+                                    "movement"
+                                ],
+                                "properties": {
+                                    "movement": {
+                                        "$id": "#/properties/level/properties/sceneObjects/items/properties/components/properties/movement",
+                                        "type": "object",
+                                        "title": "The Movement Schema",
+                                        "required": [
+                                            "rotation"
+                                        ],
+                                        "properties": {
+                                            "rotation": {
+                                                "$id": "#/properties/level/properties/sceneObjects/items/properties/components/properties/movement/properties/rotation",
+                                                "type": "array",
+                                                "title": "The Rotation Schema",
+                                                "items": {
+                                                    "$id": "#/properties/level/properties/sceneObjects/items/properties/components/properties/movement/properties/rotation/items",
+                                                    "type": "integer",
+                                                    "title": "The Items Schema",
+                                                    "default": 0,
+                                                    "examples": [
+                                                        0,
+                                                        0,
+                                                        0
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
