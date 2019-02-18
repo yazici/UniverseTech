@@ -57,10 +57,6 @@ void UniSceneRenderer::ShutDown() {
   m_uniformBuffers.fsLights.destroy();
 }
 
-void UniSceneRenderer::Tick(uint32_t millis) {
-  AddTimeDelta(millis);
-}
-
 void UniSceneRenderer::SetupVertexDescriptions() {
   // Binding description
   m_vertices.bindingDescriptions.resize(1);
@@ -147,97 +143,6 @@ void UniSceneRenderer::PrepareUniformBuffers() {
   updateUniformBuffersScreen();
   UpdateUniformBufferDeferredLights();
   UpdateDynamicUniformBuffers();
-}
-
-void UniSceneRenderer::Render() {
-  UpdateUniformBufferDeferredLights();
-  UpdateDynamicUniformBuffers();
-}
-
-void UniSceneRenderer::ViewChanged() {
-  updateUniformBuffersScreen();
-}
-
-void UniSceneRenderer::updateUniformBuffersScreen() {
-  m_uboForward.projection =
-      SceneManager()->CurrentScene()->GetCameraComponent()->matrices.projection;
-  m_uboForward.view =
-      SceneManager()->CurrentScene()->GetCameraComponent()->matrices.view;
-  memcpy(m_uniformBuffers.vsForward.mapped, &m_uboForward,
-         sizeof(m_uboForward));
-}
-
-std::shared_ptr<UniSceneManager> UniSceneRenderer::SceneManager() {
-  return UniEngine::GetInstance().SceneManager();
-}
-
-// Update light position uniform block
-void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
-  // each scene light into uboFragmentLights.lights
-  uint32_t lightCount = 0;
-  SceneManager()
-      ->CurrentScene()
-      ->m_World->each<TransformComponent, LightComponent>(
-          [&](ECS::Entity* ent,
-              ECS::ComponentHandle<TransformComponent> transform,
-              ECS::ComponentHandle<LightComponent> light) {
-            // std::cout << "Found a light! " << lightCount;
-            if (light->enabled && lightCount < MAX_LIGHT_COUNT) {
-              auto lPos = glm::vec4(transform->m_dPos, 0);
-              auto lCol = light->color;
-              uboLights.lights[lightCount].color = lCol;
-              uboLights.lights[lightCount].radius = light->radius;
-              uboLights.lights[lightCount].position = lPos * glm::vec4(1.f, -1.f, 1.f, 1.f);
-              // std::cout << ", radius: " << light->radius;
-              // std::cout << ", pos: " << lPos.x << ", " << lPos.y << ", " <<
-              // lPos.z << ". "; std::cout << ", col: " << lCol.r << ", " <<
-              // lCol.g
-              // << ", " << lCol.b << ", " << lCol.a << ". " << std::endl;
-            } else {
-              std::cout << "Light is disabled!" << std::endl;
-            }
-            lightCount++;
-          });
-
-  uboLights.viewPos =
-      glm::vec4(
-          SceneManager()->CurrentScene()->GetCameraComponent()->GetPosition(),
-          0.0f);
-  uboLights.numLights = lightCount;
-
-  // std::cout << "Enabled lights: " << lightCount << std::endl;
-
-  memcpy(m_uniformBuffers.fsLights.mapped, &uboLights, sizeof(uboLights));
-}
-
-void UniSceneRenderer::UpdateDynamicUniformBuffers() {
-  auto& engine = UniEngine::GetInstance();
-  int index = 0;
-  auto dynamicAlignment = engine.getDynamicAlignment();
-  auto models = SceneManager()->CurrentScene()->GetModels();
-  for_each(models.begin(), models.end(),
-           [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
-             glm::mat4* modelMat =
-                 (glm::mat4*)(((uint64_t)m_uboModelMatDynamic.model +
-                               (index * dynamicAlignment)));
-             *modelMat = model->GetTransform()->GetModelMat();
-             // std::cout << "Updating model matrix index: " << index <<
-             // std::endl;
-             index++;
-           });
-
-  memcpy(m_uniformBuffers.modelViews.mapped, m_uboModelMatDynamic.model,
-         m_uniformBuffers.modelViews.size);
-  // Flush to make changes visible to the host
-  VkMappedMemoryRange memoryRange = vks::initializers::mappedMemoryRange();
-  memoryRange.memory = m_uniformBuffers.modelViews.memory;
-  memoryRange.size = m_uniformBuffers.modelViews.size;
-  vkFlushMappedMemoryRanges(engine.GetDevice(), 1, &memoryRange);
-}
-
-void UniSceneRenderer::UpdateCamera(float width, float height) {
-  SceneManager()->CurrentScene()->GetCameraComponent()->aspect = width / height;
-  SceneManager()->CurrentScene()->GetCameraComponent()->CalculateProjection();
 }
 
 void UniSceneRenderer::SetupDescriptorSetLayout() {
@@ -536,6 +441,97 @@ void UniSceneRenderer::BuildCommandBuffers() {
   }
 }
 
+void UniSceneRenderer::Render() {
+  UpdateUniformBufferDeferredLights();
+  UpdateDynamicUniformBuffers();
+}
+
+void UniSceneRenderer::Tick(uint32_t millis) {
+  AddTimeDelta(millis);
+}
+
+void UniSceneRenderer::ViewChanged() {
+  updateUniformBuffersScreen();
+}
+
+void UniSceneRenderer::updateUniformBuffersScreen() {
+  m_uboForward.projection =
+      SceneManager()->CurrentScene()->GetCameraComponent()->matrices.projection;
+  m_uboForward.view =
+      SceneManager()->CurrentScene()->GetCameraComponent()->matrices.view;
+  memcpy(m_uniformBuffers.vsForward.mapped, &m_uboForward,
+         sizeof(m_uboForward));
+}
+
+// Update light position uniform block
+void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
+  // each scene light into uboFragmentLights.lights
+  uint32_t lightCount = 0;
+  SceneManager()
+      ->CurrentScene()
+      ->m_World->each<TransformComponent, LightComponent>(
+          [&](ECS::Entity* ent,
+              ECS::ComponentHandle<TransformComponent> transform,
+              ECS::ComponentHandle<LightComponent> light) {
+            // std::cout << "Found a light! " << lightCount;
+            if (light->enabled && lightCount < MAX_LIGHT_COUNT) {
+              auto lPos = glm::vec4(transform->m_dPos, 0);
+              auto lCol = light->color;
+              uboLights.lights[lightCount].color = lCol;
+              uboLights.lights[lightCount].radius = light->radius;
+              uboLights.lights[lightCount].position = lPos * glm::vec4(1.f, -1.f, 1.f, 1.f);
+              // std::cout << ", radius: " << light->radius;
+              // std::cout << ", pos: " << lPos.x << ", " << lPos.y << ", " <<
+              // lPos.z << ". "; std::cout << ", col: " << lCol.r << ", " <<
+              // lCol.g
+              // << ", " << lCol.b << ", " << lCol.a << ". " << std::endl;
+            } else {
+              std::cout << "Light is disabled!" << std::endl;
+            }
+            lightCount++;
+          });
+
+  uboLights.viewPos =
+      glm::vec4(
+          SceneManager()->CurrentScene()->GetCameraComponent()->GetPosition(),
+          0.0f);
+  uboLights.numLights = lightCount;
+
+  // std::cout << "Enabled lights: " << lightCount << std::endl;
+
+  memcpy(m_uniformBuffers.fsLights.mapped, &uboLights, sizeof(uboLights));
+}
+
+void UniSceneRenderer::UpdateDynamicUniformBuffers() {
+  auto& engine = UniEngine::GetInstance();
+  int index = 0;
+  auto dynamicAlignment = engine.getDynamicAlignment();
+  auto models = SceneManager()->CurrentScene()->GetModels();
+  for_each(models.begin(), models.end(),
+           [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
+             glm::mat4* modelMat =
+                 (glm::mat4*)(((uint64_t)m_uboModelMatDynamic.model +
+                               (index * dynamicAlignment)));
+             *modelMat = model->GetTransform()->GetModelMat();
+             // std::cout << "Updating model matrix index: " << index <<
+             // std::endl;
+             index++;
+           });
+
+  memcpy(m_uniformBuffers.modelViews.mapped, m_uboModelMatDynamic.model,
+         m_uniformBuffers.modelViews.size);
+  // Flush to make changes visible to the host
+  VkMappedMemoryRange memoryRange = vks::initializers::mappedMemoryRange();
+  memoryRange.memory = m_uniformBuffers.modelViews.memory;
+  memoryRange.size = m_uniformBuffers.modelViews.size;
+  vkFlushMappedMemoryRanges(engine.GetDevice(), 1, &memoryRange);
+}
+
+void UniSceneRenderer::UpdateCamera(float width, float height) {
+  SceneManager()->CurrentScene()->GetCameraComponent()->aspect = width / height;
+  SceneManager()->CurrentScene()->GetCameraComponent()->CalculateProjection();
+}
+
 void UniSceneRenderer::RegisterMaterial(std::shared_ptr<UniMaterial> mat) {
   m_materialInstances.push_back(mat);
 }
@@ -556,4 +552,8 @@ std::string UniSceneRenderer::GetShader(std::string shader) {
   auto aPath = engine.getAssetPath();
 
   return aPath + "shaders/" + shader + ".spv";
+}
+
+std::shared_ptr<UniSceneManager> UniSceneRenderer::SceneManager() {
+  return UniEngine::GetInstance().SceneManager();
 }
