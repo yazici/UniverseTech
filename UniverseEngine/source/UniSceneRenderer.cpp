@@ -159,26 +159,17 @@ void UniSceneRenderer::SetupDescriptorSetLayout() {
       // Binding 2 : dynamic buffer for models
       vks::initializers::descriptorSetLayoutBinding(
           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 2),
-      // Binding 3 : model texture map
-      vks::initializers::descriptorSetLayoutBinding(
-          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 3),
-      // Binding 4 : model normal map
-      vks::initializers::descriptorSetLayoutBinding(
-          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 4),
-
+          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 2)
   };
 
   auto device = UniEngine::GetInstance().GetDevice();
 
-  VkDescriptorSetLayoutCreateInfo descriptorLayout =
+  m_descriptorLayout =
       vks::initializers::descriptorSetLayoutCreateInfo(
           m_setLayoutBindings.data(),
           static_cast<uint32_t>(m_setLayoutBindings.size()));
 
-  VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout,
+  VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &m_descriptorLayout,
                                               nullptr, &m_descriptorSetLayout));
 
   VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
@@ -200,7 +191,7 @@ void UniSceneRenderer::PreparePipelines() {
 
   auto wfmode = VK_POLYGON_MODE_FILL;
   // if (m_useWireframe)
-//  wfmode = VK_POLYGON_MODE_LINE;
+  //  wfmode = VK_POLYGON_MODE_LINE;
 
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
       vks::initializers::pipelineInputAssemblyStateCreateInfo(
@@ -268,7 +259,7 @@ void UniSceneRenderer::PreparePipelines() {
   pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
   pipelineCreateInfo.pStages = shaderStages.data();
 
-  //VK_CHECK_RESULT(vkCreateGraphicsPipelines(
+  // VK_CHECK_RESULT(vkCreateGraphicsPipelines(
   //    engine.GetDevice(), engine.GetPipelineCache(), 1, &pipelineCreateInfo,
   //    nullptr, &m_pipelines.forward));
 
@@ -295,10 +286,7 @@ void UniSceneRenderer::SetupDescriptorPool() {
           2 * modelCount * drawCmdBufferCount),
       vks::initializers::descriptorPoolSize(
           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-          modelCount * drawCmdBufferCount),
-      vks::initializers::descriptorPoolSize(
-          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-          2 * modelCount * drawCmdBufferCount)};
+          modelCount * drawCmdBufferCount)};
 
   VkDescriptorPoolCreateInfo descriptorPoolInfo =
       vks::initializers::descriptorPoolCreateInfo(
@@ -316,45 +304,28 @@ void UniSceneRenderer::SetupDescriptorSets() {
       vks::initializers::descriptorSetAllocateInfo(m_descriptorPool,
                                                    &m_descriptorSetLayout, 1);
 
-  for_each(
-      m_materialInstances.begin(), m_materialInstances.end(),
-      [allocInfo, this, device](std::shared_ptr<UniMaterial> material) {
+  VK_CHECK_RESULT(
+      vkAllocateDescriptorSets(device, &allocInfo, &m_descriptorSet));
 
-      auto desc_set = material->GetDescriptorSet();
-    
-      VK_CHECK_RESULT(vkAllocateDescriptorSets(
-            device, &allocInfo, desc_set));
+  m_writeDescriptorSets = {
+      // Binding 0 : view/proj buffer
+      vks::initializers::writeDescriptorSet(
+          m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0,
+          &m_uniformBuffers.vsForward.descriptor),
+      // Binding 1 : lights buffer
+      vks::initializers::writeDescriptorSet(
+          m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1,
+          &m_uniformBuffers.fsLights.descriptor),
+      // Binding 1 : Fragment shader uniform buffer
+      vks::initializers::writeDescriptorSet(
+          m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2,
+          &m_uniformBuffers.modelViews.descriptor),
 
+  };
 
-        m_writeDescriptorSets = {
-            // Binding 0 : view/proj buffer
-            vks::initializers::writeDescriptorSet(
-                *desc_set, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                0, &m_uniformBuffers.vsForward.descriptor),
-            // Binding 1 : lights buffer
-            vks::initializers::writeDescriptorSet(
-                *desc_set, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                1, &m_uniformBuffers.fsLights.descriptor),
-            // Binding 1 : Fragment shader uniform buffer
-            vks::initializers::writeDescriptorSet(
-                *desc_set,
-                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2,
-                &m_uniformBuffers.modelViews.descriptor),
-            vks::initializers::writeDescriptorSet(
-                *material->GetDescriptorSet(),
-                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3,
-                &material->GetTexture("texture")->descriptor),
-            // Binding 2: Normal map
-            vks::initializers::writeDescriptorSet(
-                *material->GetDescriptorSet(),
-                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4,
-                &material->GetTexture("normal")->descriptor),
-        };
-
-        vkUpdateDescriptorSets(
-            device, static_cast<uint32_t>(m_writeDescriptorSets.size()),
-            m_writeDescriptorSets.data(), 0, nullptr);
-      });
+  vkUpdateDescriptorSets(device,
+                         static_cast<uint32_t>(m_writeDescriptorSets.size()),
+                         m_writeDescriptorSets.data(), 0, nullptr);
 }
 
 void UniSceneRenderer::BuildCommandBuffers() {
@@ -429,10 +400,9 @@ void UniSceneRenderer::BuildCommandBuffers() {
         sizeof(m_TimeConstants), &m_TimeConstants);
 
     for (const auto& material : m_materialInstances) {
-      //std::cout << "Building command buffer for material: "
+      // std::cout << "Building command buffer for material: "
       //          << material->GetName() << std::endl;
-      index = material->AddToCommandBuffer(drawCmdBuffers[i], index,
-                                           m_pipelineLayouts.forward);
+      index = material->AddToCommandBuffer(drawCmdBuffers[i], index);
     }
 
     vkCmdEndRenderPass(drawCmdBuffers[i]);
@@ -479,7 +449,8 @@ void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
               auto lCol = light->color;
               uboLights.lights[lightCount].color = lCol;
               uboLights.lights[lightCount].radius = light->radius;
-              uboLights.lights[lightCount].position = lPos * glm::vec4(1.f, -1.f, 1.f, 1.f);
+              uboLights.lights[lightCount].position =
+                  lPos * glm::vec4(1.f, -1.f, 1.f, 1.f);
               // std::cout << ", radius: " << light->radius;
               // std::cout << ", pos: " << lPos.x << ", " << lPos.y << ", " <<
               // lPos.z << ". "; std::cout << ", col: " << lCol.r << ", " <<
@@ -491,10 +462,9 @@ void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
             lightCount++;
           });
 
-  uboLights.viewPos =
-      glm::vec4(
-          SceneManager()->CurrentScene()->GetCameraComponent()->GetPosition(),
-          0.0f);
+  uboLights.viewPos = glm::vec4(
+      SceneManager()->CurrentScene()->GetCameraComponent()->GetPosition(),
+      0.0f);
   uboLights.numLights = lightCount;
 
   // std::cout << "Enabled lights: " << lightCount << std::endl;

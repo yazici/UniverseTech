@@ -21,7 +21,7 @@ struct Light {
     float radius;
 };
 
-layout (binding = 1) uniform UBOLIGHT
+layout (set = 0, binding = 1) uniform UBOLIGHT
 {
     Light lights[1000];
     vec4 viewPos;
@@ -33,13 +33,12 @@ layout (set = 0, binding = 2) uniform PER_OBJECT
 	mat4 model;
 } ubdo;
 
-layout (binding = 3) uniform sampler2D samplerColorMap;
-layout (binding = 4) uniform sampler2D samplerNormalMap;
+layout (set = 1, binding = 0) uniform sampler2D samplerColorMap;
+layout (set = 1, binding = 1) uniform sampler2D samplerNormalMap;
 
 layout(push_constant) uniform PushConsts {
 	uint time_seconds;
 	uint time_millis;
-	uint noise_layers;
 } pc;
 
 

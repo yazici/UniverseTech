@@ -48,13 +48,16 @@ class UniSceneRenderer {
     vks::Buffer modelViews;
   } m_uniformBuffers;
 
-  struct {
+  using PushConstantStruct = struct {
     uint32_t time_seconds = 0;
     uint32_t time_millis = 0;
-  } m_TimeConstants;
+  };
+
+  PushConstantStruct m_TimeConstants;
 
   VkDescriptorSetLayout m_descriptorSetLayout;
-
+  VkDescriptorSet m_descriptorSet;
+  VkDescriptorSetLayoutCreateInfo m_descriptorLayout;
   std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
   std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
 
@@ -120,6 +123,14 @@ class UniSceneRenderer {
   void UnRegisterMaterial(std::shared_ptr<UniMaterial> mat);
 
   vks::VertexLayout GetVertexLayout() { return m_vertexLayout; }
+  VkDescriptorSetLayout GetDescriptorSetLayout() { return m_descriptorSetLayout;}
+  VkDescriptorSetLayoutCreateInfo GetDescriptorLayout() {
+    return m_descriptorLayout;
+  }
+  VkDescriptorSet GetDescriptorSet() { return m_descriptorSet; }
+
+  uint32_t GetPushConstantSize() { return sizeof(PushConstantStruct); }
+  PushConstantStruct GetPushConstants() { return m_TimeConstants; }
 
   void AddTimeDelta(uint32_t millis) {
     millis += m_TimeConstants.time_millis;

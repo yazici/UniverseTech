@@ -23,7 +23,7 @@ struct Light {
     float radius;
 };
 
-layout (binding = 1) uniform UBOLIGHT
+layout (set = 0, binding = 1) uniform UBOLIGHT
 {
     Light lights[1000];
     vec4 viewPos;
@@ -35,8 +35,13 @@ layout (set = 0, binding = 2) uniform PER_OBJECT
 	mat4 model;
 } ubdo;
 
-layout (binding = 3) uniform sampler2D samplerColorMap;
-layout (binding = 4) uniform sampler2D samplerNormalMap;
+layout (set = 1, binding = 0) uniform sampler2D samplerColorMap;
+layout (set = 1, binding = 1) uniform sampler2D samplerNormalMap;
+layout (set = 1, binding = 2) uniform sampler2D samplerRoughnessMap;
+layout (set = 1, binding = 3) uniform sampler2D samplerMetallicMap;
+layout (set = 1, binding = 4) uniform sampler2D samplerSpecularMap;
+layout (set = 1, binding = 5) uniform sampler2D samplerEmissiveMap;
+layout (set = 1, binding = 6) uniform sampler2D samplerAOMap;
 
 layout(push_constant) uniform PushConsts {
 	uint time_seconds;
@@ -57,6 +62,9 @@ void main()
 {
 
 	vec3 albedo = texture(samplerColorMap, inUV).rgb;// * inColor;
+	vec3 emissive = texture(samplerEmissiveMap, inUV).rgb;// * inColor;
+	float roughness = texture(samplerRoughnessMap, inUV).r;
+	float metallic = texture(samplerMetallicMap, inUV).r;
 
 	// Calculate normal in tangent space
 	vec3 N = normalize(inNormal);
@@ -70,8 +78,8 @@ void main()
 	vec3 camPos = uboLights.viewPos.xyz;
 	vec3 V = normalize(camPos - inPos.xyz);
 
-	float roughness = 0.3;
-	float metallic = 0.7;
+	//float roughness = 0.3;
+	//float metallic = 0.7;
 
 	// Add striped pattern to roughness based on vertex position
 #ifdef ROUGHNESS_PATTERN
@@ -97,12 +105,12 @@ void main()
 	// Combine with ambient
 	vec3 color = albedo * 0.08;
 	color += Lo;
+	color += emissive;
 
 	// Gamma correct
 	//color = vec3(dot(N, L));
 	color = pow(color, vec3(0.4545));
-	//color = N;
-	
-	
+	//color = vec3(roughness);
+		
 	outFragColor = vec4(color, 1.0);
 }

@@ -30,8 +30,8 @@ PlanetMaterial::PlanetMaterial(std::string name, bool hasOcean) {
   //}
 }
 
-uint32_t PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer, uint32_t index, VkPipelineLayout layout){
-  vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
+uint32_t PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer, uint32_t index){
+  vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
   vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
 
   return index;
