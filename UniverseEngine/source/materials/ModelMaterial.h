@@ -8,11 +8,7 @@ class ModelMaterial : public UniMaterial {
  public:
   virtual ~ModelMaterial() { Destroy(); }
 
-  std::vector<std::shared_ptr<vks::Texture>> m_Textures;
-
-  void Destroy() override;
-
-  void LoadTexture(std::string name, std::string texturePath) override;
+  void LoadTexture(std::string name, short layer, std::string texturePath) override;
 
   std::vector<std::shared_ptr<UniModel>> GetModels() { return m_models; }
 
@@ -30,7 +26,7 @@ class ModelMaterial : public UniMaterial {
 
  public:
   ModelMaterial() = default;
-  ModelMaterial(std::string name);
+  ModelMaterial(std::string name, short layers = 0);
 };
 
 using ModelMaterialFactory =

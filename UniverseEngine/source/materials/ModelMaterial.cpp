@@ -5,24 +5,18 @@
 #include "../UniSceneManager.h"
 #include "../UniSceneRenderer.h"
 
-ModelMaterial::ModelMaterial(std::string name) {
+ModelMaterial::ModelMaterial(std::string name, short layers) {
   auto& engine = UniEngine::GetInstance();
   auto aPath = engine.getAssetPath();
   m_Name = name;
   SetShader("vert", aPath + "shaders/omnishader.vert.spv");
   SetShader("frag", aPath + "shaders/omnishader.frag.spv");
+
+  m_MaterialProperties.resize(layers);
 }
 
 
-void ModelMaterial::Destroy() {
-  std::cout << "Destroying model material..." << std::endl;
-
-  for (auto& tex : m_Textures) {
-    tex->destroy();
-  }
-}
-
-void ModelMaterial::LoadTexture(std::string name, std::string texturePath) {
+void ModelMaterial::LoadTexture(std::string name, short layer, std::string texturePath) {
 
   //if (texturePath.empty()) {
   //  return;
@@ -50,6 +44,6 @@ void ModelMaterial::LoadTexture(std::string name, std::string texturePath) {
     m_hasAOMap = true;
   }
 
-  UniMaterial::LoadTexture(name, texturePath);
+  UniMaterial::LoadTexture(name, layer, texturePath);
   
 }

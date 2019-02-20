@@ -85,6 +85,7 @@ class UniSceneRenderer {
       vks::VERTEX_COMPONENT_COLOR,
       vks::VERTEX_COMPONENT_NORMAL,
       vks::VERTEX_COMPONENT_TANGENT,
+      vks::VERTEX_COMPONENT_MATERIAL_ID
   });
 
   struct {

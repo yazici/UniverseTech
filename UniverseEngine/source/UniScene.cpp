@@ -122,19 +122,22 @@ void UniScene::Load(std::string filename) {
         roughness = so.at("roughness");
       }
 
-      auto material = std::make_shared<ModelMaterial>(materialID);
-      material->LoadTexture("texture", texturePath);
-      material->LoadTexture("normal", normalPath);
-      material->LoadTexture("metallic", metallicPath);
-      material->LoadTexture("specular", specularPath);
-      material->LoadTexture("roughness", roughnessPath);
-      material->LoadTexture("emissive", emissivePath);
-      material->LoadTexture("ao", aoPath);
-      material->SetBaseColour(baseColour);
-      material->SetEmissiveColour(emissiveColour);
-      material->SetRoughness(roughness);
-      material->SetMetallic(metallic);
-      material->SetSpecular(specular);
+      short layers = 1;
+      short layer = 0;
+
+      auto material = std::make_shared<ModelMaterial>(materialID, layers);
+      material->LoadTexture("texture", layer, texturePath);
+      material->LoadTexture("normal", layer, normalPath);
+      material->LoadTexture("metallic", layer, metallicPath);
+      material->LoadTexture("specular", layer, specularPath);
+      material->LoadTexture("roughness", layer, roughnessPath);
+      material->LoadTexture("emissive", layer, emissivePath);
+      material->LoadTexture("ao", layer, aoPath);
+      material->SetBaseColour(baseColour, layer);
+      material->SetEmissiveColour(emissiveColour, layer);
+      material->SetRoughness(roughness, layer);
+      material->SetMetallic(metallic, layer);
+      material->SetSpecular(specular, layer);
 
       renderer->RegisterMaterial(material);
 

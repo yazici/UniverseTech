@@ -10,6 +10,7 @@ layout (location = 1) in vec2 inUV;
 layout (location = 2) in vec3 inColor;
 layout (location = 3) in vec3 inNormal;
 layout (location = 4) in vec3 inTangent;
+layout (location = 5) in float inMaterialID;
 
 layout (set = 0, binding = 0) uniform UBO 
 {
@@ -111,6 +112,8 @@ void main()
 	//color = vec3(dot(N, L));
 	color = pow(color, vec3(0.4545));
 	//color = vec3(roughness);
+
+	color *= 1.0 + inMaterialID;
 		
 	outFragColor = vec4(color, 1.0);
 }

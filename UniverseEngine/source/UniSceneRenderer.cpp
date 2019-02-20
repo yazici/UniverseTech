@@ -59,37 +59,35 @@ void UniSceneRenderer::ShutDown() {
 
 void UniSceneRenderer::SetupVertexDescriptions() {
   // Binding description
-  m_vertices.bindingDescriptions.resize(1);
-  m_vertices.bindingDescriptions[0] =
+  m_vertices.bindingDescriptions = {
       vks::initializers::vertexInputBindingDescription(
           VERTEX_BUFFER_BIND_ID, m_vertexLayout.stride(),
-          VK_VERTEX_INPUT_RATE_VERTEX);
+          VK_VERTEX_INPUT_RATE_VERTEX)};
 
   // Attribute descriptions
-  m_vertices.attributeDescriptions.resize(5);
-  // Location 0: Position
-  m_vertices.attributeDescriptions[0] =
+  m_vertices.attributeDescriptions = {
       vks::initializers::vertexInputAttributeDescription(
-          VERTEX_BUFFER_BIND_ID, 0, VK_FORMAT_R32G32B32_SFLOAT, 0);
-  // Location 1: Texture coordinates
-  m_vertices.attributeDescriptions[1] =
+          VERTEX_BUFFER_BIND_ID, 0, VK_FORMAT_R32G32B32_SFLOAT, 0),
+      // Location 1: Texture coordinates
       vks::initializers::vertexInputAttributeDescription(
-          VERTEX_BUFFER_BIND_ID, 1, VK_FORMAT_R32G32_SFLOAT, sizeof(float) * 3);
-  // Location 2: Color
-  m_vertices.attributeDescriptions[2] =
+          VERTEX_BUFFER_BIND_ID, 1, VK_FORMAT_R32G32_SFLOAT, sizeof(float) * 3),
+      // Location 2: Color
       vks::initializers::vertexInputAttributeDescription(
           VERTEX_BUFFER_BIND_ID, 2, VK_FORMAT_R32G32B32_SFLOAT,
-          sizeof(float) * 5);
-  // Location 3: Normal
-  m_vertices.attributeDescriptions[3] =
+          sizeof(float) * 5),
+      // Location 3: Normal
       vks::initializers::vertexInputAttributeDescription(
           VERTEX_BUFFER_BIND_ID, 3, VK_FORMAT_R32G32B32_SFLOAT,
-          sizeof(float) * 8);
-  // Location 4: Tangent
-  m_vertices.attributeDescriptions[4] =
+          sizeof(float) * 8),
+      // Location 4: Tangent
       vks::initializers::vertexInputAttributeDescription(
           VERTEX_BUFFER_BIND_ID, 4, VK_FORMAT_R32G32B32_SFLOAT,
-          sizeof(float) * 11);
+          sizeof(float) * 11),
+      // Location 5: Material ID
+      vks::initializers::vertexInputAttributeDescription(
+          VERTEX_BUFFER_BIND_ID, 5, VK_FORMAT_R32_SFLOAT,
+          sizeof(float) * 14),
+  };
 
   m_vertices.inputState =
       vks::initializers::pipelineVertexInputStateCreateInfo();
@@ -159,15 +157,13 @@ void UniSceneRenderer::SetupDescriptorSetLayout() {
       // Binding 2 : dynamic buffer for models
       vks::initializers::descriptorSetLayoutBinding(
           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 2)
-  };
+          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 2)};
 
   auto device = UniEngine::GetInstance().GetDevice();
 
-  m_descriptorLayout =
-      vks::initializers::descriptorSetLayoutCreateInfo(
-          m_setLayoutBindings.data(),
-          static_cast<uint32_t>(m_setLayoutBindings.size()));
+  m_descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(
+      m_setLayoutBindings.data(),
+      static_cast<uint32_t>(m_setLayoutBindings.size()));
 
   VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &m_descriptorLayout,
                                               nullptr, &m_descriptorSetLayout));

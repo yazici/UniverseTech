@@ -40,7 +40,8 @@ typedef enum Component {
   VERTEX_COMPONENT_TANGENT = 0x4,
   VERTEX_COMPONENT_BITANGENT = 0x5,
   VERTEX_COMPONENT_DUMMY_FLOAT = 0x6,
-  VERTEX_COMPONENT_DUMMY_VEC4 = 0x7
+  VERTEX_COMPONENT_DUMMY_VEC4 = 0x7,
+  VERTEX_COMPONENT_MATERIAL_ID = 0x8,
 } Component;
 
 /** @brief Stores vertex layout components for model loading and Vulkan vertex
@@ -58,6 +59,9 @@ struct VertexLayout {
     uint32_t res = 0;
     for (auto& component : components) {
       switch (component) {
+        case VERTEX_COMPONENT_MATERIAL_ID:
+          res += sizeof(float);
+          break;
         case VERTEX_COMPONENT_UV:
           res += 2 * sizeof(float);
           break;
@@ -284,6 +288,8 @@ struct Model {
                 vertexBuffer.push_back(0.0f);
                 vertexBuffer.push_back(0.0f);
                 break;
+              case VERTEX_COMPONENT_MATERIAL_ID:
+                vertexBuffer.push_back(static_cast<float>(paiMesh->mMaterialIndex));
             };
           }
 
