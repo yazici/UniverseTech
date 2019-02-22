@@ -274,7 +274,7 @@ void UniSceneRenderer::SetupDescriptorPool() {
   auto modelCount = static_cast<uint32_t>(
       std::max((int)SceneManager()->CurrentScene()->GetModels().size(), 1));
 
-  auto drawCmdBufferCount = drawCmdBuffers.size();
+  auto drawCmdBufferCount = static_cast<uint32_t>(drawCmdBuffers.size());
 
   std::vector<VkDescriptorPoolSize> poolSizes = {
       vks::initializers::descriptorPoolSize(
@@ -441,8 +441,8 @@ void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
               ECS::ComponentHandle<LightComponent> light) {
             // std::cout << "Found a light! " << lightCount;
             if (light->enabled && lightCount < MAX_LIGHT_COUNT) {
-              auto lPos = glm::vec4(transform->m_dPos, 0);
-              auto lCol = light->color;
+              glm::vec4 lPos = glm::vec4(transform->m_dPos, 0);
+              glm::vec3 lCol = glm::vec3(light->color);
               uboLights.lights[lightCount].color = lCol;
               uboLights.lights[lightCount].radius = light->radius;
               uboLights.lights[lightCount].position =
@@ -453,7 +453,7 @@ void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
               // lCol.g
               // << ", " << lCol.b << ", " << lCol.a << ". " << std::endl;
             } else {
-              std::cout << "Light is disabled!" << std::endl;
+              //std::cout << "Light is disabled!" << std::endl;
             }
             lightCount++;
           });

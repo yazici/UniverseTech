@@ -11,6 +11,17 @@ void UniMaterial::SetupMaterial(
   auto& engine = UniEngine::GetInstance();
   auto device = engine.GetDevice();
 
+  // Buffer for material properties to be used in both shader stages
+  VK_CHECK_RESULT(engine.vulkanDevice->createBuffer(
+      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+      &m_MaterialPropertyBuffer, sizeof(m_MaterialProperties)));
+  VK_CHECK_RESULT(m_MaterialPropertyBuffer.map());
+
+  memcpy(m_MaterialPropertyBuffer.mapped, &m_MaterialProperties,
+         sizeof(m_MaterialProperties));
+
   SetupDescriptorSetLayout(SceneRenderer());
   PreparePipelines(SceneRenderer(), pipelineCreateInfo);
   SetupDescriptorPool(SceneRenderer());
@@ -61,6 +72,10 @@ void UniMaterial::SetupDescriptorSetLayout(
       vks::initializers::descriptorSetLayoutBinding(
           VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 6),
+      // Binding 7 : Material properties
+      vks::initializers::descriptorSetLayoutBinding(
+          VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+          VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 7),
   };
 
   auto device = UniEngine::GetInstance().GetDevice();
@@ -130,11 +145,15 @@ void UniMaterial::SetupDescriptorPool(
   std::vector<VkDescriptorPoolSize> poolSizes = {
       vks::initializers::descriptorPoolSize(
           VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-          static_cast<uint32_t>(m_setLayoutBindings.size()) * modelCount *
+          static_cast<uint32_t>(m_setLayoutBindings.size() - 1) * modelCount *
               drawCmdBufferCount),
       vks::initializers::descriptorPoolSize(
           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-          modelCount * drawCmdBufferCount)};
+          modelCount * drawCmdBufferCount),
+      vks::initializers::descriptorPoolSize(
+          VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+          modelCount * drawCmdBufferCount)
+  };
 
   VkDescriptorPoolCreateInfo descriptorPoolInfo =
       vks::initializers::descriptorPoolCreateInfo(
@@ -160,31 +179,35 @@ void UniMaterial::SetupDescriptorSets(
       // Binding 0: Texture map
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 0,
-          &GetTexture("texture", 0)->descriptor),
+          &GetTexture("texture")->descriptor),
       // Binding 1: Normal map
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1,
-          &GetTexture("normal", 0)->descriptor),
+          &GetTexture("normal")->descriptor),
       // Binding 2: Roughness map
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2,
-          &GetTexture("roughness", 0)->descriptor),
+          &GetTexture("roughness")->descriptor),
       // Binding 3: Metallic map
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3,
-          &GetTexture("metallic", 0)->descriptor),
+          &GetTexture("metallic")->descriptor),
       // Binding 4: Specular map
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4,
-          &GetTexture("specular", 0)->descriptor),
+          &GetTexture("specular")->descriptor),
       // Binding 5: Emissive map
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 5,
-          &GetTexture("emissive", 0)->descriptor),
+          &GetTexture("emissive")->descriptor),
       // Binding 6: AO map
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 6,
-          &GetTexture("ao", 0)->descriptor),
+          &GetTexture("ao")->descriptor),
+      // Binding 0 : view/proj buffer
+      vks::initializers::writeDescriptorSet(
+          m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 7,
+          &m_MaterialPropertyBuffer.descriptor),
   };
 
   vkUpdateDescriptorSets(device,
@@ -213,10 +236,7 @@ uint32_t UniMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
                      VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
                      0, renderer->GetPushConstantSize(),
                      &renderer->GetPushConstants());
-  vkCmdPushConstants(cmdBuffer, m_pipelineLayout,
-                     VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT,
-                     renderer->GetPushConstantSize(),
-                     sizeof(m_MaterialProperties), &m_MaterialProperties);
+
 
   for_each(models.begin(), models.end(),
            [this, &index, dynamicAlignment, cmdBuffer,
@@ -241,7 +261,7 @@ uint32_t UniMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
   return index;
 }
 
-void UniMaterial::LoadTexture(std::string name, short layer, std::string texturePath) {
+void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
   // Textures
   //  std::string texFormatSuffix;
   VkFormat texFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -264,6 +284,7 @@ void UniMaterial::LoadTexture(std::string name, short layer, std::string texture
   //  vks::tools::exitFatal(
   //      "Device does not support any compressed texture format!",
   //      VK_ERROR_FEATURE_NOT_PRESENT);
+
   //}
 
   auto texture = std::make_shared<vks::Texture2D>();
@@ -271,6 +292,28 @@ void UniMaterial::LoadTexture(std::string name, short layer, std::string texture
   if (!texturePath.empty()) {
     texture->loadFromFile(getAssetPath() + texturePath, texFormat, device,
                           copyQueue);
+    if (name == "texture") {
+      m_MaterialProperties.hasTextureMap = 1;
+    }
+    if (name == "normal") {
+      m_MaterialProperties.hasNormalMap = 1;
+    }
+    if (name == "metallic") {
+      m_MaterialProperties.hasMetallicMap = 1;
+    }
+    if (name == "roughness") {
+      m_MaterialProperties.hasRoughnessMap = 1;
+    }
+    if (name == "specular") {
+      m_MaterialProperties.hasSpecularMap = 1;
+    }
+    if (name == "emissive") {
+      m_MaterialProperties.hasEmissiveMap = 1;
+    }
+    if (name == "ao") {
+      m_MaterialProperties.hasAOMap = 1;
+    }
+
   } else {
     std::vector<glm::vec4> buffer(4 * 4);
     for (auto& i : buffer) {
@@ -281,7 +324,8 @@ void UniMaterial::LoadTexture(std::string name, short layer, std::string texture
                         VK_FILTER_LINEAR);
   }
 
-  SetTexture(name, layer, texture);
+
+  SetTexture(name, texture);
 }
 
 void UniMaterial::SetBuffer(std::string name,
@@ -296,19 +340,18 @@ std::shared_ptr<vks::Buffer> UniMaterial::GetBuffer(std::string buffer) {
   return m_Buffers.at(buffer);
 }
 
-std::shared_ptr<vks::Texture2D> UniMaterial::GetTexture(std::string name, short layer) {
-  if (m_Textures.find({name, layer}) == m_Textures.end()) {
-    std::cout << "No texture named " << name << " at level " << layer << ", creating empty buffer."
+std::shared_ptr<vks::Texture2D> UniMaterial::GetTexture(std::string name) {
+  if (m_Textures.find(name) == m_Textures.end()) {
+    std::cout << "No texture named " << name << ", creating empty buffer."
               << std::endl;
-    LoadTexture(name, layer, "");
+    LoadTexture(name, "");
   }
-  return m_Textures.at({name, layer});
+  return m_Textures.at(name);
 }
 
 void UniMaterial::SetTexture(std::string name,
-                             short layer,
                              std::shared_ptr<vks::Texture2D> texture) {
-  m_Textures[{name, layer}] = texture;
+  m_Textures[name] = texture;
 }
 
 std::shared_ptr<UniSceneRenderer> UniMaterial::SceneRenderer() {

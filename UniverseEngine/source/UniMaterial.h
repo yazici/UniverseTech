@@ -27,8 +27,8 @@ class UniMaterial {
   std::shared_ptr<vks::Buffer> GetBuffer(std::string name);
   void SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer);
 
-  std::shared_ptr<vks::Texture2D> GetTexture(std::string name, short layer);
-  void SetTexture(std::string name, short layer, std::shared_ptr<vks::Texture2D> texture);
+  std::shared_ptr<vks::Texture2D> GetTexture(std::string name);
+  void SetTexture(std::string name, std::shared_ptr<vks::Texture2D> texture);
 
   std::string GetShader(std::string name) { return m_Shaders.at(name); }
   void SetShader(std::string name, std::string shader) {
@@ -36,7 +36,7 @@ class UniMaterial {
   }
   void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
   virtual void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
-  virtual void LoadTexture(std::string name, short layer, std::string texturePath);
+  virtual void LoadTexture(std::string name, std::string texturePath);
   virtual uint32_t AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
                                       uint32_t index);
 
@@ -47,20 +47,22 @@ class UniMaterial {
   std::string GetName() { return m_Name; }
   void SetName(std::string name) { m_Name = name; }
 
-  void SetBaseColour(glm::vec3 bc, short layer = 0) { m_MaterialProperties[layer].baseColour = bc; }
-  void SetBaseColour(float r, float g, float b, short layer = 0) { SetBaseColour({r, g, b}, layer); }
-  void SetEmissiveColour(glm::vec3 bc, short layer = 0) { m_MaterialProperties[layer].emissiveColour = bc; }
-  void SetEmissiveColour(float r, float g, float b, short layer = 0) {
-    m_MaterialProperties[layer].emissiveColour = {r, g, b};
+  void SetBaseColour(glm::vec4 bc) { m_MaterialProperties.baseColour = bc; }
+  void SetBaseColour(float r, float g, float b, float a) { SetBaseColour({r, g, b, a}); }
+  void SetEmissiveColour(glm::vec4 bc) { 
+    //m_MaterialProperties.baseEmissive = bc; 
   }
-  void SetRoughness(float roughness, short layer = 0) {
-    m_MaterialProperties[layer].roughness = roughness;
+  void SetEmissiveColour(float r, float g, float b, float a) {
+    //SetEmissiveColour({r, g, b, a});
   }
-  void SetMetallic(float metallic, short layer = 0) {
-    m_MaterialProperties[layer].metallic = metallic;
+  void SetRoughness(float roughness) {
+    m_MaterialProperties.baseRoughness = roughness;
   }
-  void SetSpecular(float specular, short layer = 0) {
-    m_MaterialProperties[layer].specular = specular;
+  void SetMetallic(float metallic) {
+    m_MaterialProperties.baseMetallic = metallic;
+  }
+  void SetSpecular(float specular) {
+    m_MaterialProperties.baseSpecular = specular;
   }
 
 
@@ -69,33 +71,33 @@ class UniMaterial {
 
   using MaterialProperties = struct  
   {
-    bool hasTextureMap = false;
-    bool hasNormalMap = false;
-    bool hasRoughnessMap = false;
-    bool hasMetallicMap = false;
-    bool hasSpecularMap = false;
-    bool hasEmissiveMap = false;
-    bool hasAOMap = false;
-    bool padding = false;
-
-    glm::vec3 baseColour = glm::vec3(1);  // materials are white by default
-    glm::vec3 emissiveColour = glm::vec3(0);         // materials are not emissive by default
-    float roughness = 1.f;  // materials are smooth by default
-    float metallic = 0.f;   // materials are not metallic by default
-    float specular = 0.5f;  // materials are plasticy by default
-
+    glm::vec4 baseColour = glm::vec4(1.f);  // materials are white by default
+    glm::vec4 baseEmissive =
+        glm::vec4(0.f, 0.f, 0.f, 1.f);  // materials are not emissive by default
+    glm::vec4 baseNormal = glm::vec4(0.f, 0.f, 1.f, 0.f);
+    float baseRoughness = 1.f;  // materials are rough by default
+    float baseMetallic = 0.f;   // materials are not metallic by default
+    float baseSpecular = 0.04f;  // materials are plasticy by default
+    unsigned int hasTextureMap = 0;
+    unsigned int hasNormalMap = 0;
+    unsigned int hasRoughnessMap = 0;
+    unsigned int hasMetallicMap = 0;
+    unsigned int hasSpecularMap = 0;
+    unsigned int hasEmissiveMap = 0;
+    unsigned int hasAOMap = 0;
+    unsigned int isVisible = 1;
   };
 
-  short layers = 0;
 
-  std::vector<MaterialProperties> m_MaterialProperties;
+  MaterialProperties m_MaterialProperties;
+  vks::Buffer m_MaterialPropertyBuffer;
 
   std::vector<std::shared_ptr<UniModel>> m_models;
 
   std::string m_Name;
   uint32_t m_IndexCount;
    
-  std::map<std::tuple<std::string, short>, std::shared_ptr<vks::Texture2D>>
+  std::map<std::string, std::shared_ptr<vks::Texture2D>>
       m_Textures;
 
   std::map<std::string, std::string> m_Shaders;

@@ -94,19 +94,19 @@ void UniScene::Load(std::string filename) {
       if (so.find("aoMap") != so.end())
         aoPath = so.at("aoMap");
 
-      glm::vec3 baseColour = glm::vec3(1);
+      glm::vec4 baseColour = glm::vec4(1.f);
       if (so.find("colour") != so.end()) {
         auto bc = so.at("colour");
-        baseColour = glm::vec3(bc[0], bc[1], bc[2]);
+        baseColour = glm::vec4(bc[0], bc[1], bc[2], bc[3]);
       }
 
-      glm::vec3 emissiveColour = glm::vec3(0);
+      glm::vec4 emissiveColour = glm::vec4(0.f);
       if (so.find("emissive") != so.end()) {
         auto bc = so.at("emissive");
-        emissiveColour = glm::vec3(bc[0], bc[1], bc[2]);
+        emissiveColour = glm::vec4(bc[0], bc[1], bc[2], bc[3]);
       }
 
-      float specular = 0.5f;
+      float specular = 0.04f;
       float metallic = 0.f;
       float roughness = 1.f;
 
@@ -122,22 +122,20 @@ void UniScene::Load(std::string filename) {
         roughness = so.at("roughness");
       }
 
-      short layers = 1;
-      short layer = 0;
 
-      auto material = std::make_shared<ModelMaterial>(materialID, layers);
-      material->LoadTexture("texture", layer, texturePath);
-      material->LoadTexture("normal", layer, normalPath);
-      material->LoadTexture("metallic", layer, metallicPath);
-      material->LoadTexture("specular", layer, specularPath);
-      material->LoadTexture("roughness", layer, roughnessPath);
-      material->LoadTexture("emissive", layer, emissivePath);
-      material->LoadTexture("ao", layer, aoPath);
-      material->SetBaseColour(baseColour, layer);
-      material->SetEmissiveColour(emissiveColour, layer);
-      material->SetRoughness(roughness, layer);
-      material->SetMetallic(metallic, layer);
-      material->SetSpecular(specular, layer);
+      auto material = std::make_shared<ModelMaterial>(materialID);
+      material->LoadTexture("texture", texturePath);
+      material->LoadTexture("normal", normalPath);
+      material->LoadTexture("metallic", metallicPath);
+      material->LoadTexture("specular", specularPath);
+      material->LoadTexture("roughness", roughnessPath);
+      material->LoadTexture("emissive", emissivePath);
+      material->LoadTexture("ao", aoPath);
+      material->SetBaseColour(baseColour);
+      material->SetEmissiveColour(emissiveColour);
+      material->SetRoughness(roughness);
+      material->SetMetallic(metallic);
+      material->SetSpecular(specular);
 
       renderer->RegisterMaterial(material);
 

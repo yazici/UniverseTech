@@ -66,7 +66,7 @@ void main()
 	outUV.t = 1.0 - outUV.t;
 	gl_Position = ubo.projection * ubo.view * ubdo.model * vec4(inPos.xyz, 1.0);
 	
-	vec4 pos = ubdo.model * vec4(inPos, 1.0);
+	outPos = ubdo.model * vec4(inPos, 1.0);
 	outNormal = mat3(ubdo.model) * inNormal;
 
 	outMaterialID = inMaterialID;

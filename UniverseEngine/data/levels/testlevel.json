@@ -11,7 +11,7 @@
             {
                 "type": "model material",
                 "name": "spaceship01 material",
-                "colour": [ 0.560, 0.570, 0.580 ],
+                "colour": [ 0.560, 0.570, 0.580, 1.0 ],
                 "metallic": 1.0,
                 "roughness": 0.75,
                 "textureMap": "models/spaceship01/None_Base_Color.png",
@@ -23,7 +23,7 @@
             {
                 "type": "model material",
                 "name": "spaceship02 material",
-                "colour": [ 0.560, 0.570, 0.580 ],
+                "colour": [ 0.560, 0.570, 0.580, 1.0 ],
                 "metallic": 1.0,
                 "roughness": 0.75,
                 "textureMap": "models/spaceship02/Spaceship_BaseColor.png",
