@@ -1,19 +1,19 @@
-#include "UniModel.h"
+#include "ModelComponent.h"
 
-UniModel::UniModel(std::string n) {
+ModelComponent::ModelComponent(std::string n) {
 	m_Name = n;
 	m_ModelCreateInfo.center = glm::vec3(0, 0, 0);
 	m_ModelCreateInfo.scale = glm::vec3(1.f);
 	m_ModelCreateInfo.uvscale = glm::vec2(1.f);
 }
 
-void UniModel::Destroy() {
+void ModelComponent::Destroy() {
   std::cout << "Destroying model..." << std::endl;
 
   m_Model.destroy();
 }
 
-UniModel::UniModel(std::string n, const std::string &modelpath, const std::string &materialID) {
+ModelComponent::ModelComponent(std::string n, const std::string &modelpath, const std::string &materialID) {
 	m_Name = n;
 	m_ModelCreateInfo.center = glm::vec3(0, 0, 0);
 	m_ModelCreateInfo.scale = glm::vec3(1.f);
@@ -22,17 +22,17 @@ UniModel::UniModel(std::string n, const std::string &modelpath, const std::strin
   m_MaterialID = materialID;
 }
 
-void UniModel::SetScale(float scale /*= 1.f*/) {
+void ModelComponent::SetScale(float scale /*= 1.f*/) {
 	m_ModelCreateInfo.scale = glm::vec3(scale);
 }
 
-void UniModel::SetCreateInfo(glm::vec3 center, glm::vec3 scale, glm::vec2 uvScale) {
+void ModelComponent::SetCreateInfo(glm::vec3 center, glm::vec3 scale, glm::vec2 uvScale) {
 	m_ModelCreateInfo.scale = scale;
 	m_ModelCreateInfo.center = center;
 	m_ModelCreateInfo.uvscale = uvScale;
 }
 
-void UniModel::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue copyQueue, bool useCreateInfo) {
+void ModelComponent::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue copyQueue, bool useCreateInfo) {
 	if(useCreateInfo)
 		m_Model.loadFromFile(getAssetPath() + m_ModelPath, layout, &m_ModelCreateInfo, device, copyQueue);
 	else
@@ -41,4 +41,4 @@ void UniModel::Load(vks::VertexLayout layout, vks::VulkanDevice *device, VkQueue
 
 }
 
-UniModel::~UniModel() {}
+ModelComponent::~ModelComponent() {}

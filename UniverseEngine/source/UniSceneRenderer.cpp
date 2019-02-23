@@ -474,7 +474,7 @@ void UniSceneRenderer::UpdateDynamicUniformBuffers() {
   auto dynamicAlignment = engine.getDynamicAlignment();
   auto models = SceneManager()->CurrentScene()->GetModels();
   for_each(models.begin(), models.end(),
-           [this, &index, dynamicAlignment](std::shared_ptr<UniModel> model) {
+           [this, &index, dynamicAlignment](std::shared_ptr<ModelComponent> model) {
              glm::mat4* modelMat =
                  (glm::mat4*)(((uint64_t)m_uboModelMatDynamic.model +
                                (index * dynamicAlignment)));

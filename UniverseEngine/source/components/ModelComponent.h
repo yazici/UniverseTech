@@ -10,15 +10,15 @@
 
 using json = nlohmann::json;
 
-class UniModel : public UniSceneObject {
+class ModelComponent {
  public:
-  UniModel() { m_Name = "unnamed model"; }
-  UniModel(std::string n);
-  UniModel(std::string n,
+  ModelComponent() { m_Name = "unnamed model"; }
+  ModelComponent(std::string n);
+  ModelComponent(std::string n,
            const std::string& modelpath,
            const std::string& materialID);
   void Destroy();
-  ~UniModel();
+  ~ModelComponent();
 
   void SetScale(float scale = 1.f);
   void SetCreateInfo(glm::vec3 center, glm::vec3 scale, glm::vec2 uvScale);
@@ -31,6 +31,7 @@ class UniModel : public UniSceneObject {
   std::string m_ModelPath;
   std::string m_TexturePath;
   std::string m_NormalMapPath;
+  std::string m_Name;
 
   vks::Model m_Model;
   vks::ModelCreateInfo m_ModelCreateInfo;

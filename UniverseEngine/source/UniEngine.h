@@ -22,7 +22,6 @@
 
 
 // forward declarations
-class UniModel;
 class UniSceneManager;
 class UniSceneRenderer;
 class UniInput;

@@ -7,14 +7,14 @@
 #include "vks/VulkanTexture.hpp"
 
 class UniSceneRenderer;
-class UniModel;
+class ModelComponent;
 
 class UniMaterial {
  public:
   UniMaterial() = default;
   virtual void Destroy();
-  void RegisterModel(std::shared_ptr<UniModel> model);
-  void UnRegisterModel(UniModel* model);
+  void RegisterModel(std::shared_ptr<ModelComponent> model);
+  void UnRegisterModel(ModelComponent* model);
   virtual ~UniMaterial() { Destroy(); }
 
   virtual void SetupDescriptorSetLayout(std::shared_ptr<UniSceneRenderer> renderer);
@@ -92,7 +92,7 @@ class UniMaterial {
   MaterialProperties m_MaterialProperties;
   vks::Buffer m_MaterialPropertyBuffer;
 
-  std::vector<std::shared_ptr<UniModel>> m_models;
+  std::vector<std::shared_ptr<ModelComponent>> m_models;
 
   std::string m_Name;
   uint32_t m_IndexCount;

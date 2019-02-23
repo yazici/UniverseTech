@@ -171,8 +171,9 @@ void UniScene::Load(std::string filename) {
       }
 
       std::cout << "Creating model path: " << modelPath << std::endl;
-      auto model = Make<UniModel>(mpos, (std::string)so.at("name"), modelPath,
-                                  materialID);
+
+      // TODO: refactor as component
+      auto model = Make<UniSceneObject>(mpos, (std::string)so.at("name"));
 
       if (so.find("rotation") != so.end()) {
         auto rot = so.at("rotation");
@@ -331,7 +332,7 @@ void UniScene::Unload() {
   // Meshes
   auto models = GetModels();
   for_each(models.begin(), models.end(),
-           [](std::shared_ptr<UniModel> model) { model->Destroy(); });
+           [](std::shared_ptr<ModelComponent> model) { model->Destroy(); });
 }
 
 void UniScene::Tick(float deltaTime) {
@@ -339,15 +340,15 @@ void UniScene::Tick(float deltaTime) {
   // m_BodyTest->Update();
 }
 
-std::vector<std::shared_ptr<UniModel>> UniScene::GetModels() {
+std::vector<std::shared_ptr<ModelComponent>> UniScene::GetModels() {
   if (!m_ModelCache.empty()) {
     return m_ModelCache;
   }
 
-  std::vector<std::shared_ptr<UniModel>> models;
+  std::vector<std::shared_ptr<ModelComponent>> models;
   for_each(m_SceneObjects.begin(), m_SceneObjects.end(),
            [&models](std::shared_ptr<UniSceneObject> so) {
-             auto model = std::dynamic_pointer_cast<UniModel>(so);
+             auto model = std::dynamic_pointer_cast<ModelComponent>(so);
              if (model && model->IsRendered()) {
                models.push_back(model);
              }
