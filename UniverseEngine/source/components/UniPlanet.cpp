@@ -31,7 +31,7 @@ void UniPlanet::Destroy() {
   std::cout << "Destroying planet..." << std::endl;
 
   auto renderer = UniEngine::GetInstance().SceneRenderer();
-  renderer->UnRegisterMaterial(m_Material);
+  renderer->UnRegisterMaterial(m_Material->GetName());
   m_Material.reset();
 }
 
@@ -487,7 +487,7 @@ void UniPlanet::MakeContintentTexture() {
       VK_FORMAT_R32G32B32A32_SFLOAT, 1024, 1024, engine.vulkanDevice,
       engine.GetQueue(), VK_FILTER_LINEAR);
 
-  auto t = make_shared<vks::Texture>(m_ContinentTexture);
+  auto t = std::make_shared<vks::Texture>(m_ContinentTexture);
 
   m_Material->m_Textures.push_back(t);
 }
@@ -555,7 +555,7 @@ void UniPlanet::MakeRampTexture() {
                            texHeight, engine.vulkanDevice, engine.GetQueue(),
                            VK_FILTER_LINEAR);
 
-  auto t = make_shared<vks::Texture>(m_RampTexture);
+  auto t = std::make_shared<vks::Texture>(m_RampTexture);
 
   m_Material->m_Textures.push_back(t);
 }

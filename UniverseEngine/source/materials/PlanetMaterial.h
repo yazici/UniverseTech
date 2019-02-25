@@ -35,8 +35,3 @@ class PlanetMaterial : public UniMaterial {
   PlanetMaterial() = default;
   PlanetMaterial(std::string name, bool hasOcean = false);
 };
-
-
-using PlanetMaterialFactory =
-    Factory<std::string, std::shared_ptr<PlanetMaterial>>::Initializer<std::string,
-                                                                    bool>;

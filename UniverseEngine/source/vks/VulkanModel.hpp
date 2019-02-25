@@ -21,7 +21,7 @@
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
-#include "3dmaths.h"
+#include "../3dmaths.h"
 
 #include "VulkanBuffer.hpp"
 #include "VulkanDevice.hpp"

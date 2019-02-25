@@ -1,9 +1,8 @@
 #pragma once
 #include <nlohmann/json.hpp>
 #include <string>
-#include "3dmaths.h"
-#include "UniSceneObject.h"
-#include "vks/VulkanModel.hpp"
+#include "../3dmaths.h"
+#include "../vks/VulkanModel.hpp"
 //#include "vks/VulkanTexture.hpp"
 //#include "vulkan/vulkan_core.h"
 //#include "materials/ModelMaterial.h" 
@@ -35,6 +34,8 @@ class ModelComponent {
 
   vks::Model m_Model;
   vks::ModelCreateInfo m_ModelCreateInfo;
+
+  std::string GetName() { return m_Name; }
 
  protected:
   bool m_IsRendered = true;

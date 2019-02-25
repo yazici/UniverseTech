@@ -7,3 +7,4 @@
 #include "LightComponent.h"
 #include "PlayerControl.h"
 #include "UniPlanet.h"
+#include "ModelComponent.h"

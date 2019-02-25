@@ -19,7 +19,3 @@ class ModelMaterial : public UniMaterial {
   ModelMaterial() = default;
   ModelMaterial(std::string name);
 };
-
-using ModelMaterialFactory =
-    Factory<std::string,
-            std::shared_ptr<ModelMaterial>>::Initializer<std::string>;

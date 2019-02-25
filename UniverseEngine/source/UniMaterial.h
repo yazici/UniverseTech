@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <map>
-#include "factory.h"
+#include "ECS.h"
 #include "vks/VulkanBuffer.hpp"
 #include "vks/VulkanModel.hpp"
 #include "vks/VulkanTexture.hpp"
@@ -13,11 +13,12 @@ class UniMaterial {
  public:
   UniMaterial() = default;
   virtual void Destroy();
-  void RegisterModel(std::shared_ptr<ModelComponent> model);
-  void UnRegisterModel(ModelComponent* model);
+  void RegisterModel(ECS::ComponentHandle<ModelComponent> model);
+  void UnRegisterModel(ECS::ComponentHandle<ModelComponent> model);
   virtual ~UniMaterial() { Destroy(); }
 
-  virtual void SetupDescriptorSetLayout(std::shared_ptr<UniSceneRenderer> renderer);
+  virtual void SetupDescriptorSetLayout(
+      std::shared_ptr<UniSceneRenderer> renderer);
   virtual void PreparePipelines(
       std::shared_ptr<UniSceneRenderer> renderer,
       VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
@@ -48,12 +49,14 @@ class UniMaterial {
   void SetName(std::string name) { m_Name = name; }
 
   void SetBaseColour(glm::vec4 bc) { m_MaterialProperties.baseColour = bc; }
-  void SetBaseColour(float r, float g, float b, float a) { SetBaseColour({r, g, b, a}); }
-  void SetEmissiveColour(glm::vec4 bc) { 
-    //m_MaterialProperties.baseEmissive = bc; 
+  void SetBaseColour(float r, float g, float b, float a) {
+    SetBaseColour({r, g, b, a});
+  }
+  void SetEmissiveColour(glm::vec4 bc) {
+    // m_MaterialProperties.baseEmissive = bc;
   }
   void SetEmissiveColour(float r, float g, float b, float a) {
-    //SetEmissiveColour({r, g, b, a});
+    // SetEmissiveColour({r, g, b, a});
   }
   void SetRoughness(float roughness) {
     m_MaterialProperties.baseRoughness = roughness;
@@ -65,18 +68,14 @@ class UniMaterial {
     m_MaterialProperties.baseSpecular = specular;
   }
 
-
-
  protected:
-
-  using MaterialProperties = struct  
-  {
+  using MaterialProperties = struct {
     glm::vec4 baseColour = glm::vec4(1.f);  // materials are white by default
     glm::vec4 baseEmissive =
         glm::vec4(0.f, 0.f, 0.f, 1.f);  // materials are not emissive by default
     glm::vec4 baseNormal = glm::vec4(0.f, 0.f, 1.f, 0.f);
-    float baseRoughness = 1.f;  // materials are rough by default
-    float baseMetallic = 0.f;   // materials are not metallic by default
+    float baseRoughness = 1.f;   // materials are rough by default
+    float baseMetallic = 0.f;    // materials are not metallic by default
     float baseSpecular = 0.04f;  // materials are plasticy by default
     unsigned int hasTextureMap = 0;
     unsigned int hasNormalMap = 0;
@@ -88,17 +87,15 @@ class UniMaterial {
     unsigned int isVisible = 1;
   };
 
-
   MaterialProperties m_MaterialProperties;
   vks::Buffer m_MaterialPropertyBuffer;
 
-  std::vector<std::shared_ptr<ModelComponent>> m_models;
+  std::vector<ECS::ComponentHandle<ModelComponent>> m_models;
 
   std::string m_Name;
   uint32_t m_IndexCount;
-   
-  std::map<std::string, std::shared_ptr<vks::Texture2D>>
-      m_Textures;
+
+  std::map<std::string, std::shared_ptr<vks::Texture2D>> m_Textures;
 
   std::map<std::string, std::string> m_Shaders;
   std::map<std::string, std::shared_ptr<vks::Buffer>> m_Buffers;
@@ -110,7 +107,4 @@ class UniMaterial {
   std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
   std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
   VkDescriptorPool m_descriptorPool;
-  
-
-
 };

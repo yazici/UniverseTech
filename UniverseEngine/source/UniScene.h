@@ -3,7 +3,7 @@
 #include <memory>
 #include "ECS.h"
 #include "UniSceneObject.h"
-#include "ModelComponent.h"
+#include "components/Components.h"
 
 
 class UniEngine;
@@ -32,9 +32,7 @@ public:
 
 	std::vector<std::shared_ptr<UniSceneObject>> m_SceneObjects;
 	std::vector<std::shared_ptr<UniSceneObject>> m_RenderedObjectCache;
-	std::vector<std::shared_ptr<ModelComponent>> m_ModelCache;
 
-	std::vector<std::shared_ptr<ModelComponent>> GetModels();
 	std::vector<std::shared_ptr<UniSceneObject>> GetRenderedObjects();
 	void AddSceneObject(std::shared_ptr<UniSceneObject> so);
 

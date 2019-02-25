@@ -4,14 +4,6 @@
 #include "../UniEngine.h"
 #include "../UniSceneRenderer.h"
 
-const bool materialsAdded = [] {
-  PlanetMaterialFactory PlanetMaterialInitializer(
-      "planet", [](std::string name, bool hasOcean) {
-        return std::make_unique<PlanetMaterial>(name, hasOcean);
-      });
-  return true;
-}();
-
 
 PlanetMaterial::PlanetMaterial(std::string name, bool hasOcean) {
   auto& engine = UniEngine::GetInstance();

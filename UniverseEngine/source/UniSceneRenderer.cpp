@@ -112,7 +112,7 @@ void UniSceneRenderer::PrepareUniformBuffers() {
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &m_uniformBuffers.vsForward, sizeof(m_uboForward)));
 
-  auto models = engine.SceneManager()->CurrentScene()->GetModels();
+  auto models = engine.SceneManager()->CurrentScene()->GetRenderedObjects();
   auto dynamicAlignment = engine.getDynamicAlignment();
   size_t bufferSize =
       std::max(static_cast<int>(models.size()), 1) * dynamicAlignment;
@@ -262,7 +262,7 @@ void UniSceneRenderer::PreparePipelines() {
   std::cout << "Doing material pipelines..." << std::endl;
 
   for (auto& material : m_materialInstances) {
-    material->SetupMaterial(pipelineCreateInfo);
+    material.second->SetupMaterial(pipelineCreateInfo);
   }
 }
 
@@ -272,7 +272,7 @@ void UniSceneRenderer::SetupDescriptorPool() {
   auto& drawCmdBuffers = engine.GetCommandBuffers();
 
   auto modelCount = static_cast<uint32_t>(
-      std::max((int)SceneManager()->CurrentScene()->GetModels().size(), 1));
+      std::max((int)SceneManager()->CurrentScene()->GetRenderedObjects().size(), 1));
 
   auto drawCmdBufferCount = static_cast<uint32_t>(drawCmdBuffers.size());
 
@@ -398,7 +398,7 @@ void UniSceneRenderer::BuildCommandBuffers() {
     for (const auto& material : m_materialInstances) {
       // std::cout << "Building command buffer for material: "
       //          << material->GetName() << std::endl;
-      index = material->AddToCommandBuffer(drawCmdBuffers[i], index);
+      index = material.second->AddToCommandBuffer(drawCmdBuffers[i], index);
     }
 
     vkCmdEndRenderPass(drawCmdBuffers[i]);
@@ -472,9 +472,9 @@ void UniSceneRenderer::UpdateDynamicUniformBuffers() {
   auto& engine = UniEngine::GetInstance();
   int index = 0;
   auto dynamicAlignment = engine.getDynamicAlignment();
-  auto models = SceneManager()->CurrentScene()->GetModels();
+  auto models = SceneManager()->CurrentScene()->GetRenderedObjects();
   for_each(models.begin(), models.end(),
-           [this, &index, dynamicAlignment](std::shared_ptr<ModelComponent> model) {
+           [this, &index, dynamicAlignment](std::shared_ptr<UniSceneObject> model) {
              glm::mat4* modelMat =
                  (glm::mat4*)(((uint64_t)m_uboModelMatDynamic.model +
                                (index * dynamicAlignment)));
@@ -498,19 +498,12 @@ void UniSceneRenderer::UpdateCamera(float width, float height) {
   SceneManager()->CurrentScene()->GetCameraComponent()->CalculateProjection();
 }
 
-void UniSceneRenderer::RegisterMaterial(std::shared_ptr<UniMaterial> mat) {
-  m_materialInstances.push_back(mat);
+void UniSceneRenderer::RegisterMaterial(std::string materialID, std::shared_ptr<UniMaterial> mat) {
+  m_materialInstances.emplace(materialID, mat);
 }
 
-void UniSceneRenderer::UnRegisterMaterial(std::shared_ptr<UniMaterial> mat) {
-  int i = 0;
-  while (i < m_materialInstances.size()) {
-    if (m_materialInstances[i] == mat) {
-      m_materialInstances.erase(m_materialInstances.begin() + i);
-      i = 0;
-    }
-    i++;
-  }
+void UniSceneRenderer::UnRegisterMaterial(std::string materialID) {
+  m_materialInstances.erase(m_materialInstances.find(materialID));
 }
 
 std::string UniSceneRenderer::GetShader(std::string shader) {

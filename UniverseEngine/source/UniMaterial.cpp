@@ -240,7 +240,7 @@ uint32_t UniMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
 
   for_each(models.begin(), models.end(),
            [this, &index, dynamicAlignment, cmdBuffer,
-            dSets](std::shared_ptr<ModelComponent> model) {
+            dSets](auto model) {
              VkDeviceSize offsets[1] = {0};
              uint32_t dynamicOffset =
                  index * static_cast<uint32_t>(dynamicAlignment);
@@ -372,11 +372,11 @@ void UniMaterial::Destroy() {
   }
 }
 
-void UniMaterial::RegisterModel(std::shared_ptr<ModelComponent> model) {
+void UniMaterial::RegisterModel(ECS::ComponentHandle<ModelComponent> model) {
   m_models.push_back(model);
 }
 
-void UniMaterial::UnRegisterModel(ModelComponent* model) {
+void UniMaterial::UnRegisterModel(ECS::ComponentHandle<ModelComponent> model) {
   int i = 0;
   while (i < m_models.size()) {
     if (m_models[i]->GetName() == model->GetName()) {

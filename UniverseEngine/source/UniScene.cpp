@@ -60,11 +60,17 @@ void UniScene::Load(std::string filename) {
 
   for (const auto& so : level.at("materials")) {
     std::string soType = so.at("type");
+    std::string soName = so.at("name");
 
     if (soType == "model material") {
-      std::cout << "Loading model material: " << so.at("name") << std::endl;
+
+      if (loadedMaterials.find(soName) != loadedMaterials.end()) {
+        continue;
+      }
+
+      std::cout << "Loading model material: " << soName << std::endl;
       // 	m_Name = jsonData["name"];
-      std::string materialID = so.at("name");
+      std::string materialID = soName;
 
       std::string texturePath = "";
       if (so.find("textureMap") != so.end())
@@ -123,7 +129,7 @@ void UniScene::Load(std::string filename) {
       }
 
 
-      auto material = std::make_shared<ModelMaterial>(materialID);
+      auto material = renderer->GetMaterialByID<ModelMaterial>(materialID);
       material->LoadTexture("texture", texturePath);
       material->LoadTexture("normal", normalPath);
       material->LoadTexture("metallic", metallicPath);
@@ -137,14 +143,13 @@ void UniScene::Load(std::string filename) {
       material->SetMetallic(metallic);
       material->SetSpecular(specular);
 
-      renderer->RegisterMaterial(material);
-
-      loadedMaterials.insert({materialID, material});
+      loadedMaterials.emplace(materialID, material);
     }
   }
 
   for (const auto& so : level.at("sceneObjects")) {
     std::string soType = so.at("type");
+    std::string soName = so.at("name");
 
     if (soType == "model") {
 
@@ -154,7 +159,7 @@ void UniScene::Load(std::string filename) {
         }
       }
 
-      std::cout << "Loading model: " << so.at("name") << std::endl;
+      std::cout << "Loading model: " << soName << std::endl;
       // 	m_Name = jsonData["name"];
       auto modelPath = so.at("mesh");
       auto materialID = so.at("materialID");
@@ -173,11 +178,11 @@ void UniScene::Load(std::string filename) {
       std::cout << "Creating model path: " << modelPath << std::endl;
 
       // TODO: refactor as component
-      auto model = Make<UniSceneObject>(mpos, (std::string)so.at("name"));
+      auto sceneObj = Make<UniSceneObject>(mpos, soName);
 
       if (so.find("rotation") != so.end()) {
         auto rot = so.at("rotation");
-        model->GetTransform()->SetRotation({rot[0], rot[1], rot[2]});
+        sceneObj->GetTransform()->SetRotation({rot[0], rot[1], rot[2]});
       }
 
       glm::vec3 createScale = {so.at("createScale")[0], so.at("createScale")[1],
@@ -208,16 +213,18 @@ void UniScene::Load(std::string filename) {
             rot = glm::vec3(rotation.at(0), rotation.at(1), rotation.at(2));
           }
 
-          model->AddComponent<MovementComponent>(vel, rot);
+          sceneObj->AddComponent<MovementComponent>(vel, rot);
         }
       }
+
+      ECS::ComponentHandle<ModelComponent> model = sceneObj->AddComponent<ModelComponent>(soName, modelPath, materialID);
 
       model->SetCreateInfo(createOffset, createScale, createUVScale);
       model->Load(renderer->GetVertexLayout(), engine.vulkanDevice,
                   engine.GetQueue(), true);
 
       if (so.find("enabled") != so.end()) {
-        model->SetRendered(so.at("enabled"));
+        sceneObj->SetRendered(so.at("enabled"));
       }
 
       std::shared_ptr<ModelMaterial> modelMat = std::dynamic_pointer_cast<ModelMaterial>(
@@ -229,7 +236,7 @@ void UniScene::Load(std::string filename) {
     
     // TODO: render something to debug lighting positions
     if (soType == "light") {
-      std::cout << "Loading light: " << so.at("name") << std::endl;
+      std::cout << "Loading light: " << soName << std::endl;
 
       glm::vec3 lpos;
       if (so.find("position") != so.end()) {
@@ -238,7 +245,7 @@ void UniScene::Load(std::string filename) {
         lpos = glm::vec3(pos[0], pos[1], pos[2]);
       }
 
-      auto light = Make<UniSceneObject>(lpos, (std::string)so.at("name"));
+      auto light = Make<UniSceneObject>(lpos, soName);
 
       if (so.find("rotation") != so.end()) {
         auto rot = so.at("rotation");
@@ -274,7 +281,7 @@ void UniScene::Load(std::string filename) {
       }
     }
     if (soType == "planet") {
-      std::cout << "Loading planet: " << so.at("name") << std::endl;
+      std::cout << "Loading planet: " << soName << std::endl;
 
       glm::vec3 ppos;
       if (so.find("position") != so.end()) {
@@ -294,9 +301,7 @@ void UniScene::Load(std::string filename) {
         hasOcean = so.at("hasOcean");
       }
 
-      std::string name = so.at("name");
-
-      auto planet = Make<UniSceneObject>(ppos, name);
+      auto planet = Make<UniSceneObject>(ppos, soName);
       planet->AddComponent<UniPlanet>(radius, maxHeight, maxDepth, gridSize,
                                       hasOcean);
 
@@ -330,9 +335,11 @@ void UniScene::Load(std::string filename) {
 
 void UniScene::Unload() {
   // Meshes
-  auto models = GetModels();
+  auto models = GetRenderedObjects();
   for_each(models.begin(), models.end(),
-           [](std::shared_ptr<ModelComponent> model) { model->Destroy(); });
+           [](std::shared_ptr<UniSceneObject> model) { 
+      // model->Destroy(); 
+  });
 }
 
 void UniScene::Tick(float deltaTime) {
@@ -340,42 +347,22 @@ void UniScene::Tick(float deltaTime) {
   // m_BodyTest->Update();
 }
 
-std::vector<std::shared_ptr<ModelComponent>> UniScene::GetModels() {
-  if (!m_ModelCache.empty()) {
-    return m_ModelCache;
-  }
-
-  std::vector<std::shared_ptr<ModelComponent>> models;
-  for_each(m_SceneObjects.begin(), m_SceneObjects.end(),
-           [&models](std::shared_ptr<UniSceneObject> so) {
-             auto model = std::dynamic_pointer_cast<ModelComponent>(so);
-             if (model && model->IsRendered()) {
-               models.push_back(model);
-             }
-           });
-
-  return models;
-}
-
 std::vector<std::shared_ptr<UniSceneObject>> UniScene::GetRenderedObjects() {
   if (!m_RenderedObjectCache.empty()) {
     return m_RenderedObjectCache;
   }
 
-  std::vector<std::shared_ptr<UniSceneObject>> objects;
   for_each(m_SceneObjects.begin(), m_SceneObjects.end(),
-           [&objects](std::shared_ptr<UniSceneObject> so) {
+           [this](std::shared_ptr<UniSceneObject> so) {
              if (so->IsRendered()) {
-               objects.push_back(so);
+               m_RenderedObjectCache.push_back(so);
              }
            });
 
-  return objects;
+  return m_RenderedObjectCache;
 }
 
 void UniScene::AddSceneObject(std::shared_ptr<UniSceneObject> so) {
   m_SceneObjects.push_back(so);
-  m_ModelCache.clear();
   m_RenderedObjectCache.clear();
-  m_ModelCache = GetModels();
 }

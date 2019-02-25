@@ -24,7 +24,7 @@ public:
 	ECS::ComponentHandle<TransformComponent> GetTransform();
 
 	template<class T, class... _Types>
-	void AddComponent(_Types&&... _Args);
+  ECS::ComponentHandle<T> AddComponent(_Types&&... _Args);
 
 	template<class T>
 	ECS::ComponentHandle<T> GetComponent();
@@ -35,6 +35,8 @@ public:
 	bool IsRendered() { return m_IsRendered; }
 	void SetRendered(bool render) { m_IsRendered = render; }
 
+  void Destroy();
+
 protected:
 	UniScene * m_Scene;
 	std::string m_Name = "object";
@@ -42,8 +44,8 @@ protected:
 };
 
 template<class T, class... _Types>
-void UniSceneObject::AddComponent(_Types&&... _Args) {
-	m_Entity->assign<T>(_Args...);	
+ECS::ComponentHandle<T> UniSceneObject::AddComponent(_Types&&... _Args) {
+	return m_Entity->assign<T>(_Args...);	
 }
 
 template<class T>

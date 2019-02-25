@@ -72,7 +72,7 @@ class UniSceneRenderer {
 
   VkRenderPass m_renderPass;
 
-  std::vector<std::shared_ptr<UniMaterial>> m_materialInstances;
+  std::map<std::string, std::shared_ptr<UniMaterial>> m_materialInstances;
 
   VkDescriptorPool m_descriptorPool;
 
@@ -120,8 +120,12 @@ class UniSceneRenderer {
   void SetupDescriptorPool();
   void SetupDescriptorSets();
   void BuildCommandBuffers();
-  void RegisterMaterial(std::shared_ptr<UniMaterial> mat);
-  void UnRegisterMaterial(std::shared_ptr<UniMaterial> mat);
+  void RegisterMaterial(std::string materialID, std::shared_ptr<UniMaterial> mat);
+  void UnRegisterMaterial(std::string materialID);
+  
+  template<typename T>
+  std::shared_ptr<T> GetMaterialByID(std::string materialID);
+
 
   vks::VertexLayout GetVertexLayout() { return m_vertexLayout; }
   VkDescriptorSetLayout GetDescriptorSetLayout() { return m_descriptorSetLayout;}
@@ -141,3 +145,13 @@ class UniSceneRenderer {
 
   std::string GetShader(std::string shader);
 };
+
+template<typename T>
+std::shared_ptr<T> UniSceneRenderer::GetMaterialByID(
+    std::string materialID) {
+  if (m_materialInstances.find(materialID) == m_materialInstances.end()) {
+    auto mat = std::make_shared<T>(materialID);
+    RegisterMaterial(materialID, mat);
+  }
+  return std::dynamic_pointer_cast<T>(m_materialInstances.at(materialID));
+}
