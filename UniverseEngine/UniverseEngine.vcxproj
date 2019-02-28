@@ -254,6 +254,7 @@
     <ClCompile Include="source\materials\ModelMaterial.cpp" />
     <ClCompile Include="source\materials\PlanetMaterial.cpp" />
     <ClCompile Include="source\systems\GravitySystem.cpp" />
+    <ClCompile Include="source\systems\ModelRenderSystem.cpp" />
     <ClCompile Include="source\systems\PhysicsSystem.cpp" />
     <ClCompile Include="source\systems\PlanetRenderSystem.cpp" />
     <ClCompile Include="source\systems\PlayerControlSystem.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="source\materials\PlanetMaterial.h" />
     <ClInclude Include="source\systems\events.h" />
     <ClInclude Include="source\systems\GravitySystem.h" />
+    <ClInclude Include="source\systems\ModelRenderSystem.h" />
     <ClInclude Include="source\systems\PhysicsSystem.h" />
     <ClInclude Include="source\systems\PlanetRenderSystem.h" />
     <ClInclude Include="source\systems\PlayerControlSystem.h" />
@@ -275,6 +277,7 @@
     <ClInclude Include="source\UniEngine.h" />
     <ClInclude Include="source\UniInput.h" />
     <ClInclude Include="source\UniMaterial.h" />
+    <ClInclude Include="source\UniModelMesh.h" />
     <ClInclude Include="source\UniScene.h" />
     <ClInclude Include="source\UniSceneManager.h" />
     <ClInclude Include="source\UniSceneObject.h" />
@@ -306,6 +309,7 @@
     <ClCompile Include="source\UniEngine.cpp" />
     <ClCompile Include="source\UniInput.cpp" />
     <ClCompile Include="source\UniMaterial.cpp" />
+    <ClCompile Include="source\UniModelMesh.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
     <ClCompile Include="source\UniSceneManager.cpp" />
     <ClCompile Include="source\UniSceneObject.cpp" />

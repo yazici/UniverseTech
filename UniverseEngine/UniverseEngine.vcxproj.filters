@@ -219,6 +219,12 @@
     <ClInclude Include="source\components\ModelComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="source\UniModelMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\systems\ModelRenderSystem.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -313,6 +319,12 @@
     </ClCompile>
     <ClCompile Include="source\components\ModelComponent.cpp">
       <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniModelMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\systems\ModelRenderSystem.cpp">
+      <Filter>Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

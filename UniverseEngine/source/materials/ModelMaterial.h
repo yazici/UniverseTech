@@ -6,12 +6,11 @@ class ModelComponent;
 
 class ModelMaterial : public UniMaterial {
  public:
-  virtual ~ModelMaterial() { Destroy(); }
+  virtual ~ModelMaterial() = default;
 
   std::vector<std::shared_ptr<ModelComponent>> GetModels() { return m_models; }
 
  private:
-  std::string m_Name;
   std::vector<std::shared_ptr<ModelComponent>> m_models;
 
 

@@ -12,10 +12,11 @@ class ModelComponent;
 class UniMaterial {
  public:
   UniMaterial() = default;
+  UniMaterial(std::string name);
   virtual void Destroy();
   void RegisterModel(ECS::ComponentHandle<ModelComponent> model);
   void UnRegisterModel(ECS::ComponentHandle<ModelComponent> model);
-  virtual ~UniMaterial() { Destroy(); }
+  virtual ~UniMaterial() = default;
 
   virtual void SetupDescriptorSetLayout(
       std::shared_ptr<UniSceneRenderer> renderer);
@@ -38,9 +39,10 @@ class UniMaterial {
   void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
   virtual void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
   virtual void LoadTexture(std::string name, std::string texturePath);
-  virtual uint32_t AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
-                                      uint32_t index);
+  //virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer);
 
+	virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
+                          ECS::ComponentHandle<ModelComponent> model);
   VkDescriptorSet* GetDescriptorSet() { return &m_descriptorSet; }
 
   std::shared_ptr<UniSceneRenderer> SceneRenderer();

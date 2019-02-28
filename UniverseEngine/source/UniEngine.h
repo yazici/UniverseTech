@@ -28,16 +28,18 @@ class UniInput;
 
 class UniEngine final : public VulkanExampleBase {
  private:
-  UniEngine();
-  ~UniEngine();
   UniEngine(const UniEngine&) = delete;
   UniEngine& operator=(const UniEngine&) = delete;
   UniEngine(UniEngine&&) = delete;
   UniEngine& operator=(UniEngine&&) = delete;
 
- public:
-  static UniEngine& GetInstance();
+  DWORD m_ID;
 
+ public:
+  UniEngine();
+  ~UniEngine();
+  static std::shared_ptr<UniEngine> GetInstance();
+  static void Delete();
   // Framebuffer for offscreen rendering
   struct FrameBufferAttachment {
     VkImage image;
@@ -67,7 +69,6 @@ class UniEngine final : public VulkanExampleBase {
   // One sampler for the frame buffer color attachments
   VkSampler m_colorSampler;
 
-  VkCommandBuffer m_forwardCommandBuffer = VK_NULL_HANDLE;
 
  private:
   std::shared_ptr<UniSceneManager> m_SceneManager;

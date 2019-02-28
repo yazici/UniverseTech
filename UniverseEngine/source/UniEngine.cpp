@@ -24,11 +24,16 @@ void UniEngine::Shutdown() {
 
   SceneRenderer()->ShutDown();
 
-  vkFreeCommandBuffers(device, cmdPool, 1, &m_forwardCommandBuffer);
+  m_SceneManager.reset();
+  m_SceneRenderer.reset();
+  m_InputManager.reset();
+
 }
 
 UniEngine::~UniEngine() {
   // Shutdown();
+  std::cout << "Engine " << m_ID << " is being deleted!" << std::endl;
+
 }
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
@@ -38,11 +43,23 @@ UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
   title = "Universe Tech Test";
   paused = false;
   settings.overlay = true;
+
+  m_ID = GetTickCount();
+  
+  std::cout << "Created engine instance " << m_ID << std::endl;
+
 }
 
-UniEngine& UniEngine::GetInstance() {
-  static UniEngine instance;
+std::shared_ptr<UniEngine> UniEngine::GetInstance() {
+  static std::shared_ptr<UniEngine> instance(new UniEngine);
   return instance;
+}
+
+void UniEngine::Delete() {
+  std::cout << "UniEngine shared pointer has " << GetInstance().use_count()
+            << "uses still left in shutdown." << std::endl;
+  GetInstance().reset();
+  
 }
 
 // Enable physical device features required for this example

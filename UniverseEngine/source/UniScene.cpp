@@ -3,9 +3,9 @@
 #include <iosfwd>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include "Materials.h"
 #include "UniEngine.h"
 #include "UniSceneRenderer.h"
-#include "Materials.h"
 #include "components/Components.h"
 #include "systems/Systems.h"
 
@@ -14,17 +14,10 @@ using json = nlohmann::json;
 UniScene::UniScene() {}
 
 UniScene::~UniScene() {
-  std::cout << "Shutting down scene." << std::endl;
-
-  for (auto so : m_SceneObjects) {
-    so.reset();
-  }
-  m_SceneObjects.clear();
-  m_World->destroyWorld();
 }
 
 void UniScene::Initialize() {
-  UniEngine& engine = UniEngine::GetInstance();
+  auto engine = UniEngine::GetInstance();
   m_World = ECS::World::createWorld();
   m_World->registerSystem(new MovementSystem());
   m_World->registerSystem(new CameraSystem());
@@ -32,11 +25,12 @@ void UniScene::Initialize() {
   m_World->registerSystem(new PlayerControlSystem());
   m_World->registerSystem(new GravitySystem());
   m_World->registerSystem(new PhysicsSystem());
+  m_World->registerSystem(new ModelRenderSystem());
 
   m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
   m_CurrentCamera->AddComponent<CameraComponent>(
       m_CurrentCamera->GetTransform(),
-      (float)engine.width / (float)engine.height, 50.f, 0.01f, 1000.f);
+      (float)engine->width / (float)engine->height, 50.f, 0.01f, 1000.f);
   // m_CurrentCamera->AddComponent<MovementComponent>();
   m_CurrentCamera->AddComponent<PlayerControlComponent>();
   m_CurrentCamera->AddComponent<PhysicsComponent>(5000.0);
@@ -45,8 +39,8 @@ void UniScene::Initialize() {
 }
 
 void UniScene::Load(std::string filename) {
-  UniEngine& engine = UniEngine::GetInstance();
-  auto renderer = engine.SceneRenderer();
+  auto engine = UniEngine::GetInstance();
+  auto renderer = engine->SceneRenderer();
 
   std::ifstream t(filename);
   std::stringstream buffer;
@@ -63,7 +57,6 @@ void UniScene::Load(std::string filename) {
     std::string soName = so.at("name");
 
     if (soType == "model material") {
-
       if (loadedMaterials.find(soName) != loadedMaterials.end()) {
         continue;
       }
@@ -128,7 +121,6 @@ void UniScene::Load(std::string filename) {
         roughness = so.at("roughness");
       }
 
-
       auto material = renderer->GetMaterialByID<ModelMaterial>(materialID);
       material->LoadTexture("texture", texturePath);
       material->LoadTexture("normal", normalPath);
@@ -152,7 +144,6 @@ void UniScene::Load(std::string filename) {
     std::string soName = so.at("name");
 
     if (soType == "model") {
-
       if (so.find("enabled") != so.end()) {
         if (so.at("enabled") == false) {
           continue;
@@ -162,11 +153,13 @@ void UniScene::Load(std::string filename) {
       std::cout << "Loading model: " << soName << std::endl;
       // 	m_Name = jsonData["name"];
       auto modelPath = so.at("mesh");
-      auto materialID = so.at("materialID");
+      std::vector<std::string> materials = so.at("materials");
 
-      if (loadedMaterials.find(materialID) == loadedMaterials.end()) {
-        throw std::runtime_error("Cannot load model with material id: " +
-                                 materialID);
+      for (const auto& materialID : materials) {
+        if (loadedMaterials.find(materialID) == loadedMaterials.end()) {
+          throw std::runtime_error("Cannot load model with material id: " +
+                                   materialID);
+        }
       }
 
       glm::vec3 mpos;
@@ -217,23 +210,29 @@ void UniScene::Load(std::string filename) {
         }
       }
 
-      ECS::ComponentHandle<ModelComponent> model = sceneObj->AddComponent<ModelComponent>(soName, modelPath, materialID);
+      ECS::ComponentHandle<ModelComponent> model =
+          sceneObj->AddComponent<ModelComponent>(soName, modelPath, materials);
+
+      model->SetSceneObject(sceneObj);
 
       model->SetCreateInfo(createOffset, createScale, createUVScale);
-      model->Load(renderer->GetVertexLayout(), engine.vulkanDevice,
-                  engine.GetQueue(), true);
+      model->Load(renderer->GetVertexLayout(), engine->vulkanDevice,
+                  engine->GetQueue(), true);
 
       if (so.find("enabled") != so.end()) {
         sceneObj->SetRendered(so.at("enabled"));
       }
 
-      std::shared_ptr<ModelMaterial> modelMat = std::dynamic_pointer_cast<ModelMaterial>(
-          loadedMaterials.at(materialID));
+      for (const auto& materialID : materials) {
+        std::shared_ptr<ModelMaterial> modelMat =
+            std::dynamic_pointer_cast<ModelMaterial>(
+                loadedMaterials.at(materialID));
 
-      modelMat->RegisterModel(model);
+        modelMat->RegisterModel(model);
+      }
 
     }
-    
+
     // TODO: render something to debug lighting positions
     if (soType == "light") {
       std::cout << "Loading light: " << soName << std::endl;
@@ -334,12 +333,14 @@ void UniScene::Load(std::string filename) {
 }
 
 void UniScene::Unload() {
-  // Meshes
-  auto models = GetRenderedObjects();
-  for_each(models.begin(), models.end(),
-           [](std::shared_ptr<UniSceneObject> model) { 
-      // model->Destroy(); 
-  });
+  std::cout << "Shutting down scene." << std::endl;
+
+  m_World->destroyWorld();
+
+  for (auto so : m_SceneObjects) {
+    so.reset();
+  }
+  m_SceneObjects.clear();
 }
 
 void UniScene::Tick(float deltaTime) {

@@ -9,7 +9,7 @@ void UniSceneManager::Initialise() {
   m_CurrentScene = std::make_shared<UniScene>();
   m_CurrentScene->Initialize();
 
-  m_renderer = UniEngine::GetInstance().SceneRenderer();
+  m_renderer = UniEngine::GetInstance()->SceneRenderer();
 
 }
 

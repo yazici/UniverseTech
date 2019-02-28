@@ -27,7 +27,7 @@ void UniFrustum::SetToCamera(ECS::ComponentHandle<CameraComponent> camera) {
 void UniFrustum::Update() {
 	//calculate generalized relative width and aspect ratio
 	float normHalfWidth = tan(glm::radians(m_FOV));
-	float aspectRatio = m_Aspect; // (float)UniEngine::GetInstance().width / (float)UniEngine::GetInstance().height;
+	float aspectRatio = m_Aspect; // (float)UniEngine::GetInstance()->width / (float)UniEngine::GetInstance()->height;
 
 
 	//calculate width and height for near and far plane

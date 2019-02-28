@@ -4,15 +4,23 @@
 #include "UniSceneManager.h"
 #include "UniSceneRenderer.h"
 
+UniMaterial::UniMaterial(std::string name) {
+  auto engine = UniEngine::GetInstance();
+  auto aPath = engine->getAssetPath();
+  m_Name = name;
+  SetShader("vert", aPath + "shaders/omnishader.vert.spv");
+  SetShader("frag", aPath + "shaders/omnishader.frag.spv");
+}
+
 void UniMaterial::SetupMaterial(
     VkGraphicsPipelineCreateInfo& pipelineCreateInfo) {
   VkGraphicsPipelineCreateInfo localPCI = pipelineCreateInfo;
 
-  auto& engine = UniEngine::GetInstance();
-  auto device = engine.GetDevice();
+  auto engine = UniEngine::GetInstance();
+  auto device = engine->GetDevice();
 
   // Buffer for material properties to be used in both shader stages
-  VK_CHECK_RESULT(engine.vulkanDevice->createBuffer(
+  VK_CHECK_RESULT(engine->vulkanDevice->createBuffer(
       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -21,7 +29,7 @@ void UniMaterial::SetupMaterial(
 
   memcpy(m_MaterialPropertyBuffer.mapped, &m_MaterialProperties,
          sizeof(m_MaterialProperties));
-
+  
   SetupDescriptorSetLayout(SceneRenderer());
   PreparePipelines(SceneRenderer(), pipelineCreateInfo);
   SetupDescriptorPool(SceneRenderer());
@@ -78,7 +86,7 @@ void UniMaterial::SetupDescriptorSetLayout(
           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 7),
   };
 
-  auto device = UniEngine::GetInstance().GetDevice();
+  auto device = UniEngine::GetInstance()->GetDevice();
 
   VkDescriptorSetLayoutCreateInfo descriptorLayout =
       vks::initializers::descriptorSetLayoutCreateInfo(
@@ -88,7 +96,8 @@ void UniMaterial::SetupDescriptorSetLayout(
   VK_CHECK_RESULT(vkCreateDescriptorSetLayout(device, &descriptorLayout,
                                               nullptr, &m_descriptorSetLayout));
 
-  std::vector<VkDescriptorSetLayout> dsLayouts = {renderer->GetDescriptorSetLayout(), m_descriptorSetLayout};
+  std::vector<VkDescriptorSetLayout> dsLayouts = {
+      renderer->GetDescriptorSetLayout(), m_descriptorSetLayout};
 
   VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
       vks::initializers::pipelineLayoutCreateInfo(
@@ -112,31 +121,31 @@ void UniMaterial::PreparePipelines(
     std::shared_ptr<UniSceneRenderer> renderer,
     VkGraphicsPipelineCreateInfo& pipelineCreateInfo) {
   VkGraphicsPipelineCreateInfo localPCI = pipelineCreateInfo;
-  auto& engine = UniEngine::GetInstance();
-  auto device = engine.GetDevice();
+  auto engine = UniEngine::GetInstance();
+  auto device = engine->GetDevice();
 
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
   localPCI.layout = m_pipelineLayout;
 
   shaderStages[0] =
-      engine.loadShader(GetShader("vert"), VK_SHADER_STAGE_VERTEX_BIT);
+      engine->loadShader(GetShader("vert"), VK_SHADER_STAGE_VERTEX_BIT);
   shaderStages[1] =
-      engine.loadShader(GetShader("frag"), VK_SHADER_STAGE_FRAGMENT_BIT);
+      engine->loadShader(GetShader("frag"), VK_SHADER_STAGE_FRAGMENT_BIT);
 
   localPCI.stageCount = static_cast<uint32_t>(shaderStages.size());
   localPCI.pStages = shaderStages.data();
 
-  VK_CHECK_RESULT(vkCreateGraphicsPipelines(engine.GetDevice(),
-                                            engine.GetPipelineCache(), 1,
+  VK_CHECK_RESULT(vkCreateGraphicsPipelines(engine->GetDevice(),
+                                            engine->GetPipelineCache(), 1,
                                             &localPCI, nullptr, &m_pipeline));
 }
 
 void UniMaterial::SetupDescriptorPool(
     std::shared_ptr<UniSceneRenderer> renderer) {
-  auto& engine = UniEngine::GetInstance();
-  auto device = engine.GetDevice();
-  auto& drawCmdBuffers = engine.GetCommandBuffers();
+  auto engine = UniEngine::GetInstance();
+  auto device = engine->GetDevice();
+  auto& drawCmdBuffers = engine->GetCommandBuffers();
 
   auto modelCount = static_cast<uint32_t>(std::max((int)m_models.size(), 1));
 
@@ -150,10 +159,8 @@ void UniMaterial::SetupDescriptorPool(
       vks::initializers::descriptorPoolSize(
           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
           modelCount * drawCmdBufferCount),
-      vks::initializers::descriptorPoolSize(
-          VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-          modelCount * drawCmdBufferCount)
-  };
+      vks::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                            modelCount * drawCmdBufferCount)};
 
   VkDescriptorPoolCreateInfo descriptorPoolInfo =
       vks::initializers::descriptorPoolCreateInfo(
@@ -166,7 +173,7 @@ void UniMaterial::SetupDescriptorPool(
 
 void UniMaterial::SetupDescriptorSets(
     std::shared_ptr<UniSceneRenderer> renderer) {
-  auto device = UniEngine::GetInstance().GetDevice();
+  auto device = UniEngine::GetInstance()->GetDevice();
 
   VkDescriptorSetAllocateInfo allocInfo =
       vks::initializers::descriptorSetAllocateInfo(m_descriptorPool,
@@ -215,17 +222,16 @@ void UniMaterial::SetupDescriptorSets(
                          m_writeDescriptorSets.data(), 0, nullptr);
 }
 
-uint32_t UniMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
-                                         uint32_t index) {
+void UniMaterial::AddToCommandBuffer(
+    VkCommandBuffer& cmdBuffer,
+    ECS::ComponentHandle<ModelComponent> model) {
   // std::cout << "Calling add to command buffer for model material." <<
   // std::endl;
 
   vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
   VkDeviceSize offsets[1] = {0};
 
-  auto dynamicAlignment = UniEngine::GetInstance().getDynamicAlignment();
-
-  auto models = m_models;
+  auto dynamicAlignment = UniEngine::GetInstance()->getDynamicAlignment();
 
   auto renderer = SceneRenderer();
 
@@ -237,28 +243,27 @@ uint32_t UniMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
                      0, renderer->GetPushConstantSize(),
                      &renderer->GetPushConstants());
 
+  uint32_t dynamicOffset = model->GetSceneObject()->GetRenderIndex() *
+                           static_cast<uint32_t>(dynamicAlignment);
 
-  for_each(models.begin(), models.end(),
-           [this, &index, dynamicAlignment, cmdBuffer,
-            dSets](auto model) {
-             VkDeviceSize offsets[1] = {0};
-             uint32_t dynamicOffset =
-                 index * static_cast<uint32_t>(dynamicAlignment);
-             vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                     m_pipelineLayout, 0,
-                                     static_cast<uint32_t>(dSets.size()),
-                                     dSets.data(),
-                                     1,
-                                     &dynamicOffset);
-             vkCmdBindVertexBuffers(cmdBuffer, VERTEX_BUFFER_BIND_ID, 1,
-                                    &model->m_Model.vertices.buffer, offsets);
-             vkCmdBindIndexBuffer(cmdBuffer, model->m_Model.indices.buffer, 0,
-                                  VK_INDEX_TYPE_UINT32);
-             vkCmdDrawIndexed(cmdBuffer, model->m_Model.indexCount, 1, 0, 0, 0);
-             index++;
-           });
+  vkCmdBindDescriptorSets(
+      cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0,
+      static_cast<uint32_t>(dSets.size()), dSets.data(), 1, &dynamicOffset);
+  /*auto matIndices =
+      model->m_Model->GetSubmeshIDsByMaterialID(
+          model->GetMaterialIndex(m_Name));*/
+  // for_each(matIndices.begin(), matIndices.end(), [](){});
 
-  return index;
+  std::vector<uint32_t> meshIDs = {1};
+  meshIDs = model->m_Model.GetMeshIndicesByMaterialName(m_Name);
+  for_each(meshIDs.begin(), meshIDs.end(), [&](uint32_t meshID) {
+    vkCmdBindVertexBuffers(cmdBuffer, VERTEX_BUFFER_BIND_ID, 1,
+                           &model->m_Model.m_vertices[meshID].buffer, offsets);
+    vkCmdBindIndexBuffer(cmdBuffer, model->m_Model.m_indices[meshID].buffer, 0,
+                         VK_INDEX_TYPE_UINT32);
+    vkCmdDrawIndexed(cmdBuffer, model->m_Model.m_indexCount[meshID], 1, 0, 0,
+                     0);
+  });
 }
 
 void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
@@ -266,9 +271,9 @@ void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
   //  std::string texFormatSuffix;
   VkFormat texFormat = VK_FORMAT_R8G8B8A8_UNORM;
 
-  auto& engine = UniEngine::GetInstance();
-  auto device = engine.vulkanDevice;
-  auto copyQueue = engine.GetQueue();
+  auto engine = UniEngine::GetInstance();
+  auto device = engine->vulkanDevice;
+  auto copyQueue = engine->GetQueue();
 
   //// Get supported compressed texture format
   // if (device->features.textureCompressionBC) {
@@ -324,7 +329,6 @@ void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
                         VK_FILTER_LINEAR);
   }
 
-
   SetTexture(name, texture);
 }
 
@@ -355,21 +359,36 @@ void UniMaterial::SetTexture(std::string name,
 }
 
 std::shared_ptr<UniSceneRenderer> UniMaterial::SceneRenderer() {
-  return UniEngine::GetInstance().SceneRenderer();
+  return UniEngine::GetInstance()->SceneRenderer();
 }
 
 void UniMaterial::Destroy() {
   std::cout << "Destroying base material..." << std::endl;
 
-  auto& engine = UniEngine::GetInstance();
-  auto device = engine.GetDevice();
+  auto engine = UniEngine::GetInstance();
+  auto device = engine->GetDevice();
 
-  //vkDestroyPipeline(device, m_pipeline, nullptr);
+  // vkDestroyPipeline(device, m_pipeline, nullptr);
+  for (const auto& kv : m_Textures) {
+    kv.second->destroy();
+  }
+
+  vkDestroyBuffer(device, m_MaterialPropertyBuffer.buffer, nullptr);
+  vkFreeMemory(device, m_MaterialPropertyBuffer.memory, nullptr);
+  
 
   for (const auto& kv : m_Buffers) {
     vkDestroyBuffer(device, kv.second->buffer, nullptr);
     vkFreeMemory(device, kv.second->memory, nullptr);
   }
+
+  
+  vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
+  vkDestroyPipeline(device, m_pipeline, nullptr);
+  vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
+  //vkFreeDescriptorSets(device, m_descriptorPool, 1, &m_descriptorSet);
+  vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
+
 }
 
 void UniMaterial::RegisterModel(ECS::ComponentHandle<ModelComponent> model) {

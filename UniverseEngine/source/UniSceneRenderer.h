@@ -10,7 +10,7 @@
 
 #include <vulkan/vulkan.h>
 #include "vks/VulkanBuffer.hpp"
-#include "vks/VulkanModel.hpp"
+#include "UniModelMesh.h"
 #include "vks/VulkanTexture.hpp"
 #include "vks/vulkanexamplebase.h"
 
@@ -79,13 +79,13 @@ class UniSceneRenderer {
   VkClearColorValue m_defaultClearColor = {{0.025f, 0.025f, 0.025f, 1.0f}};
 
   // Vertex layout for the models
-  vks::VertexLayout m_vertexLayout = vks::VertexLayout({
-      vks::VERTEX_COMPONENT_POSITION,
-      vks::VERTEX_COMPONENT_UV,
-      vks::VERTEX_COMPONENT_COLOR,
-      vks::VERTEX_COMPONENT_NORMAL,
-      vks::VERTEX_COMPONENT_TANGENT,
-      vks::VERTEX_COMPONENT_MATERIAL_ID
+  uni::VertexLayout m_vertexLayout = uni::VertexLayout({
+      uni::VERTEX_COMPONENT_POSITION,
+      uni::VERTEX_COMPONENT_UV,
+      uni::VERTEX_COMPONENT_COLOR,
+      uni::VERTEX_COMPONENT_NORMAL,
+      uni::VERTEX_COMPONENT_TANGENT,
+      uni::VERTEX_COMPONENT_MATERIAL_ID
   });
 
   struct {
@@ -127,7 +127,7 @@ class UniSceneRenderer {
   std::shared_ptr<T> GetMaterialByID(std::string materialID);
 
 
-  vks::VertexLayout GetVertexLayout() { return m_vertexLayout; }
+  uni::VertexLayout GetVertexLayout() { return m_vertexLayout; }
   VkDescriptorSetLayout GetDescriptorSetLayout() { return m_descriptorSetLayout;}
   VkDescriptorSetLayoutCreateInfo GetDescriptorLayout() {
     return m_descriptorLayout;

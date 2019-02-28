@@ -18,8 +18,7 @@ class PlanetMaterial : public UniMaterial {
 
   virtual ~PlanetMaterial() { Destroy(); }
 
-
-  uint32_t AddToCommandBuffer(VkCommandBuffer& cmdBuffer, uint32_t index) override;
+  //void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) override;
 
   std::vector<std::shared_ptr<vks::Texture>> m_Textures;
 

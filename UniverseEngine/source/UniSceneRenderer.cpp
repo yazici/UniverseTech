@@ -3,6 +3,7 @@
 #include "UniEngine.h"
 #include "UniSceneManager.h"
 #include "UniSceneRenderer.h"
+#include "systems/events.h"
 
 // Wrapper functions for aligned memory allocation
 // There is currently no standard for this in C++ that works across all
@@ -51,10 +52,25 @@ void UniSceneRenderer::Initialise() {
 }
 
 void UniSceneRenderer::ShutDown() {
+
+  for (const auto& mat : m_materialInstances) {
+    mat.second->Destroy();
+  }
+
+  auto engine = UniEngine::GetInstance();
+  auto device = engine->GetDevice();
+
+  vkDestroyPipelineLayout(device, m_pipelineLayouts.forward, nullptr);
+  vkDestroyPipeline(device, m_pipelines.forward, nullptr);
+  vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
+  // vkFreeDescriptorSets(device, m_descriptorPool, 1, &m_descriptorSet);
+  vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
+
   // Uniform buffers
   m_uniformBuffers.vsForward.destroy();
   m_uniformBuffers.modelViews.destroy();
   m_uniformBuffers.fsLights.destroy();
+
 }
 
 void UniSceneRenderer::SetupVertexDescriptions() {
@@ -103,17 +119,17 @@ void UniSceneRenderer::SetupVertexDescriptions() {
 
 // Prepare and initialize uniform buffer containing shader uniforms
 void UniSceneRenderer::PrepareUniformBuffers() {
-  auto& engine = UniEngine::GetInstance();
+  auto engine = UniEngine::GetInstance();
 
   // Fullscreen vertex shader
-  VK_CHECK_RESULT(engine.vulkanDevice->createBuffer(
+  VK_CHECK_RESULT(engine->vulkanDevice->createBuffer(
       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &m_uniformBuffers.vsForward, sizeof(m_uboForward)));
 
-  auto models = engine.SceneManager()->CurrentScene()->GetRenderedObjects();
-  auto dynamicAlignment = engine.getDynamicAlignment();
+  auto models = engine->SceneManager()->CurrentScene()->GetRenderedObjects();
+  auto dynamicAlignment = engine->getDynamicAlignment();
   size_t bufferSize =
       std::max(static_cast<int>(models.size()), 1) * dynamicAlignment;
   m_uboModelMatDynamic.model =
@@ -121,12 +137,12 @@ void UniSceneRenderer::PrepareUniformBuffers() {
   assert(m_uboModelMatDynamic.model);
 
   // vertex shader dynamic
-  VK_CHECK_RESULT(engine.vulkanDevice->createBuffer(
+  VK_CHECK_RESULT(engine->vulkanDevice->createBuffer(
       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
       &m_uniformBuffers.modelViews, bufferSize));
 
   // fragment shader
-  VK_CHECK_RESULT(engine.vulkanDevice->createBuffer(
+  VK_CHECK_RESULT(engine->vulkanDevice->createBuffer(
       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -159,7 +175,7 @@ void UniSceneRenderer::SetupDescriptorSetLayout() {
           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 2)};
 
-  auto device = UniEngine::GetInstance().GetDevice();
+  auto device = UniEngine::GetInstance()->GetDevice();
 
   m_descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(
       m_setLayoutBindings.data(),
@@ -183,7 +199,7 @@ void UniSceneRenderer::SetupDescriptorSetLayout() {
 }
 
 void UniSceneRenderer::PreparePipelines() {
-  auto& engine = UniEngine::GetInstance();
+  auto engine = UniEngine::GetInstance();
 
   auto wfmode = VK_POLYGON_MODE_FILL;
   // if (m_useWireframe)
@@ -224,7 +240,7 @@ void UniSceneRenderer::PreparePipelines() {
 
   VkGraphicsPipelineCreateInfo pipelineCreateInfo =
       vks::initializers::pipelineCreateInfo(
-          m_pipelineLayouts.forward, UniEngine::GetInstance().GetRenderPass(),
+          m_pipelineLayouts.forward, UniEngine::GetInstance()->GetRenderPass(),
           0);
 
   VkPipelineVertexInputStateCreateInfo emptyInputState{};
@@ -243,20 +259,20 @@ void UniSceneRenderer::PreparePipelines() {
   pipelineCreateInfo.pViewportState = &viewportState;
   pipelineCreateInfo.pDepthStencilState = &depthStencilState;
   pipelineCreateInfo.pDynamicState = &dynamicState;
-  pipelineCreateInfo.renderPass = UniEngine::GetInstance().GetRenderPass();
+  pipelineCreateInfo.renderPass = UniEngine::GetInstance()->GetRenderPass();
 
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 
-  shaderStages[0] = engine.loadShader(GetShader("omnishader.vert"),
+  shaderStages[0] = engine->loadShader(GetShader("omnishader.vert"),
                                       VK_SHADER_STAGE_VERTEX_BIT);
-  shaderStages[1] = engine.loadShader(GetShader("omnishader.frag"),
+  shaderStages[1] = engine->loadShader(GetShader("omnishader.frag"),
                                       VK_SHADER_STAGE_FRAGMENT_BIT);
 
   pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
   pipelineCreateInfo.pStages = shaderStages.data();
 
   // VK_CHECK_RESULT(vkCreateGraphicsPipelines(
-  //    engine.GetDevice(), engine.GetPipelineCache(), 1, &pipelineCreateInfo,
+  //    engine->GetDevice(), engine->GetPipelineCache(), 1, &pipelineCreateInfo,
   //    nullptr, &m_pipelines.forward));
 
   std::cout << "Doing material pipelines..." << std::endl;
@@ -267,9 +283,9 @@ void UniSceneRenderer::PreparePipelines() {
 }
 
 void UniSceneRenderer::SetupDescriptorPool() {
-  auto& engine = UniEngine::GetInstance();
-  auto device = engine.GetDevice();
-  auto& drawCmdBuffers = engine.GetCommandBuffers();
+  auto engine = UniEngine::GetInstance();
+  auto device = engine->GetDevice();
+  auto& drawCmdBuffers = engine->GetCommandBuffers();
 
   auto modelCount = static_cast<uint32_t>(
       std::max((int)SceneManager()->CurrentScene()->GetRenderedObjects().size(), 1));
@@ -294,7 +310,7 @@ void UniSceneRenderer::SetupDescriptorPool() {
 }
 
 void UniSceneRenderer::SetupDescriptorSets() {
-  auto device = UniEngine::GetInstance().GetDevice();
+  auto device = UniEngine::GetInstance()->GetDevice();
 
   VkDescriptorSetAllocateInfo allocInfo =
       vks::initializers::descriptorSetAllocateInfo(m_descriptorPool,
@@ -325,7 +341,7 @@ void UniSceneRenderer::SetupDescriptorSets() {
 }
 
 void UniSceneRenderer::BuildCommandBuffers() {
-  auto& engine = UniEngine::GetInstance();
+  auto engine = UniEngine::GetInstance();
 
   VkCommandBufferBeginInfo cmdBufInfo =
       vks::initializers::commandBufferBeginInfo();
@@ -336,19 +352,19 @@ void UniSceneRenderer::BuildCommandBuffers() {
 
   VkRenderPassBeginInfo renderPassBeginInfo =
       vks::initializers::renderPassBeginInfo();
-  renderPassBeginInfo.renderPass = engine.GetRenderPass();
+  renderPassBeginInfo.renderPass = engine->GetRenderPass();
   renderPassBeginInfo.renderArea.offset.x = 0;
   renderPassBeginInfo.renderArea.offset.y = 0;
-  renderPassBeginInfo.renderArea.extent.width = engine.width;
-  renderPassBeginInfo.renderArea.extent.height = engine.height;
+  renderPassBeginInfo.renderArea.extent.width = engine->width;
+  renderPassBeginInfo.renderArea.extent.height = engine->height;
   renderPassBeginInfo.clearValueCount = 2;
   renderPassBeginInfo.pClearValues = clearValues;
 
-  auto& drawCmdBuffers = engine.GetCommandBuffers();
+  auto& drawCmdBuffers = engine->GetCommandBuffers();
 
   for (int32_t i = 0; i < drawCmdBuffers.size(); ++i) {
     // Set target frame buffer
-    renderPassBeginInfo.framebuffer = engine.GetFrameBuffers()[i];
+    renderPassBeginInfo.framebuffer = engine->GetFrameBuffers()[i];
 
     VK_CHECK_RESULT(vkBeginCommandBuffer(drawCmdBuffers[i], &cmdBufInfo));
 
@@ -356,11 +372,11 @@ void UniSceneRenderer::BuildCommandBuffers() {
                          VK_SUBPASS_CONTENTS_INLINE);
 
     VkViewport viewport = vks::initializers::viewport(
-        (float)engine.width, (float)engine.height, 0.0f, 1.0f);
+        (float)engine->width, (float)engine->height, 0.0f, 1.0f);
     vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
 
     VkRect2D scissor =
-        vks::initializers::rect2D(engine.width, engine.height, 0, 0);
+        vks::initializers::rect2D(engine->width, engine->height, 0, 0);
     vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
 
     // uint32_t dummy = 0;
@@ -387,19 +403,20 @@ void UniSceneRenderer::BuildCommandBuffers() {
     //                  m_pipelines.forward);
     // vkCmdDraw(drawCmdBuffers[i], 3, 1, 0, 0);
 
-    auto dynamicAlignment = engine.getDynamicAlignment();
-    uint32_t index = 0;
-
+    auto dynamicAlignment = engine->getDynamicAlignment();
+    
     vkCmdPushConstants(
         drawCmdBuffers[i], m_pipelineLayouts.forward,
         VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, 0,
         sizeof(m_TimeConstants), &m_TimeConstants);
 
-    for (const auto& material : m_materialInstances) {
-      // std::cout << "Building command buffer for material: "
-      //          << material->GetName() << std::endl;
-      index = material.second->AddToCommandBuffer(drawCmdBuffers[i], index);
-    }
+    //for (const auto& material : m_materialInstances) {
+    //  // std::cout << "Building command buffer for material: "
+    //  //          << material->GetName() << std::endl;
+    //  index = material.second->AddToCommandBuffer(drawCmdBuffers[i], index);
+    //}
+
+    SceneManager()->EmitEvent<RenderEvent>({drawCmdBuffers[i]});
 
     vkCmdEndRenderPass(drawCmdBuffers[i]);
 
@@ -469,9 +486,9 @@ void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
 }
 
 void UniSceneRenderer::UpdateDynamicUniformBuffers() {
-  auto& engine = UniEngine::GetInstance();
-  int index = 0;
-  auto dynamicAlignment = engine.getDynamicAlignment();
+  auto engine = UniEngine::GetInstance();
+  uint32_t index = 0;
+  auto dynamicAlignment = engine->getDynamicAlignment();
   auto models = SceneManager()->CurrentScene()->GetRenderedObjects();
   for_each(models.begin(), models.end(),
            [this, &index, dynamicAlignment](std::shared_ptr<UniSceneObject> model) {
@@ -481,6 +498,7 @@ void UniSceneRenderer::UpdateDynamicUniformBuffers() {
              *modelMat = model->GetTransform()->GetModelMat();
              // std::cout << "Updating model matrix index: " << index <<
              // std::endl;
+             model->SetRenderIndex(index);
              index++;
            });
 
@@ -490,7 +508,7 @@ void UniSceneRenderer::UpdateDynamicUniformBuffers() {
   VkMappedMemoryRange memoryRange = vks::initializers::mappedMemoryRange();
   memoryRange.memory = m_uniformBuffers.modelViews.memory;
   memoryRange.size = m_uniformBuffers.modelViews.size;
-  vkFlushMappedMemoryRanges(engine.GetDevice(), 1, &memoryRange);
+  vkFlushMappedMemoryRanges(engine->GetDevice(), 1, &memoryRange);
 }
 
 void UniSceneRenderer::UpdateCamera(float width, float height) {
@@ -507,12 +525,12 @@ void UniSceneRenderer::UnRegisterMaterial(std::string materialID) {
 }
 
 std::string UniSceneRenderer::GetShader(std::string shader) {
-  auto& engine = UniEngine::GetInstance();
-  auto aPath = engine.getAssetPath();
+  auto engine = UniEngine::GetInstance();
+  auto aPath = engine->getAssetPath();
 
   return aPath + "shaders/" + shader + ".spv";
 }
 
 std::shared_ptr<UniSceneManager> UniSceneRenderer::SceneManager() {
-  return UniEngine::GetInstance().SceneManager();
+  return UniEngine::GetInstance()->SceneManager();
 }

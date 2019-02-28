@@ -6,8 +6,8 @@
 
 
 PlanetMaterial::PlanetMaterial(std::string name, bool hasOcean) {
-  auto& engine = UniEngine::GetInstance();
-  auto aPath = engine.getAssetPath();
+  auto engine = UniEngine::GetInstance();
+  auto aPath = engine->getAssetPath();
   m_Name = name;
   m_RenderOcean = false;
   SetShader("vert", aPath + "shaders/unirayplanet.vert.spv");
@@ -22,12 +22,11 @@ PlanetMaterial::PlanetMaterial(std::string name, bool hasOcean) {
   //}
 }
 
-uint32_t PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer, uint32_t index){
-  vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
-  vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
-
-  return index;
-}
+//void PlanetMaterial::AddToCommandBuffer(VkCommandBuffer& cmdBuffer){
+//  vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+//  vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
+//
+//}
 
 void PlanetMaterial::Destroy() {
   std::cout << "Destroying planet material..." << std::endl;
