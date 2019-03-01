@@ -17,15 +17,13 @@ void UniEngine::Shutdown() {
   std::cout << "Shutting down..." << std::endl;
 
   SceneManager()->Shutdown();
-
-  // Clean up used Vulkan resources
-  // Note : Inherited destructor cleans up resources stored in base class
-
   SceneRenderer()->ShutDown();
+  AudioManager()->Shutdown();
 
   m_SceneManager.reset();
   m_SceneRenderer.reset();
   m_InputManager.reset();
+  m_AudioManager.reset();
 }
 
 UniEngine::~UniEngine() {

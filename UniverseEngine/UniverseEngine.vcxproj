@@ -234,6 +234,8 @@
     <ClInclude Include="..\external\imgui\stb_truetype.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\3dmaths.h" />
+    <ClInclude Include="source\components\AudioComponent.h" />
+    <ClInclude Include="source\systems\AudioSystem.h" />
     <ClInclude Include="source\UniAudioEngine.h" />
     <ClInclude Include="source\components\Camera.h" />
     <ClInclude Include="source\components\Components.h" />
@@ -245,6 +247,8 @@
     <ClInclude Include="source\components\Transform.h" />
     <ClInclude Include="source\components\UniPlanet.h" />
     <ClInclude Include="source\ECS.h" />
+    <ClCompile Include="source\components\AudioComponent.cpp" />
+    <ClCompile Include="source\systems\AudioSystem.cpp" />
     <ClCompile Include="source\UniAudioEngine.cpp" />
     <ClCompile Include="source\components\ModelComponent.cpp" />
     <ClCompile Include="source\components\Movement.cpp" />

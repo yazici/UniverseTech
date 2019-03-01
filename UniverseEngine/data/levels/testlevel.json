@@ -1,5 +1,5 @@
 ﻿{
-    "$schema":  "levelschema.json",
+    "$schema": "levelschema.json",
     "level": {
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
@@ -44,6 +44,15 @@
             }
         ],
         "sceneObjects": [
+            {
+                "type": "audio",
+                "name": "spacewind",
+                "position": [ 10.0, 0.0, 0.0 ],
+                "rotation": [ 0.0, 0.0, 0.0 ],
+                "enabled": true,
+                "filename": "audio/spacewind.mp3",
+                "3d": false
+            },
             {
                 "type": "model",
                 "name": "spaceship 01",

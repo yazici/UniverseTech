@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Transform.h"
-#include "Movement.h"
+#include "AudioComponent.h"
 #include "Camera.h"
-#include "PhysicsComponent.h"
 #include "LightComponent.h"
-#include "PlayerControl.h"
-#include "UniPlanet.h"
 #include "ModelComponent.h"
+#include "Movement.h"
+#include "PhysicsComponent.h"
+#include "PlayerControl.h"
+#include "Transform.h"
+#include "UniPlanet.h"
