@@ -115,9 +115,17 @@ void main()
 	//int i = 0;
 		Light light = uboLights.lights[i];
 		vec4 lPos = light.position;
-		float atten = light.radius / (pow(distance(lPos, inPos), 2.0) + 1.0);
-		vec3 lightColour = light.color.xyz * atten;
 		vec3 L = normalize(lPos - inPos).xyz;
+
+		float atten = light.radius / (pow(distance(lPos, inPos), 2.0) + 1.0);
+
+		// directional lights ignore attenuation and have constant direction		
+		if(light.radius < 0.001){
+			L = normalize(lPos.xyz);
+			atten = 1.0;
+		}
+
+		vec3 lightColour = light.color.xyz * atten;
 		
 		Lo += lambert(L, N) * lightColour * albedo;
 		Lo += clamp(BRDF(L, V, N, lightColour, albedo, metallic, roughness), vec3(0), vec3(1));
@@ -132,7 +140,7 @@ void main()
 	// Gamma correct
 	//color = vec3(dot(N, L));
 	color = pow(color, vec3(0.4545));
-	//color = vec3(roughness);
+	//color = vec3(N);
 		
 	outFragColor = vec4(color, 1.0);
 }

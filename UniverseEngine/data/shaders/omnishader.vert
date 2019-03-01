@@ -59,7 +59,6 @@ void main()
 {
 	
 	
-	outNormal = inNormal;
 	outColor = inColor;
 	outTangent = inTangent;
 	outUV = inUV;
@@ -67,7 +66,7 @@ void main()
 	gl_Position = ubo.projection * ubo.view * ubdo.model * vec4(inPos.xyz, 1.0);
 	
 	outPos = ubdo.model * vec4(inPos, 1.0);
-	outNormal = mat3(ubdo.model) * inNormal;
+	outNormal = mat3(ubdo.model) * normalize(inNormal);
 
 	outMaterialID = inMaterialID;
 }

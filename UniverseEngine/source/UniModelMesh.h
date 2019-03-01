@@ -198,12 +198,7 @@ struct Model {
     pScene = Importer.ReadFile(filename.c_str(), flags);
     if (!pScene) {
       std::string error = Importer.GetErrorString();
-      vks::tools::exitFatal(
-          error +
-              "\n\nThe file may be part of the additional asset pack.\n\nRun "
-              "\"download_assets.py\" in the repository root to download the "
-              "latest version.",
-          -1);
+      vks::tools::exitFatal(error, -1);
     }
 #endif
 
@@ -220,6 +215,17 @@ struct Model {
         center = createInfo->center;
       }
 
+      int matAdjust = 0;
+      uint32_t minMatID = pScene->mMeshes[0]->mMaterialIndex;
+      for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
+        const aiMesh* paiMesh = pScene->mMeshes[i];
+        auto matID = paiMesh->mMaterialIndex;
+        if (matID < minMatID) {
+          minMatID = matID;
+        }
+      }
+      matAdjust = 0 - minMatID;
+
       // Load meshes
       for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
         std::vector<float> vertexBuffer;
@@ -233,22 +239,24 @@ struct Model {
 
         m_vertexCount.emplace(i, pScene->mMeshes[i]->mNumVertices);
 
-        if (paiMesh->mMaterialIndex > materialIDs.size()) {
-          std::ostringstream err;
-          err << "Cannot load material with ID" << paiMesh->mMaterialIndex
-              << " when there are only " << materialIDs.size() << " materials."
-              << std::endl;
+        uint32_t matID = std::max(0, (int)paiMesh->mMaterialIndex - matAdjust);
 
-          throw std::runtime_error(err.str());
+        if (matID >= materialIDs.size()) {
+          // std::ostringstream err;
+          std::cout << "Cannot load material with ID" << matID
+                    << " when there are only " << materialIDs.size()
+                    << " materials." << std::endl;
+
+          // throw std::runtime_error(err.str());
+          matID = matID % materialIDs.size();
         }
 
-        auto matName = materialIDs[paiMesh->mMaterialIndex - 1];
+        auto matName = materialIDs[matID];
 
         m_meshesByMaterial[matName].push_back(i);
 
         aiColor3D pColor(0.f, 0.f, 0.f);
-        pScene->mMaterials[paiMesh->mMaterialIndex]->Get(
-            AI_MATKEY_COLOR_DIFFUSE, pColor);
+        pScene->mMaterials[matID]->Get(AI_MATKEY_COLOR_DIFFUSE, pColor);
 
         const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
 
@@ -307,8 +315,7 @@ struct Model {
                 vertexBuffer.push_back(0.0f);
                 break;
               case VERTEX_COMPONENT_MATERIAL_ID:
-                vertexBuffer.push_back(
-                    static_cast<float>(paiMesh->mMaterialIndex));
+                vertexBuffer.push_back(static_cast<float>(matID));
             };
           }
 

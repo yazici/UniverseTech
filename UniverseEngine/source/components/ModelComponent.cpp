@@ -51,16 +51,20 @@ void ModelComponent::Load(uni::VertexLayout layout,
                           vks::VulkanDevice* device,
                           VkQueue copyQueue,
                           bool useCreateInfo) {
-
   auto engine = UniEngine::GetInstance();
+
+  auto testFlags = aiProcess_Triangulate | aiProcess_CalcTangentSpace |
+                   aiProcess_FindDegenerates | aiProcess_OptimizeMeshes |
+                   aiProcess_FindInvalidData | aiProcess_GenSmoothNormals;
 
   if (useCreateInfo)
     m_Model.loadFromFile(engine->getAssetPath() + m_ModelPath, layout,
-                         &m_ModelCreateInfo, device, copyQueue, m_Materials);
-    
+                         &m_ModelCreateInfo, device, copyQueue, m_Materials,
+                         testFlags);
+
   else
-    m_Model.loadFromFile(engine->getAssetPath() + m_ModelPath, layout, 1.f, device,
-                         copyQueue, m_Materials);
+    m_Model.loadFromFile(engine->getAssetPath() + m_ModelPath, layout, 1.f,
+                         device, copyQueue, m_Materials);
 }
 
 ModelComponent::~ModelComponent() {}
