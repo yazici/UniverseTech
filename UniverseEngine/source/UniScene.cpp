@@ -30,7 +30,7 @@ void UniScene::Initialize() {
   m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
   m_CurrentCamera->AddComponent<CameraComponent>(
       m_CurrentCamera->GetTransform(),
-      (float)engine->width / (float)engine->height, 50.f, 0.01f, 1000.f);
+      (float)engine->width / (float)engine->height, 50.f, 0.01f, 10000.f);
   // m_CurrentCamera->AddComponent<MovementComponent>();
   m_CurrentCamera->AddComponent<PlayerControlComponent>();
   m_CurrentCamera->AddComponent<PhysicsComponent>(5000.0);

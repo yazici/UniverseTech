@@ -49,7 +49,7 @@
                 "name": "spaceship 01",
                 "mesh": "models/spaceship01/spaceship.obj",
                 "materialID": "spaceship01 material1",
-                "materials": ["spaceship01 material1", "spaceship01 material2"],
+                "materials": [ "spaceship01 material1", "spaceship01 material2" ],
                 "position": [ 10.0, 0.0, 0.0 ],
                 "rotation": [ 0.0, 0.0, 0.0 ],
                 "createScale": [ 1, 1, 1 ],
@@ -66,7 +66,7 @@
                 "name": "spaceship 02",
                 "mesh": "models/spaceship02/Spaceship.obj",
                 "materialID": "spaceship02 material",
-                "materials": ["spaceship02 material"],
+                "materials": [ "spaceship02 material" ],
                 "position": [ -10.0, 0.0, 0.0 ],
                 "rotation": [ 0.0, 90.0, 0.0 ],
                 "createScale": [ 0.02, 0.02, 0.02 ],
@@ -81,9 +81,9 @@
 
             {
                 "type": "light",
-                "name": "light-key",
-                "position": [ 0, 20, -30.0 ],
-                "radius": 100.0,
+                "name": "light-sun",
+                "position": [ 0, 1.0, 0.7 ],
+                "radius": 0.0,
                 "color": [ 1.0, 0.9, 0.5, 1 ],
                 "on": true
             },
@@ -91,7 +91,7 @@
                 "type": "light",
                 "name": "light-fill",
                 "position": [ -10.0, 20.0, -10.0 ],
-                "radius": 50.0,
+                "radius": 0.0,
                 "color": [ 1, 0.6, 0.3, 1 ],
                 "on": true
             },
@@ -99,7 +99,7 @@
                 "type": "light",
                 "name": "light-fill2",
                 "position": [ 0.0, -30.0, 0.0 ],
-                "radius": 50.0,
+                "radius": 0.0,
                 "color": [ 1, 0.6, 0.3, 1 ],
                 "on": true
             },
@@ -107,7 +107,7 @@
                 "type": "light",
                 "name": "light-rim",
                 "position": [ 0.0, 0.0, 100.0 ],
-                "radius": 200.0,
+                "radius": 0.0,
                 "color": [ 0.6, 0.6, 1, 1 ],
                 "on": true
             }

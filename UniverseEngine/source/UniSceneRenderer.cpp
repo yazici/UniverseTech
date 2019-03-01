@@ -210,7 +210,7 @@ void UniSceneRenderer::PreparePipelines() {
 
   VkPipelineRasterizationStateCreateInfo rasterizationState =
       vks::initializers::pipelineRasterizationStateCreateInfo(
-          wfmode, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE, 0);
+          wfmode, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 
   VkPipelineColorBlendAttachmentState blendAttachmentState =
       vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE);
