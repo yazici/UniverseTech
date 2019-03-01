@@ -113,7 +113,7 @@ void UniAudioEngine::SetChannel3dPosition(int nChannelId,
     return;
 
   FMOD_VECTOR position = VectorToFmod(vPosition);
-  UniAudioEngine::ErrorCheck(tFoundIt->second->set3DAttributes(&position, NULL));
+  UniAudioEngine::ErrorCheck(tFoundIt->second->set3DAttributes(&position, nullptr));
 }
 
 void UniAudioEngine::SetChannelVolume(int nChannelId, float fVolumedB) {
@@ -141,11 +141,11 @@ void UniAudioEngine::LoadEvent(const std::string& strEventName) {
   auto tFoundit = GetImplementation()->mEvents.find(strEventName);
   if (tFoundit != GetImplementation()->mEvents.end())
     return;
-  FMOD::Studio::EventDescription* pEventDescription = NULL;
+  FMOD::Studio::EventDescription* pEventDescription = nullptr;
   UniAudioEngine::ErrorCheck(GetImplementation()->mpStudioSystem->getEvent(
       strEventName.c_str(), &pEventDescription));
   if (pEventDescription) {
-    FMOD::Studio::EventInstance* pEventInstance = NULL;
+    FMOD::Studio::EventInstance* pEventInstance = nullptr;
     UniAudioEngine::ErrorCheck(
         pEventDescription->createInstance(&pEventInstance));
     if (pEventInstance) {
@@ -181,7 +181,7 @@ bool UniAudioEngine::IsEventPlaying(const string& strEventName) const {
   if (tFoundIt == GetImplementation()->mEvents.end())
     return false;
 
-  FMOD_STUDIO_PLAYBACK_STATE* state = NULL;
+  FMOD_STUDIO_PLAYBACK_STATE* state = nullptr;
   if (tFoundIt->second->getPlaybackState(state) ==
       FMOD_STUDIO_PLAYBACK_PLAYING) {
     return true;
@@ -196,7 +196,7 @@ void UniAudioEngine::GetEventParameter(const string& strEventName,
   if (tFoundIt == GetImplementation()->mEvents.end())
     return;
 
-  FMOD::Studio::ParameterInstance* pParameter = NULL;
+  FMOD::Studio::ParameterInstance* pParameter = nullptr;
   UniAudioEngine::ErrorCheck(
       tFoundIt->second->getParameter(strParameterName.c_str(), &pParameter));
   UniAudioEngine::ErrorCheck(pParameter->getValue(parameter));
@@ -209,7 +209,7 @@ void UniAudioEngine::SetEventParameter(const string& strEventName,
   if (tFoundIt == GetImplementation()->mEvents.end())
     return;
 
-  FMOD::Studio::ParameterInstance* pParameter = NULL;
+  FMOD::Studio::ParameterInstance* pParameter = nullptr;
   UniAudioEngine::ErrorCheck(
       tFoundIt->second->getParameter(strParameterName.c_str(), &pParameter));
   UniAudioEngine::ErrorCheck(pParameter->setValue(fValue));
