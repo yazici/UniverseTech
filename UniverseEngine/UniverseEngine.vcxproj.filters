@@ -225,6 +225,9 @@
     <ClInclude Include="source\systems\ModelRenderSystem.h">
       <Filter>Systems</Filter>
     </ClInclude>
+    <ClInclude Include="source\UniAudioEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -325,6 +328,9 @@
     </ClCompile>
     <ClCompile Include="source\systems\ModelRenderSystem.cpp">
       <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniAudioEngine.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

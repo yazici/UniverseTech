@@ -1,5 +1,6 @@
 #include "UniSceneManager.h"
 #include "UniSceneRenderer.h"
+#include "UniAudioEngine.h"
 #include "UniEngine.h"
 
 std::vector<std::string> scenelist = {"testlevel", "testlevel2"};
@@ -10,7 +11,6 @@ void UniSceneManager::Initialise() {
   m_CurrentScene->Initialize();
 
   m_renderer = UniEngine::GetInstance()->SceneRenderer();
-
 }
 
 void UniSceneManager::LoadScene(std::string sceneName) {
@@ -18,9 +18,13 @@ void UniSceneManager::LoadScene(std::string sceneName) {
   LoadAssets(sceneName);
   std::cout << "Finished loading new scene." << std::endl;
 
+  auto engine = UniEngine::GetInstance();
+  engine->AudioManager()->LoadSound(getAssetPath() + "audio/spacewind.mp3",
+                                    false, true, true);
+  engine->AudioManager()->PlaySoundFile(getAssetPath() + "audio/spacewind.mp3");
+
   m_UpdateScene = false;
   m_NextScene = "";
-
 }
 
 void UniSceneManager::UnloadCurrentScene() {
@@ -45,9 +49,7 @@ void UniSceneManager::CycleScenes() {
 
   m_NextScene = scenelist.at(m_CurrentSceneIdx);
   m_UpdateScene = true;
-
 }
-
 
 void UniSceneManager::Shutdown() {
   UnloadCurrentScene();
@@ -60,9 +62,8 @@ std::shared_ptr<UniScene> UniSceneManager::CurrentScene() {
 void UniSceneManager::Tick(float frameTimer) {
   CurrentScene()->Tick(frameTimer);
   m_renderer->Tick(frameTimer);
-  
+  UniEngine::GetInstance()->AudioManager()->Update();
 }
-
 
 bool UniSceneManager::CheckNewScene() {
   if (m_UpdateScene && !m_NextScene.empty()) {
