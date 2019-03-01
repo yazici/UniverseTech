@@ -40,13 +40,6 @@ class UniEngine final : public VulkanExampleBase {
   ~UniEngine();
   static std::shared_ptr<UniEngine> GetInstance();
   static void Delete();
-  // Framebuffer for offscreen rendering
-  struct FrameBufferAttachment {
-    VkImage image;
-    VkDeviceMemory mem;
-    VkImageView view;
-    VkFormat format;
-  };
 
   void getEnabledFeatures() override;
   size_t getDynamicAlignment();
@@ -62,12 +55,7 @@ class UniEngine final : public VulkanExampleBase {
   VkPipelineCache GetPipelineCache() { return pipelineCache; }
   void Shutdown();
   bool m_debugDisplay = false;
-  bool m_useMSAA = true;
-  bool m_useSampleShading = true;
   bool m_useWireframe = false;
-
-  // One sampler for the frame buffer color attachments
-  VkSampler m_colorSampler;
 
 
  private:

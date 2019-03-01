@@ -63,7 +63,6 @@ void UniSceneRenderer::ShutDown() {
   vkDestroyPipelineLayout(device, m_pipelineLayouts.forward, nullptr);
   vkDestroyPipeline(device, m_pipelines.forward, nullptr);
   vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
-  // vkFreeDescriptorSets(device, m_descriptorPool, 1, &m_descriptorSet);
   vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
 
   // Uniform buffers

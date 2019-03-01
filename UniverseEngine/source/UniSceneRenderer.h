@@ -70,8 +70,6 @@ class UniSceneRenderer {
     VkPipelineLayout forward;
   } m_pipelineLayouts;
 
-  VkRenderPass m_renderPass;
-
   std::map<std::string, std::shared_ptr<UniMaterial>> m_materialInstances;
 
   VkDescriptorPool m_descriptorPool;
