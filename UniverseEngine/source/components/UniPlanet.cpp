@@ -30,13 +30,13 @@ UniPlanet::UniPlanet(double radius /*= 1.0*/,
 void UniPlanet::Destroy() {
   std::cout << "Destroying planet..." << std::endl;
 
-  auto renderer = UniEngine::GetInstance().SceneRenderer();
-  renderer->UnRegisterMaterial(m_Material);
+  auto renderer = UniEngine::GetInstance()->SceneRenderer();
+  renderer->UnRegisterMaterial(m_Material->GetName());
   m_Material.reset();
 }
 
 void UniPlanet::Initialize() {
-  auto renderer = UniEngine::GetInstance().SceneRenderer();
+  auto renderer = UniEngine::GetInstance()->SceneRenderer();
 
   //m_Material = std::static_pointer_cast<PlanetMaterial>(
   //    PlanetMaterialFactory::create("planet", "testworld", m_HasOcean));
@@ -209,7 +209,7 @@ void UniPlanet::UpdateBuffers() {
   vks::Buffer vertexStaging, indexStaging, oceanVertexStaging,
       oceanIndexStaging;
 
-  auto device = UniEngine::GetInstance().vulkanDevice;
+  auto device = UniEngine::GetInstance()->vulkanDevice;
 
   // Vertex buffer
   VK_CHECK_RESULT(device->createBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -267,7 +267,7 @@ void UniPlanet::UpdateBuffers() {
                     m_OceanIndexBuffer.buffer, 1, &copyRegion);
   }
 
-  device->flushCommandBuffer(copyCmd, UniEngine::GetInstance().GetQueue());
+  device->flushCommandBuffer(copyCmd, UniEngine::GetInstance()->GetQueue());
 
   // Destroy staging resources
   vkDestroyBuffer(device->logicalDevice, vertexStaging.buffer, nullptr);
@@ -283,8 +283,8 @@ void UniPlanet::UpdateBuffers() {
 }
 
 void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
-  auto& engine = UniEngine::GetInstance();
-  auto camera = engine.SceneManager()->CurrentScene()->GetCameraComponent();
+  auto engine = UniEngine::GetInstance();
+  auto camera = engine->SceneManager()->CurrentScene()->GetCameraComponent();
 
   //// Pass transformations to the shader
   m_UniformBufferData.modelMat = modelMat;
@@ -309,13 +309,13 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
   m_UniformBufferData.tessLevel = 0.75f;
 
   m_UniformBufferData.viewportDim =
-      glm::vec2((float)engine.width, (float)engine.height);
+      glm::vec2((float)engine->width, (float)engine->height);
   m_UniformBufferData.tessellatedEdgeSize = 20.f;
 
   m_UniformBufferData.hasOcean = m_HasOcean;
 
   vks::Buffer uniformStaging;
-  auto device = UniEngine::GetInstance().vulkanDevice;
+  auto device = UniEngine::GetInstance()->vulkanDevice;
 
   // Vertex buffer
   VK_CHECK_RESULT(device->createBuffer(
@@ -335,7 +335,7 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
   vkCmdCopyBuffer(copyCmd, uniformStaging.buffer, m_UniformBuffer.buffer, 1,
                   &copyRegion);
 
-  device->flushCommandBuffer(copyCmd, UniEngine::GetInstance().GetQueue());
+  device->flushCommandBuffer(copyCmd, UniEngine::GetInstance()->GetQueue());
 
   // Destroy staging resources
   vkDestroyBuffer(device->logicalDevice, uniformStaging.buffer, nullptr);
@@ -392,7 +392,7 @@ void UniPlanet::CreateBuffers() {
   uint32_t storageBufferSize =
       static_cast<uint32_t>(m_NoiseLayers.size() * sizeof(NoiseLayerData));
 
-  auto device = UniEngine::GetInstance().vulkanDevice;
+  auto device = UniEngine::GetInstance()->vulkanDevice;
 
   // Create device local target buffers
   // Vertex buffer
@@ -461,7 +461,7 @@ void UniPlanet::MakeContintentTexture() {
   noise.SetNoiseType(FastNoise::SimplexFractal);
   noise.SetFractalOctaves(3);
 
-  auto& engine = UniEngine::GetInstance();
+  auto engine = UniEngine::GetInstance();
 
   std::vector<glm::vec4> buffer;
 
@@ -484,19 +484,19 @@ void UniPlanet::MakeContintentTexture() {
 
   m_ContinentTexture.fromBuffer(
       buffer.data(), buffer.size() * sizeof(glm::vec4),
-      VK_FORMAT_R32G32B32A32_SFLOAT, 1024, 1024, engine.vulkanDevice,
-      engine.GetQueue(), VK_FILTER_LINEAR);
+      VK_FORMAT_R32G32B32A32_SFLOAT, 1024, 1024, engine->vulkanDevice,
+      engine->GetQueue(), VK_FILTER_LINEAR);
 
-  auto t = make_shared<vks::Texture>(m_ContinentTexture);
+  auto t = std::make_shared<vks::Texture>(m_ContinentTexture);
 
   m_Material->m_Textures.push_back(t);
 }
 
 void UniPlanet::UpdateStorageBuffer() {
-  auto& engine = UniEngine::GetInstance();
+  auto engine = UniEngine::GetInstance();
 
   vks::Buffer storageStaging;
-  auto device = engine.vulkanDevice;
+  auto device = engine->vulkanDevice;
 
   m_Material->SetNoiseLayerCount(static_cast<uint32_t>(m_NoiseLayers.size()));
 
@@ -520,7 +520,7 @@ void UniPlanet::UpdateStorageBuffer() {
   vkCmdCopyBuffer(copyCmd, storageStaging.buffer, m_StorageBuffer.buffer, 1,
                   &copyRegion);
 
-  device->flushCommandBuffer(copyCmd, engine.GetQueue());
+  device->flushCommandBuffer(copyCmd, engine->GetQueue());
 
   // Destroy staging resources
   vkDestroyBuffer(device->logicalDevice, storageStaging.buffer, nullptr);
@@ -543,7 +543,7 @@ uint32_t UniPlanet::AddNoiseLayer(NoiseType type,
 }
 
 void UniPlanet::MakeRampTexture() {
-  auto& engine = UniEngine::GetInstance();
+  auto engine = UniEngine::GetInstance();
   std::string path = getAssetPath() + "textures/terrain-ramp.png";
   int texWidth, texHeight, texChannels;
   stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels,
@@ -552,10 +552,10 @@ void UniPlanet::MakeRampTexture() {
   VkDeviceSize imSize = texWidth * texHeight * 4;
 
   m_RampTexture.fromBuffer(pixels, imSize, VK_FORMAT_R8G8B8A8_UNORM, texWidth,
-                           texHeight, engine.vulkanDevice, engine.GetQueue(),
+                           texHeight, engine->vulkanDevice, engine->GetQueue(),
                            VK_FILTER_LINEAR);
 
-  auto t = make_shared<vks::Texture>(m_RampTexture);
+  auto t = std::make_shared<vks::Texture>(m_RampTexture);
 
   m_Material->m_Textures.push_back(t);
 }

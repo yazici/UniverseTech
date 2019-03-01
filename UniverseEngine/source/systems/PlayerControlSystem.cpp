@@ -6,7 +6,7 @@
 void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 	//std::cout << "Got an input event!" << std::endl;
 
-	auto input = UniEngine::GetInstance().GetInputManager();
+	auto input = UniEngine::GetInstance()->GetInputManager();
 
 	switch (event.axis)
 	{
@@ -45,7 +45,7 @@ void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 		m_InputRotation.z = -event.value;
 		break;
     case UniInput::ButtonExperiment:
-        UniEngine::GetInstance().SceneManager()->CycleScenes();
+        UniEngine::GetInstance()->SceneManager()->CycleScenes();
         break;
     }
 }

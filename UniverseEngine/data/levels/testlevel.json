@@ -10,17 +10,8 @@
         "materials": [
             {
                 "type": "model material",
-                "name": "test material",
-                "colour": [ 0.560, 0.570, 0.580 ],
-                "metallic": 1.0,
-                "roughness": 0.75,
-                "textureMap": "models/cerberus/albedo.ktx",
-                "normalMap": "models/cerberus/normal.ktx"
-            },
-            {
-                "type": "model material",
-                "name": "spaceship01 material",
-                "colour": [ 0.560, 0.570, 0.580 ],
+                "name": "spaceship01 material1",
+                "colour": [ 0.560, 0.570, 0.580, 1.0 ],
                 "metallic": 1.0,
                 "roughness": 0.75,
                 "textureMap": "models/spaceship01/None_Base_Color.png",
@@ -31,8 +22,19 @@
             },
             {
                 "type": "model material",
+                "name": "spaceship01 material2",
+                "colour": [ 0.560, 0.570, 0.580, 1.0 ],
+                "metallic": 1.0,
+                "roughness": 0.75,
+                "textureMap": "models/spaceship01/None.001_Base_Color.png",
+                "normalMap": "models/spaceship01/None.001_Normal_DirectX.png",
+                "roughnessMap": "models/spaceship01/None.001_Roughness.png",
+                "metallicMap": "models/spaceship01/None.001_Metallic.png"
+            },
+            {
+                "type": "model material",
                 "name": "spaceship02 material",
-                "colour": [ 0.560, 0.570, 0.580 ],
+                "colour": [ 0.560, 0.570, 0.580, 1.0 ],
                 "metallic": 1.0,
                 "roughness": 0.75,
                 "textureMap": "models/spaceship02/Spaceship_BaseColor.png",
@@ -44,33 +46,18 @@
         "sceneObjects": [
             {
                 "type": "model",
-                "name": "cerberus 1",
-                "mesh": "models/cerberus/cerberus.fbx",
-                "materialID": "test material",
-                "position": [ 0.0, 0.0, 0.0 ],
-                "rotation": [ 0.0, 0.0, 0.0 ],
-                "createScale": [ 0.005, 0.005, 0.005 ],
-                "createUVScale": [ 1, 1 ],
-                "enabled": false,
-                "components": {
-                    "movement": {
-                        "rotation": [ 0, 0, 0 ]
-                    }
-                }
-            },
-            {
-                "type": "model",
                 "name": "spaceship 01",
                 "mesh": "models/spaceship01/spaceship.obj",
-                "materialID": "spaceship01 material",
+                "materialID": "spaceship01 material1",
+                "materials": ["spaceship01 material1", "spaceship01 material2"],
                 "position": [ 10.0, 0.0, 0.0 ],
                 "rotation": [ 0.0, 0.0, 0.0 ],
                 "createScale": [ 1, 1, 1 ],
                 "createUVScale": [ 1, 1 ],
-                "enabled": false,
+                "enabled": true,
                 "components": {
                     "movement": {
-                        "rotation": [ 0, 0, 0 ]
+                        "rotation": [ 0, 30, 0 ]
                     }
                 }
             },
@@ -79,14 +66,15 @@
                 "name": "spaceship 02",
                 "mesh": "models/spaceship02/Spaceship.obj",
                 "materialID": "spaceship02 material",
-                "position": [ 0.0, -1.0, -1.0 ],
-                "rotation": [ 0.0, 0.0, 0.0 ],
-                "createScale": [ 0.01, 0.01, 0.01 ],
+                "materials": ["spaceship02 material"],
+                "position": [ -10.0, 0.0, 0.0 ],
+                "rotation": [ 0.0, 90.0, 0.0 ],
+                "createScale": [ 0.02, 0.02, 0.02 ],
                 "createUVScale": [ 1, 1 ],
                 "enabled": true,
                 "components": {
                     "movement": {
-                        "rotation": [ 0, 60, 0 ]
+                        "rotation": [ 0, -30, 0 ]
                     }
                 }
             },

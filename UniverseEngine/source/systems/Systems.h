@@ -6,6 +6,7 @@
 #include "PhysicsSystem.h"
 #include "PlanetRenderSystem.h"
 #include "PlayerControlSystem.h"
+#include "ModelRenderSystem.h"
 
 class MovementSystem : public ECS::EntitySystem {
 public:

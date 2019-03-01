@@ -18,8 +18,7 @@ class PlanetMaterial : public UniMaterial {
 
   virtual ~PlanetMaterial() { Destroy(); }
 
-
-  uint32_t AddToCommandBuffer(VkCommandBuffer& cmdBuffer, uint32_t index, VkPipelineLayout layout) override;
+  //void AddToCommandBuffer(VkCommandBuffer& cmdBuffer) override;
 
   std::vector<std::shared_ptr<vks::Texture>> m_Textures;
 
@@ -35,8 +34,3 @@ class PlanetMaterial : public UniMaterial {
   PlanetMaterial() = default;
   PlanetMaterial(std::string name, bool hasOcean = false);
 };
-
-
-using PlanetMaterialFactory =
-    Factory<std::string, std::shared_ptr<PlanetMaterial>>::Initializer<std::string,
-                                                                    bool>;

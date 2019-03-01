@@ -23,7 +23,7 @@ struct Light {
     float radius;
 };
 
-layout (binding = 1) uniform UBOLIGHT
+layout (set = 0, binding = 1) uniform UBOLIGHT
 {
     Light lights[1000];
     vec4 viewPos;
@@ -35,8 +35,33 @@ layout (set = 0, binding = 2) uniform PER_OBJECT
 	mat4 model;
 } ubdo;
 
-layout (binding = 3) uniform sampler2D samplerColorMap;
-layout (binding = 4) uniform sampler2D samplerNormalMap;
+layout (set = 1, binding = 7) uniform PER_MATERIAL
+{
+	vec4 baseColour;
+	vec4 baseEmissive;
+	vec4 baseNormal;
+	float baseRoughness;
+	float baseMetallic;
+	float baseSpecular;
+	
+	uint hasTextureMap;
+	uint hasNormalMap;
+	uint hasRoughnessMap;
+	uint hasMetallicMap;
+	uint hasSpecularMap;
+	uint hasEmissiveMap;
+	uint hasAOMap;
+	uint isVisible;
+} ubmo;
+
+
+layout (set = 1, binding = 0) uniform sampler2D samplerColorMap;
+layout (set = 1, binding = 1) uniform sampler2D samplerNormalMap;
+layout (set = 1, binding = 2) uniform sampler2D samplerRoughnessMap;
+layout (set = 1, binding = 3) uniform sampler2D samplerMetallicMap;
+layout (set = 1, binding = 4) uniform sampler2D samplerSpecularMap;
+layout (set = 1, binding = 5) uniform sampler2D samplerEmissiveMap;
+layout (set = 1, binding = 6) uniform sampler2D samplerAOMap;
 
 layout(push_constant) uniform PushConsts {
 	uint time_seconds;
@@ -53,25 +78,30 @@ float lambert(vec3 N, vec3 L){
   return max(result, 0.0);
 }
 
+
 void main() 
 {
 
-	vec3 albedo = texture(samplerColorMap, inUV).rgb;// * inColor;
+	vec3 albedo = mix(ubmo.baseColour.rgb, texture(samplerColorMap, inUV).rgb, float(ubmo.hasTextureMap));
+	vec3 emissive = mix(ubmo.baseEmissive.rgb, texture(samplerEmissiveMap, inUV).rgb, float(ubmo.hasEmissiveMap));
+	float roughness = mix(ubmo.baseRoughness, texture(samplerRoughnessMap, inUV).r, float(ubmo.hasRoughnessMap));
+	float metallic = mix(ubmo.baseMetallic, texture(samplerMetallicMap, inUV).r, float(ubmo.hasMetallicMap));
 
 	// Calculate normal in tangent space
-	vec3 N = normalize(inNormal);
-	vec3 T = normalize(inTangent);
+	vec3 N = normalize(inNormal.xyz);
+	vec3 T = normalize(inTangent.xyz);
 	vec3 B = cross(N, T);
 	mat3 TBN = mat3(T, B, N);
-	vec3 tnorm = TBN * normalize(texture(samplerNormalMap, inUV).xyz * 2.0 - vec3(1.0));
+	vec3 sampledNormal = mix(ubmo.baseNormal.xyz, texture(samplerNormalMap, inUV).xyz, float(ubmo.hasNormalMap));
+	vec3 tnorm = TBN * normalize(sampledNormal * 2.0 - vec3(1.0));
 
 	N = tnorm;
 	
 	vec3 camPos = uboLights.viewPos.xyz;
 	vec3 V = normalize(camPos - inPos.xyz);
 
-	float roughness = 0.3;
-	float metallic = 0.7;
+	//float roughness = 0.3;
+	//float metallic = 0.7;
 
 	// Add striped pattern to roughness based on vertex position
 #ifdef ROUGHNESS_PATTERN
@@ -86,7 +116,7 @@ void main()
 		Light light = uboLights.lights[i];
 		vec4 lPos = light.position;
 		float atten = light.radius / (pow(distance(lPos, inPos), 2.0) + 1.0);
-		vec3 lightColour = light.color * atten;
+		vec3 lightColour = light.color.xyz * atten;
 		vec3 L = normalize(lPos - inPos).xyz;
 		
 		Lo += lambert(L, N) * lightColour * albedo;
@@ -95,14 +125,14 @@ void main()
 	};
 
 	// Combine with ambient
-	vec3 color = albedo * 0.08;
+	vec3 color = albedo * 0.001;
 	color += Lo;
+	color += emissive;
 
 	// Gamma correct
 	//color = vec3(dot(N, L));
 	color = pow(color, vec3(0.4545));
-	//color = N;
-	
-	
+	//color = vec3(roughness);
+		
 	outFragColor = vec4(color, 1.0);
 }

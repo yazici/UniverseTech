@@ -22,30 +22,24 @@
 
 
 // forward declarations
-class UniModel;
 class UniSceneManager;
 class UniSceneRenderer;
 class UniInput;
 
 class UniEngine final : public VulkanExampleBase {
  private:
-  UniEngine();
-  ~UniEngine();
   UniEngine(const UniEngine&) = delete;
   UniEngine& operator=(const UniEngine&) = delete;
   UniEngine(UniEngine&&) = delete;
   UniEngine& operator=(UniEngine&&) = delete;
 
- public:
-  static UniEngine& GetInstance();
+  DWORD m_ID;
 
-  // Framebuffer for offscreen rendering
-  struct FrameBufferAttachment {
-    VkImage image;
-    VkDeviceMemory mem;
-    VkImageView view;
-    VkFormat format;
-  };
+ public:
+  UniEngine();
+  ~UniEngine();
+  static std::shared_ptr<UniEngine> GetInstance();
+  static void Delete();
 
   void getEnabledFeatures() override;
   size_t getDynamicAlignment();
@@ -61,14 +55,8 @@ class UniEngine final : public VulkanExampleBase {
   VkPipelineCache GetPipelineCache() { return pipelineCache; }
   void Shutdown();
   bool m_debugDisplay = false;
-  bool m_useMSAA = true;
-  bool m_useSampleShading = true;
   bool m_useWireframe = false;
 
-  // One sampler for the frame buffer color attachments
-  VkSampler m_colorSampler;
-
-  VkCommandBuffer m_forwardCommandBuffer = VK_NULL_HANDLE;
 
  private:
   std::shared_ptr<UniSceneManager> m_SceneManager;

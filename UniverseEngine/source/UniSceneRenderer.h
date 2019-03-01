@@ -10,7 +10,7 @@
 
 #include <vulkan/vulkan.h>
 #include "vks/VulkanBuffer.hpp"
-#include "vks/VulkanModel.hpp"
+#include "UniModelMesh.h"
 #include "vks/VulkanTexture.hpp"
 #include "vks/vulkanexamplebase.h"
 
@@ -48,13 +48,16 @@ class UniSceneRenderer {
     vks::Buffer modelViews;
   } m_uniformBuffers;
 
-  struct {
+  using PushConstantStruct = struct {
     uint32_t time_seconds = 0;
     uint32_t time_millis = 0;
-  } m_TimeConstants;
+  };
+
+  PushConstantStruct m_TimeConstants;
 
   VkDescriptorSetLayout m_descriptorSetLayout;
-
+  VkDescriptorSet m_descriptorSet;
+  VkDescriptorSetLayoutCreateInfo m_descriptorLayout;
   std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
   std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
 
@@ -67,21 +70,20 @@ class UniSceneRenderer {
     VkPipelineLayout forward;
   } m_pipelineLayouts;
 
-  VkRenderPass m_renderPass;
-
-  std::vector<std::shared_ptr<UniMaterial>> m_materialInstances;
+  std::map<std::string, std::shared_ptr<UniMaterial>> m_materialInstances;
 
   VkDescriptorPool m_descriptorPool;
 
   VkClearColorValue m_defaultClearColor = {{0.025f, 0.025f, 0.025f, 1.0f}};
 
   // Vertex layout for the models
-  vks::VertexLayout m_vertexLayout = vks::VertexLayout({
-      vks::VERTEX_COMPONENT_POSITION,
-      vks::VERTEX_COMPONENT_UV,
-      vks::VERTEX_COMPONENT_COLOR,
-      vks::VERTEX_COMPONENT_NORMAL,
-      vks::VERTEX_COMPONENT_TANGENT,
+  uni::VertexLayout m_vertexLayout = uni::VertexLayout({
+      uni::VERTEX_COMPONENT_POSITION,
+      uni::VERTEX_COMPONENT_UV,
+      uni::VERTEX_COMPONENT_COLOR,
+      uni::VERTEX_COMPONENT_NORMAL,
+      uni::VERTEX_COMPONENT_TANGENT,
+      uni::VERTEX_COMPONENT_MATERIAL_ID
   });
 
   struct {
@@ -116,10 +118,22 @@ class UniSceneRenderer {
   void SetupDescriptorPool();
   void SetupDescriptorSets();
   void BuildCommandBuffers();
-  void RegisterMaterial(std::shared_ptr<UniMaterial> mat);
-  void UnRegisterMaterial(std::shared_ptr<UniMaterial> mat);
+  void RegisterMaterial(std::string materialID, std::shared_ptr<UniMaterial> mat);
+  void UnRegisterMaterial(std::string materialID);
+  
+  template<typename T>
+  std::shared_ptr<T> GetMaterialByID(std::string materialID);
 
-  vks::VertexLayout GetVertexLayout() { return m_vertexLayout; }
+
+  uni::VertexLayout GetVertexLayout() { return m_vertexLayout; }
+  VkDescriptorSetLayout GetDescriptorSetLayout() { return m_descriptorSetLayout;}
+  VkDescriptorSetLayoutCreateInfo GetDescriptorLayout() {
+    return m_descriptorLayout;
+  }
+  VkDescriptorSet GetDescriptorSet() { return m_descriptorSet; }
+
+  uint32_t GetPushConstantSize() { return sizeof(PushConstantStruct); }
+  PushConstantStruct GetPushConstants() { return m_TimeConstants; }
 
   void AddTimeDelta(uint32_t millis) {
     millis += m_TimeConstants.time_millis;
@@ -129,3 +143,13 @@ class UniSceneRenderer {
 
   std::string GetShader(std::string shader);
 };
+
+template<typename T>
+std::shared_ptr<T> UniSceneRenderer::GetMaterialByID(
+    std::string materialID) {
+  if (m_materialInstances.find(materialID) == m_materialInstances.end()) {
+    auto mat = std::make_shared<T>(materialID);
+    RegisterMaterial(materialID, mat);
+  }
+  return std::dynamic_pointer_cast<T>(m_materialInstances.at(materialID));
+}

@@ -14,8 +14,8 @@ UniInput::~UniInput() {
 
 void UniInput::Initialize() {
 
-    auto height = UniEngine::GetInstance().height;
-    auto width = UniEngine::GetInstance().width;
+    auto height = UniEngine::GetInstance()->height;
+    auto width = UniEngine::GetInstance()->width;
 
 	m_InputManager.SetDisplaySize(width, height);
 	

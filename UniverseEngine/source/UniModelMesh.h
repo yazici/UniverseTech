@@ -11,6 +11,8 @@
 
 #include <stdlib.h>
 #include <fstream>
+#include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -21,16 +23,18 @@
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
-#include "../3dmaths.h"
+#include "3dmaths.h"
 
-#include "VulkanBuffer.hpp"
-#include "VulkanDevice.hpp"
+#include "vks/VulkanBuffer.hpp"
+#include "vks/VulkanDevice.hpp"
+
+#include "UniMaterial.h"
 
 #if defined(__ANDROID__)
 #include <android/asset_manager.h>
 #endif
 
-namespace vks {
+namespace uni {
 /** @brief Vertex layout components */
 typedef enum Component {
   VERTEX_COMPONENT_POSITION = 0x0,
@@ -103,10 +107,11 @@ struct ModelCreateInfo {
 
 struct Model {
   VkDevice device = nullptr;
-  vks::Buffer vertices;
-  vks::Buffer indices;
-  uint32_t indexCount = 0;
-  uint32_t vertexCount = 0;
+  std::map<uint32_t, vks::Buffer> m_vertices;
+  std::map<uint32_t, vks::Buffer> m_indices;
+  std::map<uint32_t, uint32_t> m_indexCount;
+  std::map<uint32_t, uint32_t> m_vertexCount;
+  std::map<std::string, std::vector<uint32_t>> m_meshesByMaterial;
 
   /** @brief Stores vertex and index base and counts for each part of a model */
   struct ModelPart {
@@ -131,11 +136,13 @@ struct Model {
   /** @brief Release all Vulkan resources of this model */
   void destroy() {
     assert(device);
-    vkDestroyBuffer(device, vertices.buffer, nullptr);
-    vkFreeMemory(device, vertices.memory, nullptr);
-    if (indices.buffer != VK_NULL_HANDLE) {
-      vkDestroyBuffer(device, indices.buffer, nullptr);
-      vkFreeMemory(device, indices.memory, nullptr);
+    for (auto kv : m_vertices) {
+      vkDestroyBuffer(device, kv.second.buffer, nullptr);
+      vkFreeMemory(device, kv.second.memory, nullptr);
+    }
+    for (auto kv : m_indices) {
+      vkDestroyBuffer(device, kv.second.buffer, nullptr);
+      vkFreeMemory(device, kv.second.memory, nullptr);
     }
   }
 
@@ -153,10 +160,11 @@ struct Model {
    * @param (Optional) flags ASSIMP model loading flags
    */
   bool loadFromFile(const std::string& filename,
-                    vks::VertexLayout layout,
-                    vks::ModelCreateInfo* createInfo,
+                    uni::VertexLayout layout,
+                    uni::ModelCreateInfo* createInfo,
                     vks::VulkanDevice* device,
                     VkQueue copyQueue,
+                    std::vector<std::string>& materialIDs,
                     const int flags = defaultFlags) {
     this->device = device->logicalDevice;
 
@@ -212,21 +220,31 @@ struct Model {
         center = createInfo->center;
       }
 
-      std::vector<float> vertexBuffer;
-      std::vector<uint32_t> indexBuffer;
-
-      vertexCount = 0;
-      indexCount = 0;
-
       // Load meshes
       for (unsigned int i = 0; i < pScene->mNumMeshes; i++) {
+        std::vector<float> vertexBuffer;
+        std::vector<uint32_t> indexBuffer;
+
         const aiMesh* paiMesh = pScene->mMeshes[i];
 
         parts[i] = {};
-        parts[i].vertexBase = vertexCount;
-        parts[i].indexBase = indexCount;
+        parts[i].vertexBase = 0;
+        parts[i].indexBase = 0;
 
-        vertexCount += pScene->mMeshes[i]->mNumVertices;
+        m_vertexCount.emplace(i, pScene->mMeshes[i]->mNumVertices);
+
+        if (paiMesh->mMaterialIndex > materialIDs.size()) {
+          std::ostringstream err;
+          err << "Cannot load material with ID" << paiMesh->mMaterialIndex
+              << " when there are only " << materialIDs.size() << " materials."
+              << std::endl;
+
+          throw std::runtime_error(err.str());
+        }
+
+        auto matName = materialIDs[paiMesh->mMaterialIndex - 1];
+
+        m_meshesByMaterial[matName].push_back(i);
 
         aiColor3D pColor(0.f, 0.f, 0.f);
         pScene->mMaterials[paiMesh->mMaterialIndex]->Get(
@@ -289,7 +307,8 @@ struct Model {
                 vertexBuffer.push_back(0.0f);
                 break;
               case VERTEX_COMPONENT_MATERIAL_ID:
-                vertexBuffer.push_back(static_cast<float>(paiMesh->mMaterialIndex));
+                vertexBuffer.push_back(
+                    static_cast<float>(paiMesh->mMaterialIndex));
             };
           }
 
@@ -306,74 +325,78 @@ struct Model {
 
         parts[i].vertexCount = paiMesh->mNumVertices;
 
-        uint32_t indexBase = static_cast<uint32_t>(indexBuffer.size());
         for (unsigned int j = 0; j < paiMesh->mNumFaces; j++) {
           const aiFace& Face = paiMesh->mFaces[j];
           if (Face.mNumIndices != 3)
             continue;
-          indexBuffer.push_back(indexBase + Face.mIndices[0]);
-          indexBuffer.push_back(indexBase + Face.mIndices[1]);
-          indexBuffer.push_back(indexBase + Face.mIndices[2]);
+          indexBuffer.push_back(Face.mIndices[0]);
+          indexBuffer.push_back(Face.mIndices[1]);
+          indexBuffer.push_back(Face.mIndices[2]);
           parts[i].indexCount += 3;
-          indexCount += 3;
         }
+
+        m_indexCount.emplace(i, parts[i].indexCount);
+
+        uint32_t vBufferSize =
+            static_cast<uint32_t>(vertexBuffer.size()) * sizeof(float);
+        uint32_t iBufferSize =
+            static_cast<uint32_t>(indexBuffer.size()) * sizeof(uint32_t);
+
+        // Use staging buffer to move vertex and index buffer to device local
+        // memory Create staging buffers
+        vks::Buffer vertexStaging, indexStaging;
+
+        // Vertex buffer
+        VK_CHECK_RESULT(device->createBuffer(
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            &vertexStaging, vBufferSize, vertexBuffer.data()));
+
+        // Index buffer
+        VK_CHECK_RESULT(device->createBuffer(
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            &indexStaging, iBufferSize, indexBuffer.data()));
+
+        m_vertices.emplace(i, vks::Buffer());
+        m_indices.emplace(i, vks::Buffer());
+
+        // Create device local target buffers
+        // Vertex buffer
+        VK_CHECK_RESULT(device->createBuffer(
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+                VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &m_vertices[i], vBufferSize));
+
+        // Index buffer
+        VK_CHECK_RESULT(device->createBuffer(
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &m_indices[i], iBufferSize));
+
+        // Copy from staging buffers
+        VkCommandBuffer copyCmd =
+            device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+        VkBufferCopy copyRegion{};
+
+        copyRegion.size = m_vertices[i].size;
+        vkCmdCopyBuffer(copyCmd, vertexStaging.buffer, m_vertices[i].buffer, 1,
+                        &copyRegion);
+
+        copyRegion.size = m_indices[i].size;
+        vkCmdCopyBuffer(copyCmd, indexStaging.buffer, m_indices[i].buffer, 1,
+                        &copyRegion);
+
+        device->flushCommandBuffer(copyCmd, copyQueue);
+
+        // Destroy staging resources
+        vkDestroyBuffer(device->logicalDevice, vertexStaging.buffer, nullptr);
+        vkFreeMemory(device->logicalDevice, vertexStaging.memory, nullptr);
+        vkDestroyBuffer(device->logicalDevice, indexStaging.buffer, nullptr);
+        vkFreeMemory(device->logicalDevice, indexStaging.memory, nullptr);
       }
-
-      uint32_t vBufferSize =
-          static_cast<uint32_t>(vertexBuffer.size()) * sizeof(float);
-      uint32_t iBufferSize =
-          static_cast<uint32_t>(indexBuffer.size()) * sizeof(uint32_t);
-
-      // Use staging buffer to move vertex and index buffer to device local
-      // memory Create staging buffers
-      vks::Buffer vertexStaging, indexStaging;
-
-      // Vertex buffer
-      VK_CHECK_RESULT(device->createBuffer(
-          VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-              VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-          &vertexStaging, vBufferSize, vertexBuffer.data()));
-
-      // Index buffer
-      VK_CHECK_RESULT(
-          device->createBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                               &indexStaging, iBufferSize, indexBuffer.data()));
-
-      // Create device local target buffers
-      // Vertex buffer
-      VK_CHECK_RESULT(device->createBuffer(
-          VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &vertices, vBufferSize));
-
-      // Index buffer
-      VK_CHECK_RESULT(device->createBuffer(
-          VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &indices, iBufferSize));
-
-      // Copy from staging buffers
-      VkCommandBuffer copyCmd =
-          device->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-      VkBufferCopy copyRegion{};
-
-      copyRegion.size = vertices.size;
-      vkCmdCopyBuffer(copyCmd, vertexStaging.buffer, vertices.buffer, 1,
-                      &copyRegion);
-
-      copyRegion.size = indices.size;
-      vkCmdCopyBuffer(copyCmd, indexStaging.buffer, indices.buffer, 1,
-                      &copyRegion);
-
-      device->flushCommandBuffer(copyCmd, copyQueue);
-
-      // Destroy staging resources
-      vkDestroyBuffer(device->logicalDevice, vertexStaging.buffer, nullptr);
-      vkFreeMemory(device->logicalDevice, vertexStaging.memory, nullptr);
-      vkDestroyBuffer(device->logicalDevice, indexStaging.buffer, nullptr);
-      vkFreeMemory(device->logicalDevice, indexStaging.memory, nullptr);
 
       return true;
     } else {
@@ -400,14 +423,24 @@ struct Model {
    * @param (Optional) flags ASSIMP model loading flags
    */
   bool loadFromFile(const std::string& filename,
-                    vks::VertexLayout layout,
+                    uni::VertexLayout layout,
                     float scale,
                     vks::VulkanDevice* device,
                     VkQueue copyQueue,
+                    std::vector<std::string>& materialIDs,
                     const int flags = defaultFlags) {
-    vks::ModelCreateInfo modelCreateInfo(scale, 1.0f, 0.0f);
+    uni::ModelCreateInfo modelCreateInfo(scale, 1.0f, 0.0f);
     return loadFromFile(filename, layout, &modelCreateInfo, device, copyQueue,
-                        flags);
+                        materialIDs, flags);
+  }
+
+  std::vector<uint32_t> GetMeshIndicesByMaterialName(std::string material) {
+    if (m_meshesByMaterial.find(material) != m_meshesByMaterial.end())
+      return m_meshesByMaterial.at(material);
+    else {
+      std::cout << "Cannot find meshes for material " << material << std::endl;
+      throw std::runtime_error("Missing mesh materials!");
+    }
   }
 };
-};  // namespace vks
+};  // namespace uni

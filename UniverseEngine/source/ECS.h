@@ -1227,7 +1227,7 @@ namespace ECS
 			Internal::ComponentContainer<T>* container = std::allocator_traits<ComponentAllocator>::allocate(alloc, 1);
 			std::allocator_traits<ComponentAllocator>::construct(alloc, container, T(args...));
 
-			components.insert({ getTypeIndex<T>(), container });
+			components.emplace(getTypeIndex<T>(), container);
 
 			auto handle = ComponentHandle<T>(&container->data);
 			world->emit<Events::OnComponentAssigned<T>>({ this, handle });
