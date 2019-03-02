@@ -21,13 +21,16 @@ void AudioSystem::receive(ECS::World* world, const LevelStartEvent& event) {
 
 void AudioSystem::tick(ECS::World* world, float deltaTime) {
   
-  auto mat = UniEngine::GetInstance()->SceneManager()->CurrentCamera()->matrices.view;
+  auto cam = UniEngine::GetInstance()->SceneManager()->CurrentScene()->GetCameraObject();
+  auto transform = cam->GetComponent<TransformComponent>();
+  auto physics = cam->GetComponent<PhysicsComponent>();
 
-  glm::vec3 pos = mat[3];
-  glm::vec3 up = mat[0];
-  glm::vec3 forward = mat[2];
+  glm::vec3 pos = transform->GetPosition();
+  glm::vec3 up = transform->TransformLocalDirectionToWorldSpace({ 0, -1, 0 });
+  glm::vec3 forward = transform->TransformLocalDirectionToWorldSpace({ 0, 0, 1 });
+  glm::vec3 velocity = physics->m_Velocity;
 
-  UniEngine::GetInstance()->AudioManager()->Set3dListenerAndOrientation(pos, up, forward);
+  UniEngine::GetInstance()->AudioManager()->Set3dListenerAndOrientation(pos, up, forward, velocity);
 
   std::cout << "Setting audio listener at " << glm::to_string<glm::vec3>(pos) << std::endl;
 

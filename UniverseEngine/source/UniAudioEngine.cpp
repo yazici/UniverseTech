@@ -82,7 +82,7 @@ void UniAudioEngine::Set3dListenerAndOrientation(const glm::vec3 & vPos, const g
   FMOD_VECTOR position = VectorToFmod(vPos);
   FMOD_VECTOR up = VectorToFmod(vUp);
   FMOD_VECTOR forward = VectorToFmod(vForward);
-  FMOD_VECTOR velocity = VectorToFmod({ 0, 0, 0 });
+  FMOD_VECTOR velocity = VectorToFmod(vVelocity);
   UniAudioEngine::ErrorCheck(GetImplementation()->mpSystem->set3DListenerAttributes(0, &position, &velocity, &forward, &up));
 }
 

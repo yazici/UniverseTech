@@ -81,7 +81,7 @@
                 "rotation": [ 0.0, 90.0, 0.0 ],
                 "createScale": [ 0.02, 0.02, 0.02 ],
                 "createUVScale": [ 1, 1 ],
-                "enabled": false,
+                "enabled": true,
                 "components": {
                     "movement": {
                         "rotation": [ 0, -30, 0 ]
