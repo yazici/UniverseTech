@@ -161,9 +161,11 @@ void UniScene::Load(std::string filename) {
       }
 
       auto fname = getAssetPath() + static_cast<std::string>(so.at("filename"));
+      auto is3d = static_cast<bool>(so.at("3d"));
+      auto isLooping = static_cast<bool>(so.at("looping"));
 
       UniEngine::GetInstance()->AudioManager()->LoadSound(
-          fname, static_cast<bool>(so.at("3d")), true, true);
+          fname, is3d, isLooping, false);
 
       audio->AddComponent<AudioComponent>(fname, so.at("3d"));
     }
