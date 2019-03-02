@@ -1,6 +1,7 @@
 #include "UniSceneManager.h"
 #include "UniSceneRenderer.h"
 #include "UniEngine.h"
+#include "systems/Systems.h"
 
 std::vector<std::string> scenelist = {"testlevel", "testlevel2"};
 
@@ -10,7 +11,6 @@ void UniSceneManager::Initialise() {
   m_CurrentScene->Initialize();
 
   m_renderer = UniEngine::GetInstance()->SceneRenderer();
-
 }
 
 void UniSceneManager::LoadScene(std::string sceneName) {
@@ -18,9 +18,10 @@ void UniSceneManager::LoadScene(std::string sceneName) {
   LoadAssets(sceneName);
   std::cout << "Finished loading new scene." << std::endl;
 
+  EmitEvent<LevelStartEvent>({true});
+
   m_UpdateScene = false;
   m_NextScene = "";
-
 }
 
 void UniSceneManager::UnloadCurrentScene() {
@@ -45,9 +46,7 @@ void UniSceneManager::CycleScenes() {
 
   m_NextScene = scenelist.at(m_CurrentSceneIdx);
   m_UpdateScene = true;
-
 }
-
 
 void UniSceneManager::Shutdown() {
   UnloadCurrentScene();
@@ -60,9 +59,8 @@ std::shared_ptr<UniScene> UniSceneManager::CurrentScene() {
 void UniSceneManager::Tick(float frameTimer) {
   CurrentScene()->Tick(frameTimer);
   m_renderer->Tick(frameTimer);
-  
-}
 
+}
 
 bool UniSceneManager::CheckNewScene() {
   if (m_UpdateScene && !m_NextScene.empty()) {

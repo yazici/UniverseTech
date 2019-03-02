@@ -17,3 +17,7 @@ struct PlanetZEvent {
 struct RenderEvent {
   VkCommandBuffer& cmdBuffer;
 };
+
+struct LevelStartEvent {
+  bool isStarted;
+};

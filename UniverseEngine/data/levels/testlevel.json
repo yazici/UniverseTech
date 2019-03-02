@@ -1,10 +1,10 @@
 ﻿{
-    "$schema":  "levelschema.json",
+    "$schema": "levelschema.json",
     "level": {
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
-            "position": [ 0, 0, -10 ],
+            "position": [ 0, 0, 0 ],
             "rotation": [ 0, 0, 0 ]
         },
         "materials": [
@@ -45,12 +45,22 @@
         ],
         "sceneObjects": [
             {
+                "type": "audio",
+                "name": "spacewind",
+                "position": [ 0.0, 0.0, 0.0 ],
+                "rotation": [ 0.0, 0.0, 0.0 ],
+                "enabled": true,
+                "filename": "audio/engine_loop.wav",
+                "3d": true,
+                "looping":  true
+            },
+            {
                 "type": "model",
                 "name": "spaceship 01",
                 "mesh": "models/spaceship01/spaceship.obj",
                 "materialID": "spaceship01 material1",
                 "materials": [ "spaceship01 material1", "spaceship01 material2" ],
-                "position": [ 10.0, 0.0, 0.0 ],
+                "position": [ 0.0, 0.0, 0.0 ],
                 "rotation": [ 0.0, 0.0, 0.0 ],
                 "createScale": [ 1, 1, 1 ],
                 "createUVScale": [ 1, 1 ],

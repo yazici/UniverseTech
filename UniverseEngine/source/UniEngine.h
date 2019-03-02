@@ -25,6 +25,7 @@
 class UniSceneManager;
 class UniSceneRenderer;
 class UniInput;
+class UniAudioEngine;
 
 class UniEngine final : public VulkanExampleBase {
  private:
@@ -62,6 +63,7 @@ class UniEngine final : public VulkanExampleBase {
   std::shared_ptr<UniSceneManager> m_SceneManager;
   std::shared_ptr<UniInput> m_InputManager;
   std::shared_ptr<UniSceneRenderer> m_SceneRenderer;
+  std::shared_ptr<UniAudioEngine> m_AudioManager;
 
   bool m_CamPaused = false;
   float m_PlanetZOffset = 0;
@@ -71,6 +73,7 @@ class UniEngine final : public VulkanExampleBase {
   std::shared_ptr<UniSceneRenderer> SceneRenderer() { return m_SceneRenderer; }
   void windowResized() override;
   std::shared_ptr<UniInput> GetInputManager() { return m_InputManager; }
+  std::shared_ptr<UniAudioEngine> AudioManager() { return m_AudioManager; }
   void SetupInput();
 
   void handleWMMessages(MSG& msg) override;

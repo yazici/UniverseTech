@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include "Materials.h"
 #include "UniEngine.h"
+#include "UniAudioEngine.h"
 #include "UniSceneRenderer.h"
 #include "components/Components.h"
 #include "systems/Systems.h"
@@ -13,8 +14,7 @@ using json = nlohmann::json;
 
 UniScene::UniScene() {}
 
-UniScene::~UniScene() {
-}
+UniScene::~UniScene() {}
 
 void UniScene::Initialize() {
   auto engine = UniEngine::GetInstance();
@@ -26,6 +26,7 @@ void UniScene::Initialize() {
   m_World->registerSystem(new GravitySystem());
   m_World->registerSystem(new PhysicsSystem());
   m_World->registerSystem(new ModelRenderSystem());
+  m_World->registerSystem(new AudioSystem());
 
   m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
   m_CurrentCamera->AddComponent<CameraComponent>(
@@ -143,6 +144,32 @@ void UniScene::Load(std::string filename) {
     std::string soType = so.at("type");
     std::string soName = so.at("name");
 
+    if (soType == "audio") {
+      std::cout << "Loading audio emitter: " << soName << std::endl;
+
+      glm::vec3 lpos;
+      if (so.find("position") != so.end()) {
+        auto pos = so.at("position");
+        lpos = glm::vec3(pos[0], pos[1], pos[2]);
+      }
+
+      auto audio = Make<UniSceneObject>(lpos, soName);
+
+      if (so.find("rotation") != so.end()) {
+        auto rot = so.at("rotation");
+        audio->GetTransform()->SetRotation({rot[0], rot[1], rot[2]});
+      }
+
+      auto fname = getAssetPath() + static_cast<std::string>(so.at("filename"));
+      auto is3d = static_cast<bool>(so.at("3d"));
+      auto isLooping = static_cast<bool>(so.at("looping"));
+
+      UniEngine::GetInstance()->AudioManager()->LoadSound(
+          fname, is3d, isLooping, false);
+
+      audio->AddComponent<AudioComponent>(fname, so.at("3d"));
+    }
+
     if (soType == "model") {
       if (so.find("enabled") != so.end()) {
         if (so.at("enabled") == false) {
@@ -230,7 +257,6 @@ void UniScene::Load(std::string filename) {
 
         modelMat->RegisterModel(model);
       }
-
     }
 
     // TODO: render something to debug lighting positions

@@ -2,6 +2,7 @@
 #include "UniEngine.h"
 #include <assert.h>
 #include <algorithm>
+#include "UniAudioEngine.h"
 #include "UniInput.h"
 #include "UniMaterial.h"
 #include "UniSceneManager.h"
@@ -12,42 +13,36 @@
 
 #define ENABLE_VALIDATION true
 
-
-
 void UniEngine::Shutdown() {
   std::cout << "Shutting down..." << std::endl;
 
   SceneManager()->Shutdown();
-  
-  // Clean up used Vulkan resources
-  // Note : Inherited destructor cleans up resources stored in base class
-
   SceneRenderer()->ShutDown();
+  AudioManager()->Shutdown();
 
   m_SceneManager.reset();
   m_SceneRenderer.reset();
   m_InputManager.reset();
-
+  m_AudioManager.reset();
 }
 
 UniEngine::~UniEngine() {
   // Shutdown();
   std::cout << "Engine " << m_ID << " is being deleted!" << std::endl;
-
 }
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
   m_SceneManager = std::make_shared<UniSceneManager>();
   m_SceneRenderer = std::make_shared<UniSceneRenderer>();
+  m_AudioManager = std::make_shared<UniAudioEngine>();
 
   title = "Universe Tech Test";
   paused = false;
   settings.overlay = true;
 
   m_ID = GetTickCount();
-  
-  std::cout << "Created engine instance " << m_ID << std::endl;
 
+  std::cout << "Created engine instance " << m_ID << std::endl;
 }
 
 std::shared_ptr<UniEngine> UniEngine::GetInstance() {
@@ -59,7 +54,6 @@ void UniEngine::Delete() {
   std::cout << "UniEngine shared pointer has " << GetInstance().use_count()
             << "uses still left in shutdown." << std::endl;
   GetInstance().reset();
-  
 }
 
 // Enable physical device features required for this example
@@ -97,13 +91,13 @@ void UniEngine::getEnabledFeatures() {
                           VK_ERROR_FEATURE_NOT_PRESENT);
   }
 
-  //if (deviceFeatures.shaderSampledImageArrayDynamicIndexing) {
+  // if (deviceFeatures.shaderSampledImageArrayDynamicIndexing) {
   //  enabledFeatures.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
   //} else {
-  //  vks::tools::exitFatal("Selected GPU does not support dynamic texture indexing!",
+  //  vks::tools::exitFatal("Selected GPU does not support dynamic texture
+  //  indexing!",
   //                        VK_ERROR_FEATURE_NOT_PRESENT);
   //}
-
 }
 
 size_t UniEngine::getDynamicAlignment() {
@@ -119,7 +113,6 @@ size_t UniEngine::getDynamicAlignment() {
   return dynamicAlignment;
 }
 
-
 void UniEngine::prepare() {
   std::cout << "Initialize engine..." << std::endl;
 
@@ -132,10 +125,14 @@ void UniEngine::prepare() {
   std::cout << "Initialize base engine..." << std::endl;
   VulkanExampleBase::prepare();
 
+  std::cout << "Create an audio manager..." << std::endl;
+  AudioManager()->Init();
+
   std::cout << "Load level data..." << std::endl;
   SceneManager()->LoadScene("testlevel");
 
   SceneRenderer()->Initialise();
+
 
   prepared = true;
   std::cout << "Initialization complete." << std::endl;
@@ -151,53 +148,40 @@ void UniEngine::SetupInput() {
                             [this]() { paused = !paused; });
 
   m_InputManager->OnRelease(UniInput::ButtonExperiment, [this]() {
-    SceneManager()->EmitEvent<InputEvent>(
-        {UniInput::ButtonExperiment, 1.0f});
+    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonExperiment, 1.0f});
   });
 
   m_InputManager->OnRelease(UniInput::ButtonBoostUp, [this]() {
-    SceneManager()->EmitEvent<InputEvent>(
-        {UniInput::ButtonBoostUp, 1.0f});
+    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonBoostUp, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonBoostDown, [this]() {
-    SceneManager()->EmitEvent<InputEvent>(
-        {UniInput::ButtonBoostDown, 1.0f});
+    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonBoostDown, 1.0f});
   });
 
   m_InputManager->OnPress(UniInput::ButtonRollLeft, [this]() {
-    SceneManager()->EmitEvent<InputEvent>(
-        {UniInput::ButtonRollLeft, 1.0f});
+    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonRollLeft, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonRollLeft, [this]() {
-    SceneManager()->EmitEvent<InputEvent>(
-        {UniInput::ButtonRollLeft, 0.0f});
+    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonRollLeft, 0.0f});
   });
   m_InputManager->OnPress(UniInput::ButtonRollRight, [this]() {
-    SceneManager()->EmitEvent<InputEvent>(
-        {UniInput::ButtonRollRight, 1.0f});
+    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonRollRight, 1.0f});
   });
   m_InputManager->OnRelease(UniInput::ButtonRollRight, [this]() {
-    SceneManager()->EmitEvent<InputEvent>(
-        {UniInput::ButtonRollRight, 0.0f});
+    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonRollRight, 0.0f});
   });
 
-  m_InputManager->RegisterFloatCallback(UniInput::AxisYaw, [this](
-                                                               float oldValue,
-                                                               float newValue) {
-        SceneManager()->EmitEvent<InputEvent>(
-            {UniInput::AxisYaw, newValue});
-  });
-  m_InputManager->RegisterFloatCallback(UniInput::AxisPitch, [this](
-                                                                 float oldValue,
-                                                                 float
-                                                                     newValue) {
-        SceneManager()->EmitEvent<InputEvent>(
-            {UniInput::AxisPitch, newValue});
-  });
+  m_InputManager->RegisterFloatCallback(
+      UniInput::AxisYaw, [this](float oldValue, float newValue) {
+        SceneManager()->EmitEvent<InputEvent>({UniInput::AxisYaw, newValue});
+      });
+  m_InputManager->RegisterFloatCallback(
+      UniInput::AxisPitch, [this](float oldValue, float newValue) {
+        SceneManager()->EmitEvent<InputEvent>({UniInput::AxisPitch, newValue});
+      });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisThrust, [this](float oldValue, float newValue) {
-        SceneManager()->EmitEvent<InputEvent>(
-            {UniInput::AxisThrust, newValue});
+        SceneManager()->EmitEvent<InputEvent>({UniInput::AxisThrust, newValue});
       });
   m_InputManager->RegisterFloatCallback(
       UniInput::AxisReverse, [this](float oldValue, float newValue) {
@@ -221,16 +205,15 @@ void UniEngine::SetupInput() {
       });
 }
 
-
 void UniEngine::draw() {
   VulkanExampleBase::prepareFrame();
 
   // Scene rendering
   // Submit work
-  
+
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = &drawCmdBuffers[currentBuffer];
-  
+
   VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
   VulkanExampleBase::submitFrame();
@@ -251,12 +234,10 @@ void UniEngine::render() {
     SceneManager()->Tick(frameTimer);
   }
 
-  if(SceneManager()->CheckNewScene()){
+  if (SceneManager()->CheckNewScene()) {
     m_InputManager.reset();
     SetupInput();
   }
-
-
 }
 
 void UniEngine::viewChanged() {
@@ -264,8 +245,7 @@ void UniEngine::viewChanged() {
 }
 
 void UniEngine::windowResized() {
-  SceneManager()->CurrentCamera()->aspect =
-      (float)width / (float)height;
+  SceneManager()->CurrentCamera()->aspect = (float)width / (float)height;
   SceneManager()->CurrentCamera()->CalculateProjection();
 }
 
@@ -275,8 +255,7 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
       ToggleWireframe();
     }*/
     if (overlay->checkBox("Pause camera position", &m_CamPaused)) {
-      SceneManager()->EmitEvent<CameraPauseEvent>(
-          {m_CamPaused});
+      SceneManager()->EmitEvent<CameraPauseEvent>({m_CamPaused});
     }
 
     SceneManager()
@@ -340,24 +319,25 @@ void UniEngine::updateOverlay() {
 
   ImGui::End();
 
-//  ImGui::SetNextWindowPos(ImVec2(width - 170.f, 10.f));
-//  ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiSetCond_FirstUseEver);
-//  ImGui::Begin("Current position:", nullptr,
-//               ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize |
-//                   ImGuiWindowFlags_NoMove);
-//
-//#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-//  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,
-//                      ImVec2(0.0f, 5.0f * UIOverlay->scale));
-//#endif
-//  /*ImGui::PushItemWidth(110.0f * UIOverlay->scale);
-//  OnUpdateUserUIOverlay(UIOverlay);
-//  ImGui::PopItemWidth();*/
-//#if defined(VK_USE_PLATFORM_ANDROID_KHR)
-//  ImGui::PopStyleVar();
-//#endif
-//
-//  ImGui::End();
+  //  ImGui::SetNextWindowPos(ImVec2(width - 170.f, 10.f));
+  //  ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiSetCond_FirstUseEver);
+  //  ImGui::Begin("Current position:", nullptr,
+  //               ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize
+  //               |
+  //                   ImGuiWindowFlags_NoMove);
+  //
+  //#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+  //  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,
+  //                      ImVec2(0.0f, 5.0f * UIOverlay->scale));
+  //#endif
+  //  /*ImGui::PushItemWidth(110.0f * UIOverlay->scale);
+  //  OnUpdateUserUIOverlay(UIOverlay);
+  //  ImGui::PopItemWidth();*/
+  //#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+  //  ImGui::PopStyleVar();
+  //#endif
+  //
+  //  ImGui::End();
 
   ImGui::PopStyleVar();
   ImGui::Render();
@@ -370,7 +350,6 @@ void UniEngine::updateOverlay() {
   }
 #endif
 }
-
 
 void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
   for (const auto& so : SceneManager()->CurrentScene()->m_SceneObjects) {
@@ -390,4 +369,3 @@ void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
     }
   }
 }
-

@@ -2,29 +2,27 @@
 
 #include "../ECS.h"
 #include "../components/Components.h"
+#include "AudioSystem.h"
 #include "GravitySystem.h"
+#include "ModelRenderSystem.h"
 #include "PhysicsSystem.h"
 #include "PlanetRenderSystem.h"
 #include "PlayerControlSystem.h"
-#include "ModelRenderSystem.h"
 
 class MovementSystem : public ECS::EntitySystem {
-public:
-	MovementSystem() {
-	}
+ public:
+  MovementSystem() {}
 
-	virtual ~MovementSystem() {}
+  virtual ~MovementSystem() {}
 
-	virtual void tick(ECS::World* world, float deltaTime) override;
-
+  virtual void tick(ECS::World* world, float deltaTime) override;
 };
 
 class CameraSystem : public ECS::EntitySystem {
-public:
-	CameraSystem() {
-	}
+ public:
+  CameraSystem() {}
 
-	virtual ~CameraSystem() {}
+  virtual ~CameraSystem() {}
 
-	virtual void tick(ECS::World* world, float deltaTime) override;
+  virtual void tick(ECS::World* world, float deltaTime) override;
 };

@@ -28,6 +28,8 @@ struct CameraComponent {
 
   CameraType cameraType = CAMERA_FIXED;
 
+  ECS::ComponentHandle<TransformComponent> m_Transform;
+
   CameraComponent(ECS::ComponentHandle<TransformComponent> transform,
                   float ratio = 1.77778f,
                   float verticalFOV = 50.f,
@@ -38,9 +40,12 @@ struct CameraComponent {
     fov = verticalFOV;
     nearClip = nClip;
     farClip = fClip;
+    m_Transform = transform;
     CalculateProjection();
     CalculateView(transform);
   }
+
+  ECS::ComponentHandle<TransformComponent> GetTransform() { return m_Transform; }
 
   void UpdateTarget(glm::vec3 t) { target = t; }
 
