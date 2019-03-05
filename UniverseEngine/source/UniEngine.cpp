@@ -7,6 +7,7 @@
 #include "UniMaterial.h"
 #include "UniSceneManager.h"
 #include "UniSceneRenderer.h"
+#include "UniAssetManager.h"
 #include "components/Components.h"
 #include "systems/events.h"
 #include "vks/VulkanTools.h"
@@ -19,11 +20,13 @@ void UniEngine::Shutdown() {
   SceneManager()->Shutdown();
   SceneRenderer()->ShutDown();
   AudioManager()->Shutdown();
+  AssetManager()->Shutdown();
 
   m_SceneManager.reset();
   m_SceneRenderer.reset();
   m_InputManager.reset();
   m_AudioManager.reset();
+  m_AssetManager.reset();
 }
 
 UniEngine::~UniEngine() {
@@ -32,6 +35,7 @@ UniEngine::~UniEngine() {
 }
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
+  m_AssetManager = std::make_shared<UniAssetManager>(getAssetPath() + "assets");
   m_SceneManager = std::make_shared<UniSceneManager>();
   m_SceneRenderer = std::make_shared<UniSceneRenderer>();
   m_AudioManager = std::make_shared<UniAudioEngine>();
