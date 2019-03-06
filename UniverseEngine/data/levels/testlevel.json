@@ -12,7 +12,7 @@
                 "name": "Space Ship 1",
                 "position": [ 0, 0, 10 ],
                 "rotation": [ 0, 0, 0 ],
-                "enabled":  true,
+                "enabled": true,
                 "components": [
                     {
                         "type": "model",
@@ -25,6 +25,22 @@
                     {
                         "type": "movement",
                         "rotation": [ 0, 30, 0 ]
+                    }
+                ]
+            },
+            {
+                "name": "Space Ship 2",
+                "position": [ 20, 0, 10 ],
+                "rotation": [ 0, 0, 0 ],
+                "enabled": true,
+                "components": [
+                    {
+                        "type": "model",
+                        "asset": "/models/spaceship02/Spaceship.obj"
+                    },
+                    {
+                        "type": "movement",
+                        "rotation": [ 0, -30, 0 ]
                     }
                 ]
             },
