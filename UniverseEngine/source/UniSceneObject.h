@@ -37,7 +37,7 @@ class UniSceneObject {
   void SetRenderIndex(uint32_t index) { m_renderIndex = index; }
   uint32_t GetRenderIndex() { return m_renderIndex; }
 
-  void Destroy();
+  void Destroy() {};
 
  protected:
   UniScene* m_Scene;

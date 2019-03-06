@@ -17,10 +17,11 @@
 void UniEngine::Shutdown() {
   std::cout << "Shutting down..." << std::endl;
 
+  AssetManager()->Shutdown();
   SceneManager()->Shutdown();
   SceneRenderer()->ShutDown();
   AudioManager()->Shutdown();
-  AssetManager()->Shutdown();
+
 
   m_SceneManager.reset();
   m_SceneRenderer.reset();

@@ -35,6 +35,10 @@ class UniAssetTexture2D : public UniAsset {
 public:
   UniAssetTexture2D(std::string t, std::string p) : UniAsset(t, p) {}
   std::shared_ptr<vks::Texture2D> m_texture;
+
+  void Destroy() override {
+    m_texture->destroy();
+  }
 };
 
 
@@ -43,6 +47,10 @@ public:
   UniAssetModel(std::string t, std::string p) : UniAsset(t, p) {}
   std::shared_ptr<uni::Model> m_model;
   std::vector<std::string> m_materials;
+
+  void Destroy() override {
+    m_model->destroy();
+  }
 };
 
 
@@ -50,6 +58,10 @@ class UniAssetMaterial : public UniAsset {
 public:
   UniAssetMaterial(std::string t, std::string p) : UniAsset(t, p) {}
   std::shared_ptr<ModelMaterial> m_material;
+
+  void Destroy() override {
+    m_material->Destroy();
+  }
 };
 
 
@@ -57,4 +69,6 @@ public:
 class UniAssetAudio : public UniAsset {
 public:
   UniAssetAudio(std::string t, std::string p) : UniAsset(t, p) {}
+
+  void Destroy() override;
 };

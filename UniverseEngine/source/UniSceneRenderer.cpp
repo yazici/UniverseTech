@@ -53,10 +53,6 @@ void UniSceneRenderer::Initialise() {
 
 void UniSceneRenderer::ShutDown() {
 
-  for (const auto& mat : m_materialInstances) {
-    mat.second->Destroy();
-  }
-
   auto engine = UniEngine::GetInstance();
   auto device = engine->GetDevice();
 
