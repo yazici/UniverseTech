@@ -52,7 +52,7 @@ public:
   void Set3dListenerAndOrientation(const glm::vec3& vPos, const glm::vec3& vUp, const glm::vec3& vForward, const glm::vec3& vVelocity = { 0, 0, 0 });
   int PlaySoundFile(const string& strSoundName,
     const glm::vec3& vPosition = { 0, 0, 0 },
-    float fVolumedB = 0.0f);
+    float fVolumePercent = 50.0f);
   void PlayEvent(const string& strEventName);
   void StopChannel(int nChannelId);
   void StopEvent(const string& strEventName, bool bImmediate = false);

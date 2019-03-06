@@ -81,7 +81,11 @@ void UniScene::Load(std::string filename) {
         // audio assets are not loaded in the same way as other types. the filename is
         // registered with the audio engine and just needs to be referenced for playback
         std::cout << "Assigning audio component: " << component.at("asset") << std::endl;
-        sceneObject->AddComponent<AudioComponent>(static_cast<std::string>(component.at("asset")));
+        auto audio = sceneObject->AddComponent<AudioComponent>(static_cast<std::string>(component.at("asset")));
+        if (component.find("volume") != component.end()) {
+          audio->m_volume = component.at("volume");
+
+        }
       }
 
       // MOVEMENT

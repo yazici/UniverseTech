@@ -69,6 +69,5 @@ public:
 class UniAssetAudio : public UniAsset {
 public:
   UniAssetAudio(std::string t, std::string p) : UniAsset(t, p) {}
-
   void Destroy() override;
 };

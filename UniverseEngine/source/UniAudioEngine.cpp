@@ -89,7 +89,7 @@ void UniAudioEngine::Set3dListenerAndOrientation(const glm::vec3 & vPos, const g
 
 int UniAudioEngine::PlaySoundFile(const string & strSoundName,
   const glm::vec3 & vPosition,
-  float fVolumedB) {
+  float fVolumePercent) {
   int nChannelId = GetImplementation()->mnNextChannelId++;
   auto tFoundIt = GetImplementation()->mSounds.find(strSoundName);
   if (tFoundIt == GetImplementation()->mSounds.end()) {
@@ -109,7 +109,7 @@ int UniAudioEngine::PlaySoundFile(const string & strSoundName,
       FMOD_VECTOR position = VectorToFmod(vPosition);
       UniAudioEngine::ErrorCheck(pChannel->set3DAttributes(&position, nullptr));
     }
-    UniAudioEngine::ErrorCheck(pChannel->setVolume(dbToVolume(fVolumedB)));
+    UniAudioEngine::ErrorCheck(pChannel->setVolume(fVolumePercent));
     UniAudioEngine::ErrorCheck(pChannel->setPaused(false));
     GetImplementation()->mChannels[nChannelId] = pChannel;
   }

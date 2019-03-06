@@ -12,7 +12,7 @@ void AudioSystem::receive(ECS::World* world, const LevelStartEvent& event) {
       [&](ECS::Entity* ent, ECS::ComponentHandle<AudioComponent> audio,
           ECS::ComponentHandle<TransformComponent> transform) {
         UniEngine::GetInstance()->AudioManager()->PlaySoundFile(
-            audio->m_filename, transform->GetPosition());
+            audio->m_filename, transform->GetPosition(), audio->m_volume);
 
         std::cout << "Playing audio: " << audio->m_filename << " at " << glm::to_string<glm::vec3>(transform->GetPosition()) << std::endl;
 

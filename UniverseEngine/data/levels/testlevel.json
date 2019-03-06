@@ -20,7 +20,8 @@
                     },
                     {
                         "type": "audio",
-                        "asset": "/audio/spacewind"
+                        "asset": "/audio/spacewind",
+                        "volume": 70
                     },
                     {
                         "type": "movement",
