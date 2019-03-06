@@ -1,125 +1,80 @@
 ﻿{
-    "$schema": "levelschema.json",
+    "_$schema": "levelschema.json",
     "level": {
         "name": "Test Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
-            "position": [ 0, 0, 0 ],
+            "position": [ 0, 0, -20 ],
             "rotation": [ 0, 0, 0 ]
         },
-        "materials": [
-            {
-                "type": "model material",
-                "name": "spaceship01 material1",
-                "colour": [ 0.560, 0.570, 0.580, 1.0 ],
-                "metallic": 1.0,
-                "roughness": 0.75,
-                "textureMap": "models/spaceship01/None_Base_Color.png",
-                "normalMap": "models/spaceship01/None_Normal_DirectX.png",
-                "roughnessMap": "models/spaceship01/None_Roughness.png",
-                "emissiveMap": "models/spaceship01/None_Emissive.png",
-                "metallicMap": "models/spaceship01/None_Metallic.png"
-            },
-            {
-                "type": "model material",
-                "name": "spaceship01 material2",
-                "colour": [ 0.560, 0.570, 0.580, 1.0 ],
-                "metallic": 1.0,
-                "roughness": 0.75,
-                "textureMap": "models/spaceship01/None.001_Base_Color.png",
-                "normalMap": "models/spaceship01/None.001_Normal_DirectX.png",
-                "roughnessMap": "models/spaceship01/None.001_Roughness.png",
-                "metallicMap": "models/spaceship01/None.001_Metallic.png"
-            },
-            {
-                "type": "model material",
-                "name": "spaceship02 material",
-                "colour": [ 0.560, 0.570, 0.580, 1.0 ],
-                "metallic": 1.0,
-                "roughness": 0.75,
-                "textureMap": "models/spaceship02/Spaceship_BaseColor.png",
-                "normalMap": "models/spaceship02/Spaceship_Normal8.png",
-                "roughnessMap": "models/spaceship02/Spaceship_Roughness.png",
-                "metallicMap": "models/spaceship02/Spaceship_Metallic.png"
-            }
-        ],
         "sceneObjects": [
             {
-                "type": "audio",
-                "name": "spacewind",
-                "position": [ 0.0, 0.0, 0.0 ],
-                "rotation": [ 0.0, 0.0, 0.0 ],
-                "enabled": true,
-                "filename": "audio/engine_loop.wav",
-                "3d": true,
-                "looping":  true
-            },
-            {
-                "type": "model",
-                "name": "spaceship 01",
-                "mesh": "models/spaceship01/spaceship.obj",
-                "materialID": "spaceship01 material1",
-                "materials": [ "spaceship01 material1", "spaceship01 material2" ],
-                "position": [ 0.0, 0.0, 0.0 ],
-                "rotation": [ 0.0, 0.0, 0.0 ],
-                "createScale": [ 1, 1, 1 ],
-                "createUVScale": [ 1, 1 ],
-                "enabled": true,
-                "components": {
-                    "movement": {
+                "name": "Space Ship 1",
+                "position": [ 0, 0, 10 ],
+                "rotation": [ 0, 0, 0 ],
+                "enabled":  true,
+                "components": [
+                    {
+                        "type": "model",
+                        "asset": "/models/spaceship01/spaceship.obj"
+                    },
+                    {
+                        "type": "audio",
+                        "asset": "/audio/spacewind"
+                    },
+                    {
+                        "type": "movement",
                         "rotation": [ 0, 30, 0 ]
                     }
-                }
+                ]
             },
             {
-                "type": "model",
-                "name": "spaceship 02",
-                "mesh": "models/spaceship02/Spaceship.obj",
-                "materialID": "spaceship02 material",
-                "materials": [ "spaceship02 material" ],
-                "position": [ -10.0, 0.0, 0.0 ],
-                "rotation": [ 0.0, 90.0, 0.0 ],
-                "createScale": [ 0.02, 0.02, 0.02 ],
-                "createUVScale": [ 1, 1 ],
-                "enabled": true,
-                "components": {
-                    "movement": {
-                        "rotation": [ 0, -30, 0 ]
-                    }
-                }
-            },
-
-            {
-                "type": "light",
                 "name": "light-sun",
                 "position": [ 0, 1.0, 0.7 ],
-                "radius": 0.0,
-                "color": [ 1.0, 0.9, 0.5, 1 ],
-                "on": true
+                "components": [
+                    {
+                        "type": "light",
+                        "radius": 0.0,
+                        "color": [ 1.0, 0.9, 0.5, 1 ],
+                        "on": true
+                    }
+                ]
             },
             {
-                "type": "light",
                 "name": "light-fill",
                 "position": [ -10.0, 20.0, -10.0 ],
-                "radius": 0.0,
-                "color": [ 1, 0.6, 0.3, 1 ],
-                "on": true
+                "components": [
+                    {
+                        "type": "light",
+                        "radius": 0.0,
+                        "color": [ 1, 0.6, 0.3, 1 ],
+                        "on": true
+                    }
+                ]
             },
             {
-                "type": "light",
                 "name": "light-fill2",
                 "position": [ 0.0, -30.0, 0.0 ],
-                "radius": 0.0,
-                "color": [ 1, 0.6, 0.3, 1 ],
-                "on": true
+                "components": [
+                    {
+                        "type": "light",
+                        "radius": 0.0,
+                        "color": [ 1, 0.6, 0.3, 1 ],
+                        "on": true
+                    }
+                ]
             },
             {
-                "type": "light",
                 "name": "light-rim",
                 "position": [ 0.0, 0.0, 100.0 ],
-                "radius": 0.0,
-                "color": [ 0.6, 0.6, 1, 1 ],
-                "on": true
+                "components": [
+                    {
+                        "type": "light",
+                        "radius": 0.0,
+                        "color": [ 0.6, 0.6, 1, 1 ],
+                        "on": true
+                    }
+                ]
             }
         ]
     }

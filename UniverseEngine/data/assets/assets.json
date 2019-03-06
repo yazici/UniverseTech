@@ -5,6 +5,13 @@
     "assets": [
         {
             "type": "texture2d",
+            "path": "/textures/default",
+            "filename": "default.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
             "path": "/models/spaceship01/None_Base_Color.png",
             "filename": "models/spaceship01/None_Base_Color.png",
             "last_update": 0,
@@ -150,7 +157,9 @@
         },
         {
             "type": "model",
-            "mesh": "models/spaceship02/Spaceship.obj",
+            "path": "/models/spaceship02/Spaceship.obj",
+            "filename": "models/spaceship02/Spaceship.obj",
+            "last_update": 0,
             "materials": [ "/materials/spaceship02/material" ],
             "createScale": [ 0.02, 0.02, 0.02 ],
             "createUVScale": [ 1, 1 ]

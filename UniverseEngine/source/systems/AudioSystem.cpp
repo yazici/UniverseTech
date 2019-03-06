@@ -12,7 +12,7 @@ void AudioSystem::receive(ECS::World* world, const LevelStartEvent& event) {
       [&](ECS::Entity* ent, ECS::ComponentHandle<AudioComponent> audio,
           ECS::ComponentHandle<TransformComponent> transform) {
         UniEngine::GetInstance()->AudioManager()->PlaySoundFile(
-            audio->m_filename, transform->GetPosition(), UniEngine::GetInstance()->AudioManager()->VolumeTodB(90.f));
+            audio->m_filename, transform->GetPosition());
 
         std::cout << "Playing audio: " << audio->m_filename << " at " << glm::to_string<glm::vec3>(transform->GetPosition()) << std::endl;
 
@@ -32,7 +32,7 @@ void AudioSystem::tick(ECS::World* world, float deltaTime) {
 
   UniEngine::GetInstance()->AudioManager()->Set3dListenerAndOrientation(pos, up, forward, velocity);
 
-  std::cout << "Setting audio listener at " << glm::to_string<glm::vec3>(pos) << std::endl;
+  //std::cout << "Setting audio listener at " << glm::to_string<glm::vec3>(pos) << std::endl;
 
   UniEngine::GetInstance()->AudioManager()->Update();
 

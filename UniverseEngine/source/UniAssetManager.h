@@ -7,7 +7,7 @@
 
 class UniAsset;
 
-
+using namespace uni::import;
 
 class UniImporterFactory {
 public:
@@ -16,9 +16,14 @@ public:
     m_factories.insert(std::pair<std::string, std::shared_ptr<UniImporter>>(assetType, importer));
   }
 
-  std::shared_ptr<UniAsset> Import(std::string assetType, json data, json settings = nullptr)
+  std::shared_ptr<UniAsset> Import(std::string assetType, std::shared_ptr<UniAsset> asset, bool force = false)
   {
-    return m_factories.at(assetType)->Import(data, settings);
+    return m_factories.at(assetType)->Import(asset);
+  }
+
+  std::shared_ptr<UniAsset> LoadAsset(std::string assetType, json data)
+  {
+    return m_factories.at(assetType)->LoadAsset(data);
   }
 
   std::list<std::string> GetTypes()
@@ -39,7 +44,7 @@ private:
 class UniAssetManager
 {
 public:
-  UniAssetManager(std::string basePath = "", std::string registryFile = "assets.json");
+  UniAssetManager(std::string basePath = "", std::string registryFile = "/assets.json");
   ~UniAssetManager() = default;
 
   enum ReturnType {
@@ -63,7 +68,7 @@ private:
   std::string m_registryFile;
   ReturnType CheckPath(std::string path);
 
-  UniImporterFactory m_ImporterRegistry;
+
 
 
 public:
@@ -75,21 +80,48 @@ public:
   // Registers an asset with a path name.
   ReturnType RegisterAsset(std::string path, std::shared_ptr<UniAsset> asset, bool replace);
   // Registers an asset with a path name.
-  
-  
-  void RegisterImporter(std::string assetType, std::shared_ptr<UniImporter> importer) {
-    m_ImporterRegistry.RegisterFactory(assetType, importer);
+
+
+  static std::shared_ptr<UniImporterFactory> GetRegistry() {
+    const static std::shared_ptr<UniImporterFactory> importerRegistry = std::make_shared<UniImporterFactory>();
+    return importerRegistry;
   }
 
-  std::shared_ptr<UniAsset> Import(std::string assetType, json data, json settings) {
-    return m_ImporterRegistry.Import(assetType, data, settings);
+  static void RegisterImporter(std::string assetType, std::shared_ptr<UniImporter> importer) {
+    GetRegistry()->RegisterFactory(assetType, importer);
   }
-  
+
+  std::shared_ptr<UniAsset> Import(std::string assetType, std::shared_ptr<UniAsset> asset) {
+    return GetRegistry()->Import(assetType, asset);
+  }
+
+  std::shared_ptr<UniAsset> LoadAsset(std::string assetType, json data) {
+    return GetRegistry()->LoadAsset(assetType, data);
+  }
+
+  std::string GetPath() { return m_basePath; }
+
+  bool ImportAll();
+
+
   // Deletes an asset with a path name.
   ReturnType DeleteAsset(std::string path);
   // Returns an asset at a given path
   std::shared_ptr<UniAsset> GetAsset(std::string path);
-  // Loads an asset's data into memory so it can be spawned and used in game.
-  std::shared_ptr<UniAsset> LoadAsset(std::string path);
+
+  template<typename T>
+  std::shared_ptr<T> GetAsset(std::string path);
 };
+
+
+template<typename T>
+std::shared_ptr<T> UniAssetManager::GetAsset(std::string path) {
+  if (path.empty())
+    return nullptr;
+  std::cout << "Retrieving asset " + path << std::endl;
+  std::shared_ptr<UniAsset> asset = GetAsset(path);
+  std::cout << "Got UniAsset at " << asset->m_path << std::endl;
+  std::shared_ptr<T> ret = std::dynamic_pointer_cast<T>(asset);
+  return ret;
+}
 

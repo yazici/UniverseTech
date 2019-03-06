@@ -327,12 +327,13 @@ void UniSceneRenderer::SetupDescriptorSets() {
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1,
           &m_uniformBuffers.fsLights.descriptor),
-      // Binding 1 : Fragment shader uniform buffer
+      // Binding 2 : modelviews
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2,
           &m_uniformBuffers.modelViews.descriptor),
 
   };
+
 
   vkUpdateDescriptorSets(device,
                          static_cast<uint32_t>(m_writeDescriptorSets.size()),
@@ -516,7 +517,7 @@ void UniSceneRenderer::UpdateCamera(float width, float height) {
 }
 
 void UniSceneRenderer::RegisterMaterial(std::string materialID, std::shared_ptr<UniMaterial> mat) {
-  m_materialInstances.emplace(materialID, mat);
+  m_materialInstances.insert({ materialID, mat });
 }
 
 void UniSceneRenderer::UnRegisterMaterial(std::string materialID) {

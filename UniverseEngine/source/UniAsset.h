@@ -2,25 +2,59 @@
 
 #include <chrono>
 #include <string>
+#include <nlohmann/json.hpp>
+#include "vks/VulkanTexture.hpp"
+#include "UniModelMesh.h"
+#include "Materials.h"
 
-class UniAssetImporter;
+using json = nlohmann::json;
 
-
-class UniAsset
-{
+class UniAsset {
 public:
-  UniAsset();
-  ~UniAsset();
-  void Destroy();
-  bool Load();
-protected:
-  std::string m_sourceFile;
-  uint64_t m_lastUpdate;
-  uint64_t m_created;
+  UniAsset() = default;
+  UniAsset(std::string t, std::string p) : m_type(t), m_path(p) {
+  };
+  virtual void SetFile(std::string f) { m_sourceFile = f; }
+  virtual ~UniAsset() = default;
+  virtual void Destroy() {}
+  virtual bool Load() { return true; }
 
+  std::string m_type;
+  std::string m_path;
+  std::string m_sourceFile = "";
+  uint64_t m_lastUpdate = 0;
+  uint64_t m_created = 0;
 
-public:
-  bool m_isLoaded;
-  //ImportSettings m_importSettings;
+  json m_settings = nullptr;
+
+  bool m_isLoaded = false;
+
 };
 
+class UniAssetTexture2D : public UniAsset {
+public:
+  UniAssetTexture2D(std::string t, std::string p) : UniAsset(t, p) {}
+  std::shared_ptr<vks::Texture2D> m_texture;
+};
+
+
+class UniAssetModel : public UniAsset {
+public:
+  UniAssetModel(std::string t, std::string p) : UniAsset(t, p) {}
+  std::shared_ptr<uni::Model> m_model;
+  std::vector<std::string> m_materials;
+};
+
+
+class UniAssetMaterial : public UniAsset {
+public:
+  UniAssetMaterial(std::string t, std::string p) : UniAsset(t, p) {}
+  std::shared_ptr<ModelMaterial> m_material;
+};
+
+
+
+class UniAssetAudio : public UniAsset {
+public:
+  UniAssetAudio(std::string t, std::string p) : UniAsset(t, p) {}
+};

@@ -162,7 +162,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;..\external\mango\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;..\external\mango\include;..\external\fmod\lowlevel\inc;..\external\fmod\studio\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="data/";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -172,8 +172,8 @@
       </EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\libs\assimp;..\libs\gainput;..\libs\mango;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;mango.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\libs\assimp;..\libs\gainput;..\libs\mango;..\external\fmod\lowlevel\lib;..\external\fmod\studio\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;assimp-vc140-mt.lib;gainput.lib;mango.lib;fmodstudio64_vc.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <CustomBuildStep>
@@ -322,7 +322,6 @@
     <ClCompile Include="source\UniImporter.cpp" />
     <ClCompile Include="source\UniInput.cpp" />
     <ClCompile Include="source\UniMaterial.cpp" />
-    <ClCompile Include="source\UniModelMesh.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
     <ClCompile Include="source\UniSceneManager.cpp" />
     <ClCompile Include="source\UniSceneObject.cpp" />

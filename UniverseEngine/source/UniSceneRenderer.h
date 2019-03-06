@@ -148,8 +148,9 @@ template<typename T>
 std::shared_ptr<T> UniSceneRenderer::GetMaterialByID(
     std::string materialID) {
   if (m_materialInstances.find(materialID) == m_materialInstances.end()) {
-    auto mat = std::make_shared<T>(materialID);
-    RegisterMaterial(materialID, mat);
+  //  auto mat = std::make_shared<T>(materialID);
+  //  RegisterMaterial(materialID, mat);
+    return nullptr;
   }
   return std::dynamic_pointer_cast<T>(m_materialInstances.at(materialID));
 }

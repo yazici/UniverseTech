@@ -21,6 +21,7 @@ UniAssetManager::UniAssetManager(std::string basePath, std::string registryFile)
     vks::tools::exitFatal(err, -1);
   }
   m_registryFile = registryFile;
+
 }
 
 UniAssetManager::ReturnType UniAssetManager::CheckPath(std::string path)
@@ -40,14 +41,19 @@ void UniAssetManager::Shutdown()
 
 UniAssetManager::ReturnType UniAssetManager::LoadRegistry()
 {
-  std::ifstream t(m_registryFile);
+  std::ifstream t(m_basePath + m_registryFile);
   std::stringstream buffer;
   buffer << t.rdbuf();
 
   json data = json::parse(buffer.str());
 
-  for (const auto& so : data.at("assets")) {
+  auto registry = GetRegistry()->GetTypes();
 
+  for (const auto& a : data.at("assets")) {
+    if (std::find(registry.begin(), registry.end(), a.at("type")) == registry.end())
+      continue;
+    auto asset = GetRegistry()->LoadAsset(a.at("type"), a);
+    m_assets.insert({asset->m_path, asset});
   }
 
   return LOAD_OK;
@@ -60,13 +66,18 @@ UniAssetManager::ReturnType UniAssetManager::RegisterAsset(std::string path, std
     return ALREADY_CREATED;
   }
 
-  m_assets.emplace(path, asset);
+  m_assets.insert({path, asset});
   return CREATED_OK;
 }
 
-void UniAssetManager::RegisterImporter(std::string assetType, std::shared_ptr<UniAssetImporter> importer)
+bool UniAssetManager::ImportAll()
 {
-  m_Importers.emplace(assetType, importer);
+
+  for (auto& kv : m_assets) {
+    GetRegistry()->Import(kv.second->m_type, kv.second);
+  }
+
+  return true;
 }
 
 UniAssetManager::ReturnType UniAssetManager::DeleteAsset(std::string path)
@@ -77,16 +88,8 @@ UniAssetManager::ReturnType UniAssetManager::DeleteAsset(std::string path)
 
 std::shared_ptr<UniAsset> UniAssetManager::GetAsset(std::string path)
 {
-  if (m_assets.find(path) != m_assets.end()) {
+  if (m_assets.find(path) == m_assets.end()) {
     return nullptr;
   }
   return m_assets.at(path);
-}
-
-
-// Loads an asset's data into memory so it can be spawned and used in game.
-std::shared_ptr<UniAsset> UniAssetManager::LoadAsset(std::string path)
-{
-  // TODO: Add your implementation code here.
-  return nullptr;
 }

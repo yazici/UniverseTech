@@ -112,6 +112,7 @@ struct Model {
   std::map<uint32_t, uint32_t> m_indexCount;
   std::map<uint32_t, uint32_t> m_vertexCount;
   std::map<std::string, std::vector<uint32_t>> m_meshesByMaterial;
+  std::vector<std::string> m_materialIDs;
 
   /** @brief Stores vertex and index base and counts for each part of a model */
   struct ModelPart {
@@ -170,6 +171,8 @@ struct Model {
 
     Assimp::Importer Importer;
     const aiScene* pScene;
+
+    m_materialIDs = materialIDs;
 
     // Load file
 #if defined(__ANDROID__)
@@ -243,10 +246,10 @@ struct Model {
 
         if (matID >= materialIDs.size()) {
           // std::ostringstream err;
-          std::cout << "Cannot load material with ID" << matID
+          /*std::cout << "Cannot load material with ID" << matID
                     << " when there are only " << materialIDs.size()
                     << " materials." << std::endl;
-
+*/
           // throw std::runtime_error(err.str());
           matID = matID % materialIDs.size();
         }

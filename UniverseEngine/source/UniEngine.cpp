@@ -132,6 +132,12 @@ void UniEngine::prepare() {
   std::cout << "Create an audio manager..." << std::endl;
   AudioManager()->Init();
 
+  std::cout << "Loading asset registry..." << std::endl;
+  AssetManager()->LoadRegistry();
+
+  std::cout << "Import all assets ..." << std::endl;
+  AssetManager()->ImportAll();
+
   std::cout << "Load level data..." << std::endl;
   SceneManager()->LoadScene("testlevel");
 
