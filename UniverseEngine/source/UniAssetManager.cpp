@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <nlohmann/json.hpp>
 #include "vks/VulkanTools.h"
+#include <ppl.h>
 
 using json = nlohmann::json;
 
@@ -73,9 +74,9 @@ UniAssetManager::ReturnType UniAssetManager::RegisterAsset(std::string path, std
 bool UniAssetManager::ImportAll()
 {
 
-  for (auto& kv : m_assets) {
+  concurrency::parallel_for_each(m_assets.begin(), m_assets.end(), [&](auto& kv) {
     GetRegistry()->Import(kv.second->m_type, kv.second);
-  }
+    });
 
   return true;
 }
