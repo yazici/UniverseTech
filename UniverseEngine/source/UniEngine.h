@@ -13,6 +13,7 @@
 #include "vks/VulkanModel.hpp"
 #include "vks/VulkanTexture.hpp"
 #include "vks/vulkanexamplebase.h"
+#include <mutex>
 
 #define VERTEX_BUFFER_BIND_ID 0
 #define INSTANCE_BUFFER_BIND_ID 1
@@ -70,6 +71,7 @@ class UniEngine final : public VulkanExampleBase {
   bool m_CamPaused = false;
   float m_PlanetZOffset = 0;
 
+
  public:
   std::shared_ptr<UniSceneManager> SceneManager(){ return m_SceneManager; }
   std::shared_ptr<UniSceneRenderer> SceneRenderer() { return m_SceneRenderer; }
@@ -88,5 +90,8 @@ class UniEngine final : public VulkanExampleBase {
 
   std::vector<VkCommandBuffer> &GetCommandBuffers() { return drawCmdBuffers; }
   std::vector<VkFramebuffer> &GetFrameBuffers() {return frameBuffers; }
+
+  std::mutex m_QueueMutex;
+
 
 };

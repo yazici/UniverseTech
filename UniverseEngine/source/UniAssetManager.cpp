@@ -54,7 +54,7 @@ UniAssetManager::ReturnType UniAssetManager::LoadRegistry()
     if (std::find(registry.begin(), registry.end(), a.at("type")) == registry.end())
       continue;
     auto asset = GetRegistry()->LoadAsset(a.at("type"), a);
-    m_assets.insert({asset->m_path, asset});
+    m_assets.insert({ asset->m_path, asset });
   }
 
   return LOAD_OK;
@@ -67,14 +67,15 @@ UniAssetManager::ReturnType UniAssetManager::RegisterAsset(std::string path, std
     return ALREADY_CREATED;
   }
 
-  m_assets.insert({path, asset});
+  m_assets.insert({ path, asset });
   return CREATED_OK;
 }
 
 bool UniAssetManager::ImportAll()
 {
 
-  concurrency::parallel_for_each(m_assets.begin(), m_assets.end(), [&](auto& kv) {
+  //concurrency::parallel_for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
+  for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
     GetRegistry()->Import(kv.second->m_type, kv.second);
     });
 
