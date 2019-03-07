@@ -16,6 +16,8 @@
 #include "vulkan/vulkan.h"
 #include "VulkanTools.h"
 #include "VulkanBuffer.hpp"
+#include <thread>
+#include <map>
 
 namespace vks
 {	
@@ -39,7 +41,20 @@ namespace vks
 		std::vector<std::string> supportedExtensions;
 
 		/** @brief Default command pool for the graphics queue family index */
-		VkCommandPool commandPool = VK_NULL_HANDLE;
+		//VkCommandPool commandPool = VK_NULL_HANDLE;
+
+    std::map<std::thread::id, VkCommandPool> m_commandPools;
+
+    VkCommandPool GetCommandPool() {
+      auto thread_id = std::this_thread::get_id();
+      if (m_commandPools.find(thread_id) == m_commandPools.end()) {
+        VkCommandPool pool = createCommandPool(queueFamilyIndices.graphics);
+        m_commandPools.insert({ thread_id, pool });
+      }
+
+      return m_commandPools.at(thread_id);
+
+    }
 
 		/** @brief Set to true when the debug marker extension is detected */
 		bool enableDebugMarkers = false;
@@ -102,9 +117,8 @@ namespace vks
 		*/
 		~VulkanDevice()
 		{
-			if (commandPool)
-			{
-				vkDestroyCommandPool(logicalDevice, commandPool, nullptr);
+			for(auto& [thread_id, pool]: m_commandPools){
+				vkDestroyCommandPool(logicalDevice, pool, nullptr);
 			}
 			if (logicalDevice)
 			{
@@ -322,11 +336,11 @@ namespace vks
 
 			VkResult result = vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice);
 
-			if (result == VK_SUCCESS)
-			{
-				// Create a default command pool for graphics command buffers
-				commandPool = createCommandPool(queueFamilyIndices.graphics);
-			}
+			//if (result == VK_SUCCESS)
+			//{
+			//	// Create a default command pool for graphics command buffers
+			//	commandPool = createCommandPool(queueFamilyIndices.graphics);
+			//}
 
 			this->enabledFeatures = enabledFeatures;
 
@@ -494,7 +508,7 @@ namespace vks
 		*/
 		VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin = false)
 		{
-			VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(commandPool, level, 1);
+			VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(GetCommandPool(), level, 1);
 
 			VkCommandBuffer cmdBuffer;
 			VK_CHECK_RESULT(vkAllocateCommandBuffers(logicalDevice, &cmdBufAllocateInfo, &cmdBuffer));
@@ -546,7 +560,7 @@ namespace vks
 
 			if (free)
 			{
-				vkFreeCommandBuffers(logicalDevice, commandPool, 1, &commandBuffer);
+				vkFreeCommandBuffers(logicalDevice, GetCommandPool(), 1, &commandBuffer);
 			}
 		}
 

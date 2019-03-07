@@ -74,16 +74,16 @@ UniAssetManager::ReturnType UniAssetManager::RegisterAsset(std::string path, std
 void UniAssetManager::CheckImported(std::vector<std::string> assets)
 {
   for (const auto& assetPath : assets) {
-    Import(assetPath);
+    auto _ = Import(assetPath);
   }
 }
 
 bool UniAssetManager::ImportAll()
 {
 
-  //concurrency::parallel_for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
-  for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
-    GetRegistry()->Import(kv.second->m_type, kv.second);
+  concurrency::parallel_for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
+  //for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
+    auto _ = GetRegistry()->Import(kv.second->m_type, kv.second);
     });
 
   return true;
