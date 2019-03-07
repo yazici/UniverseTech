@@ -329,6 +329,7 @@
     <ClCompile Include="source\vks\VulkanAndroid.cpp" />
     <ClCompile Include="source\vks\VulkanDebug.cpp" />
     <ClCompile Include="source\vks\vulkanexamplebase.cpp" />
+    <ClCompile Include="source\vks\VulkanTexture.cpp" />
     <ClCompile Include="source\vks\VulkanTools.cpp" />
     <ClCompile Include="source\vks\VulkanUIOverlay.cpp" />
   </ItemGroup>

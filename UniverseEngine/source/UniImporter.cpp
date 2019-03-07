@@ -8,12 +8,17 @@
 using namespace uni::import;
 
 
-std::shared_ptr<UniAsset> UniTexture2DImporter::Import(std::shared_ptr<UniAsset> asset)
+std::shared_ptr<UniAsset> UniTexture2DImporter::Import(std::shared_ptr<UniAsset> asset, bool force)
 {
+  //std::cout << "Doing texture importer " << std::endl;
+
   auto textureAsset = std::dynamic_pointer_cast<UniAssetTexture2D>(asset);
   if (textureAsset == nullptr) {
     vks::tools::exitFatal("Unable to import asset as texture2d.", -1);
   }
+
+  if (textureAsset->m_isLoaded && !force)
+    return textureAsset;
 
   // Textures
 //  std::string texFormatSuffix;
@@ -59,6 +64,8 @@ std::shared_ptr<UniAsset> UniTexture2DImporter::Import(std::shared_ptr<UniAsset>
 
   textureAsset->m_texture = texture;
 
+  textureAsset->m_isLoaded = true;
+
   return textureAsset;
 
 }
@@ -69,12 +76,18 @@ std::shared_ptr<UniAsset> UniTexture2DImporter::LoadAsset(json data)
 }
 
 
-std::shared_ptr<UniAsset> UniModelImporter::Import(std::shared_ptr<UniAsset> asset)
+std::shared_ptr<UniAsset> UniModelImporter::Import(std::shared_ptr<UniAsset> asset, bool force)
 {
+
+  //std::cout << "Doing model importer " << std::endl;
+
   auto modelAsset = std::dynamic_pointer_cast<UniAssetModel>(asset);
   if (modelAsset == nullptr) {
     vks::tools::exitFatal("Unable to import asset as model.", -1);
   }
+
+  if (modelAsset->m_isLoaded && !force)
+    return modelAsset;
 
 
   std::vector<std::string> materials = asset->m_settings.at("materials");
@@ -112,6 +125,7 @@ std::shared_ptr<UniAsset> UniModelImporter::Import(std::shared_ptr<UniAsset> ass
   modelAsset->m_model = model;
   modelAsset->m_materials = materials;
 
+  modelAsset->m_isLoaded = true;
 
   return modelAsset;
 
@@ -122,12 +136,18 @@ std::shared_ptr<UniAsset> UniModelImporter::LoadAsset(json data)
   return CreateAsset<UniAssetModel>(data);
 }
 
-std::shared_ptr<UniAsset> MaterialImporter::Import(std::shared_ptr<UniAsset> asset) {
+std::shared_ptr<UniAsset> MaterialImporter::Import(std::shared_ptr<UniAsset> asset, bool force) {
+
+  //std::cout << "Doing material importer " << std::endl;
 
   auto materialAsset = std::dynamic_pointer_cast<UniAssetMaterial>(asset);
   if (materialAsset == nullptr) {
     vks::tools::exitFatal("Unable to import asset as material.", -1);
   }
+
+  if (materialAsset->m_isLoaded && !force)
+    return materialAsset;
+
 
   std::cout << "Loading model material: " << asset->m_path << std::endl;
   // 	m_Name = jsonData["name"];
@@ -245,6 +265,8 @@ std::shared_ptr<UniAsset> MaterialImporter::Import(std::shared_ptr<UniAsset> ass
 
   materialAsset->m_material = material;
 
+  materialAsset->m_isLoaded = true;
+
   return materialAsset;
 
 }
@@ -254,7 +276,7 @@ std::shared_ptr<UniAsset> MaterialImporter::LoadAsset(json data)
   return CreateAsset<UniAssetMaterial>(data);
 }
 
-std::shared_ptr<UniAsset> AudioImporter::Import(std::shared_ptr<UniAsset> asset)
+std::shared_ptr<UniAsset> AudioImporter::Import(std::shared_ptr<UniAsset> asset, bool force)
 {
   auto audioAsset = std::dynamic_pointer_cast<UniAssetAudio>(asset);
   if (audioAsset == nullptr) {
@@ -262,17 +284,32 @@ std::shared_ptr<UniAsset> AudioImporter::Import(std::shared_ptr<UniAsset> asset)
     throw std::runtime_error("Unable to import asset as audio.");
   }
 
+  if (audioAsset->m_isLoaded && !force)
+    return audioAsset;
+
+
   auto is3d = static_cast<bool>(audioAsset->m_settings.at("3d"));
   auto isLooping = static_cast<bool>(audioAsset->m_settings.at("looping"));
   bool isStreaming = false;
+  float volume = 50.f;
 
   try {
     isStreaming = static_cast<bool>(audioAsset->m_settings.at("streaming"));
   }
   catch (json::out_of_range err) {}
 
+  try {
+    volume = static_cast<float>(audioAsset->m_settings.at("volume"));
+  }
+  catch (json::out_of_range err) {}
+
   UniEngine::GetInstance()->AudioManager()->LoadSound(
     audioAsset->m_sourceFile, is3d, isLooping, false);
+
+  audioAsset->m_is3d = is3d;
+  audioAsset->m_isLooping = isLooping;
+  audioAsset->m_Volume = volume;
+  audioAsset->m_isStreaming = isStreaming;
 
   return audioAsset;
 }

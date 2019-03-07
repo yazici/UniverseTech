@@ -17,7 +17,7 @@ namespace uni::import {
   public:
     UniImporter() = default;
     virtual ~UniImporter() = default;
-    virtual std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset) = 0;
+    virtual std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset, bool force = false) = 0;
     virtual std::shared_ptr<UniAsset> LoadAsset(json data) = 0;
 
     template<typename T>
@@ -32,7 +32,7 @@ namespace uni::import {
   class UniTexture2DImporter : public UniImporter {
   public:
     UniTexture2DImporter() = default;
-    std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset) override;
+    std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset, bool force = false) override;
     std::shared_ptr<UniAsset> LoadAsset(json data) override;
   };
 
@@ -40,21 +40,21 @@ namespace uni::import {
   class UniModelImporter : public UniImporter {
   public:
     UniModelImporter() = default;
-    std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset) override;
+    std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset, bool force = false) override;
     std::shared_ptr<UniAsset> LoadAsset(json data) override;
   };
 
   class MaterialImporter : public UniImporter {
   public:
     MaterialImporter() = default;
-    std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset) override;
+    std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset, bool force = false) override;
     std::shared_ptr<UniAsset> LoadAsset(json data) override;
   };
 
   class AudioImporter : public UniImporter {
   public:
     AudioImporter() = default;
-    std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset) override;
+    std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset, bool force = false) override;
     std::shared_ptr<UniAsset> LoadAsset(json data) override;
   };
 

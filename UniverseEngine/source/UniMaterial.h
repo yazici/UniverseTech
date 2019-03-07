@@ -134,4 +134,6 @@ protected:
   std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
   std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
   VkDescriptorPool m_descriptorPool;
+
+  bool m_setupPerformed = false;
 };

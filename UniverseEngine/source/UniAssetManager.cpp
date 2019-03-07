@@ -71,6 +71,13 @@ UniAssetManager::ReturnType UniAssetManager::RegisterAsset(std::string path, std
   return CREATED_OK;
 }
 
+void UniAssetManager::CheckImported(std::vector<std::string> assets)
+{
+  for (const auto& assetPath : assets) {
+    Import(assetPath);
+  }
+}
+
 bool UniAssetManager::ImportAll()
 {
 

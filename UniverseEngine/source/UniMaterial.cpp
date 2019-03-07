@@ -36,6 +36,8 @@ void UniMaterial::SetupMaterial(
   PreparePipelines(SceneRenderer(), pipelineCreateInfo);
   SetupDescriptorPool(SceneRenderer());
   SetupDescriptorSets(SceneRenderer());
+
+  m_setupPerformed = true;
 }
 
 /*
@@ -275,7 +277,7 @@ void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
   auto mgr = engine->AssetManager();
   auto asset = mgr->GetAsset<UniAssetTexture2D>(texturePath);
 
-  m_TexturePaths.insert({name, texturePath});
+  m_TexturePaths.insert({ name, texturePath });
 
   if (asset != nullptr)
     SetTexture(name, asset->m_texture);
@@ -321,29 +323,23 @@ std::shared_ptr<UniSceneRenderer> UniMaterial::SceneRenderer() {
 void UniMaterial::Destroy() {
   std::cout << "Destroying base material..." << std::endl;
 
-  auto engine = UniEngine::GetInstance();
-  auto device = engine->GetDevice();
+  if (m_setupPerformed) {
+    auto engine = UniEngine::GetInstance();
+    auto device = engine->GetDevice();
 
-  // vkDestroyPipeline(device, m_pipeline, nullptr);
-  //for (const auto& kv : m_Textures) {
-  //  kv.second->destroy();
-  //}
+    vkDestroyBuffer(device, m_MaterialPropertyBuffer.buffer, nullptr);
+    vkFreeMemory(device, m_MaterialPropertyBuffer.memory, nullptr);
 
-  vkDestroyBuffer(device, m_MaterialPropertyBuffer.buffer, nullptr);
-  vkFreeMemory(device, m_MaterialPropertyBuffer.memory, nullptr);
+    for (const auto& kv : m_Buffers) {
+      vkDestroyBuffer(device, kv.second->buffer, nullptr);
+      vkFreeMemory(device, kv.second->memory, nullptr);
+    }
 
-
-  for (const auto& kv : m_Buffers) {
-    vkDestroyBuffer(device, kv.second->buffer, nullptr);
-    vkFreeMemory(device, kv.second->memory, nullptr);
+    vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
+    vkDestroyPipeline(device, m_pipeline, nullptr);
+    vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
+    vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
   }
-
-
-  vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
-  vkDestroyPipeline(device, m_pipeline, nullptr);
-  vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
-  //vkFreeDescriptorSets(device, m_descriptorPool, 1, &m_descriptorSet);
-  vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
 
 }
 

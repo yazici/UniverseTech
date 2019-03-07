@@ -362,6 +362,9 @@
     <ClCompile Include="source\UniImporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\vks\VulkanTexture.cpp">
+      <Filter>Source Files\vks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UniverseEngine.rc">

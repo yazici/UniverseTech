@@ -9,18 +9,21 @@ void AudioSystem::receive(ECS::World* world, const LevelStartEvent& event) {
   auto renderer = engine->SceneRenderer();
 
   world->each<AudioComponent, TransformComponent>(
-      [&](ECS::Entity* ent, ECS::ComponentHandle<AudioComponent> audio,
-          ECS::ComponentHandle<TransformComponent> transform) {
-        UniEngine::GetInstance()->AudioManager()->PlaySoundFile(
+    [&](ECS::Entity * ent, ECS::ComponentHandle<AudioComponent> audio,
+      ECS::ComponentHandle<TransformComponent> transform) {
+
+        if (audio->m_isPlaying) {
+          UniEngine::GetInstance()->AudioManager()->PlaySoundFile(
             audio->m_filename, transform->GetPosition(), audio->m_volume);
 
-        std::cout << "Playing audio: " << audio->m_filename << " at " << glm::to_string<glm::vec3>(transform->GetPosition()) << std::endl;
+          std::cout << "Playing audio: " << audio->m_filename << " at " << glm::to_string<glm::vec3>(transform->GetPosition()) << std::endl;
+        }
 
-      });
+    });
 }
 
 void AudioSystem::tick(ECS::World* world, float deltaTime) {
-  
+
   auto cam = UniEngine::GetInstance()->SceneManager()->CurrentScene()->GetCameraObject();
   auto transform = cam->GetComponent<TransformComponent>();
   auto physics = cam->GetComponent<PhysicsComponent>();

@@ -21,7 +21,8 @@
                     {
                         "type": "audio",
                         "asset": "/audio/spacewind",
-                        "volume": 70
+                        "volume": 70,
+                        "paused": false
                     },
                     {
                         "type": "movement",

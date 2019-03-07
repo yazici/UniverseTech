@@ -4,8 +4,8 @@
 #include <string>
 #include <memory>
 #include "UniImporter.h"
+#include "UniAsset.h"
 
-class UniAsset;
 
 using namespace uni::import;
 
@@ -18,7 +18,7 @@ public:
 
   std::shared_ptr<UniAsset> Import(std::string assetType, std::shared_ptr<UniAsset> asset, bool force = false)
   {
-    return m_factories.at(assetType)->Import(asset);
+    return m_factories.at(assetType)->Import(asset, force);
   }
 
   std::shared_ptr<UniAsset> LoadAsset(std::string assetType, json data)
@@ -81,6 +81,8 @@ public:
   ReturnType RegisterAsset(std::string path, std::shared_ptr<UniAsset> asset, bool replace);
   // Registers an asset with a path name.
 
+  void CheckImported(std::vector<std::string> assets);
+
 
   static std::shared_ptr<UniImporterFactory> GetRegistry() {
     const static std::shared_ptr<UniImporterFactory> importerRegistry = std::make_shared<UniImporterFactory>();
@@ -90,6 +92,16 @@ public:
   static void RegisterImporter(std::string assetType, std::shared_ptr<UniImporter> importer) {
     GetRegistry()->RegisterFactory(assetType, importer);
   }
+
+  std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset) {
+    return GetRegistry()->Import(asset->m_type, asset);
+  }
+
+  std::shared_ptr<UniAsset> Import(std::string assetPath) {
+    auto asset = GetAsset(assetPath);
+    return GetRegistry()->Import(asset->m_type, asset);
+  }
+
 
   std::shared_ptr<UniAsset> Import(std::string assetType, std::shared_ptr<UniAsset> asset) {
     return GetRegistry()->Import(assetType, asset);

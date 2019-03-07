@@ -11,6 +11,7 @@
 #include "systems/Systems.h"
 #include "UniAssetManager.h"
 #include "UniAsset.h"
+#include <set>
 
 using json = nlohmann::json;
 
@@ -43,6 +44,9 @@ void UniScene::Initialize() {
 
 void UniScene::Load(std::string filename) {
 
+  auto assetManager = UniEngine::GetInstance()->AssetManager();
+  auto renderer = UniEngine::GetInstance()->SceneRenderer();
+
   std::ifstream t(filename);
   std::stringstream buffer;
   buffer << t.rdbuf();
@@ -50,6 +54,18 @@ void UniScene::Load(std::string filename) {
   json data = json::parse(buffer.str());
   auto level = data["level"];
   m_Name = level["name"];
+
+  std::vector<std::string> assetStrings = {};
+
+  for (const auto& row : level.at("sceneObjects")) {
+    for (const auto& component : row.at("components")) {
+      if (component.find("asset") != component.end()) {
+        assetStrings.push_back(component.at("asset"));
+      }
+    }
+  }
+
+  assetManager->CheckImported(assetStrings);
 
 
   for (const auto& row : level.at("sceneObjects")) {
@@ -84,7 +100,12 @@ void UniScene::Load(std::string filename) {
         auto audio = sceneObject->AddComponent<AudioComponent>(static_cast<std::string>(component.at("asset")));
         if (component.find("volume") != component.end()) {
           audio->m_volume = component.at("volume");
-
+        }
+        if (component.find("looping") != component.end()) {
+          audio->m_isLooping = component.at("looping");
+        }
+        if (component.find("paused") != component.end()) {
+          audio->m_isPlaying = !component.at("paused");
         }
       }
 
@@ -111,7 +132,7 @@ void UniScene::Load(std::string filename) {
       if (component.at("type") == "model") {
         std::cout << "Assigning model component: " << component.at("asset") << std::endl;
 
-        auto asset = UniEngine::GetInstance()->AssetManager()->GetAsset<UniAssetModel>(component.at("asset"));
+        auto asset = assetManager->GetAsset<UniAssetModel>(component.at("asset"));
 
         ECS::ComponentHandle<ModelComponent> model =
           sceneObject->AddComponent<ModelComponent>(asset->m_path);
@@ -120,9 +141,9 @@ void UniScene::Load(std::string filename) {
 
         for (const auto& mat : asset->m_materials) {
           
-          if (UniEngine::GetInstance()->SceneRenderer()->GetMaterialByID<ModelMaterial>(mat) == nullptr) {
-            auto matAsset = UniEngine::GetInstance()->AssetManager()->GetAsset<UniAssetMaterial>(mat);
-            UniEngine::GetInstance()->SceneRenderer()->RegisterMaterial(mat, matAsset->m_material);
+          if (renderer->GetMaterialByID<ModelMaterial>(mat) == nullptr) {
+            auto matAsset = assetManager->GetAsset<UniAssetMaterial>(mat);
+            renderer->RegisterMaterial(mat, matAsset->m_material);
           }
         }
 

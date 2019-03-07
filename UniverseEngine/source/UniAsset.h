@@ -70,4 +70,8 @@ class UniAssetAudio : public UniAsset {
 public:
   UniAssetAudio(std::string t, std::string p) : UniAsset(t, p) {}
   void Destroy() override;
+  bool m_is3d = true;
+  bool m_isLooping = false;
+  float m_Volume = 50.f;
+  bool m_isStreaming = false;
 };

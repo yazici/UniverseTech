@@ -31,7 +31,7 @@ void UniSceneManager::UnloadCurrentScene() {
 }
 
 void UniSceneManager::LoadAssets(std::string sceneName) {
-  m_CurrentScene->Load(getAssetPath() + "levels/" + sceneName + ".json");
+  m_CurrentScene->Load(UniEngine::GetInstance()->getAssetPath() + "levels/" + sceneName + ".json");
 }
 
 void UniSceneManager::RequestNewScene(std::string sceneName) {
