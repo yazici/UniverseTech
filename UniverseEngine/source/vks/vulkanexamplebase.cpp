@@ -185,31 +185,7 @@ void VulkanExampleBase::prepare() {
   setupRenderPass();
   createPipelineCache();
   setupFrameBuffer();
-  settings.overlay = settings.overlay && (!benchmark.active);
-  if (settings.overlay) {
-    vks::UIOverlayCreateInfo overlayCreateInfo = {};
-    // Setup default overlay creation info
-    overlayCreateInfo.device = vulkanDevice;
-    overlayCreateInfo.copyQueue = queue;
-    overlayCreateInfo.framebuffers = frameBuffers;
-    overlayCreateInfo.colorformat = swapChain.colorFormat;
-    overlayCreateInfo.depthformat = depthFormat;
-    overlayCreateInfo.width = width;
-    overlayCreateInfo.height = height;
-    // Virtual function call for example to customize overlay creation
-    OnSetupUIOverlay(overlayCreateInfo);
-    // Load default shaders if not specified by example
-    if (overlayCreateInfo.shaders.empty()) {
-      overlayCreateInfo.shaders = {
-          loadShader(getAssetPath() + "shaders/base/uioverlay.vert.spv",
-                     VK_SHADER_STAGE_VERTEX_BIT),
-          loadShader(getAssetPath() + "shaders/base/uioverlay.frag.spv",
-                     VK_SHADER_STAGE_FRAGMENT_BIT),
-      };
-    }
-    UIOverlay = new vks::UIOverlay(overlayCreateInfo);
-    updateOverlay();
-  }
+
 }
 
 VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShader(

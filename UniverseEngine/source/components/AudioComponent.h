@@ -3,12 +3,11 @@
 
 struct AudioComponent {
   std::string m_filename;
-  bool m_isLoaded = false;
-  bool m_isPlaying = false;
-  bool m_is3d = false;
+  bool m_isPlaying = true;
+  bool m_is3d = true;
+  bool m_isLooping = false;
+  float m_volume = 50.f;
+  int m_channel = -1;
 
-  AudioComponent(std::string filename, bool is3d = false) {
-    m_filename = filename;
-    m_is3d = is3d;
-  }
+  AudioComponent(std::string path);
 };

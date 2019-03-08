@@ -10,7 +10,7 @@ class UniSceneRenderer;
 class ModelComponent;
 
 class UniMaterial {
- public:
+public:
   UniMaterial() = default;
   UniMaterial(std::string name);
   virtual void Destroy();
@@ -19,10 +19,10 @@ class UniMaterial {
   virtual ~UniMaterial() = default;
 
   virtual void SetupDescriptorSetLayout(
-      std::shared_ptr<UniSceneRenderer> renderer);
+    std::shared_ptr<UniSceneRenderer> renderer);
   virtual void PreparePipelines(
-      std::shared_ptr<UniSceneRenderer> renderer,
-      VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
+    std::shared_ptr<UniSceneRenderer> renderer,
+    VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
   virtual void SetupDescriptorPool(std::shared_ptr<UniSceneRenderer> renderer);
   virtual void SetupDescriptorSets(std::shared_ptr<UniSceneRenderer> renderer);
 
@@ -34,15 +34,15 @@ class UniMaterial {
 
   std::string GetShader(std::string name) { return m_Shaders.at(name); }
   void SetShader(std::string name, std::string shader) {
-    m_Shaders[name] = shader;
+    m_Shaders.insert({ name, shader });
   }
   void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
   virtual void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
   virtual void LoadTexture(std::string name, std::string texturePath);
   //virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer);
 
-	virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
-                          ECS::ComponentHandle<ModelComponent> model);
+  virtual void AddToCommandBuffer(VkCommandBuffer& cmdBuffer,
+    ECS::ComponentHandle<ModelComponent> model);
   VkDescriptorSet* GetDescriptorSet() { return &m_descriptorSet; }
 
   std::shared_ptr<UniSceneRenderer> SceneRenderer();
@@ -52,7 +52,7 @@ class UniMaterial {
 
   void SetBaseColour(glm::vec4 bc) { m_MaterialProperties.baseColour = bc; }
   void SetBaseColour(float r, float g, float b, float a) {
-    SetBaseColour({r, g, b, a});
+    SetBaseColour({ r, g, b, a });
   }
   void SetEmissiveColour(glm::vec4 bc) {
     // m_MaterialProperties.baseEmissive = bc;
@@ -70,11 +70,33 @@ class UniMaterial {
     m_MaterialProperties.baseSpecular = specular;
   }
 
- protected:
+  void SetUseTexture(bool use) {
+    m_MaterialProperties.hasTextureMap = use ? 1 : 0;
+  }
+  void SetUseNormal(bool use) {
+    m_MaterialProperties.hasNormalMap= use ? 1 : 0;
+  }
+  void SetUseRoughness(bool use) {
+    m_MaterialProperties.hasRoughnessMap = use ? 1 : 0;
+  }
+  void SetUseMetallic(bool use) {
+    m_MaterialProperties.hasMetallicMap = use ? 1 : 0;
+  }
+  void SetUseSpecular(bool use) {
+    m_MaterialProperties.hasSpecularMap = use ? 1 : 0;
+  }
+  void SetUseEmissive(bool use) {
+    m_MaterialProperties.hasEmissiveMap = use ? 1 : 0;
+  }
+  void SetUseAO(bool use) {
+    m_MaterialProperties.hasAOMap = use ? 1 : 0;
+  }
+
+protected:
   using MaterialProperties = struct {
     glm::vec4 baseColour = glm::vec4(1.f);  // materials are white by default
     glm::vec4 baseEmissive =
-        glm::vec4(0.f, 0.f, 0.f, 1.f);  // materials are not emissive by default
+      glm::vec4(0.f, 0.f, 0.f, 1.f);  // materials are not emissive by default
     glm::vec4 baseNormal = glm::vec4(0.f, 0.f, 1.f, 0.f);
     float baseRoughness = 1.f;   // materials are rough by default
     float baseMetallic = 0.f;    // materials are not metallic by default
@@ -95,18 +117,23 @@ class UniMaterial {
   std::vector<ECS::ComponentHandle<ModelComponent>> m_models;
 
   std::string m_Name;
-  uint32_t m_IndexCount;
+  uint32_t m_IndexCount = 0;
 
+public:
   std::map<std::string, std::shared_ptr<vks::Texture2D>> m_Textures;
+  std::map<std::string, std::string> m_TexturePaths;
 
+protected:
   std::map<std::string, std::string> m_Shaders;
   std::map<std::string, std::shared_ptr<vks::Buffer>> m_Buffers;
 
-  VkPipelineLayout m_pipelineLayout;
-  VkPipeline m_pipeline;
-  VkDescriptorSetLayout m_descriptorSetLayout;
-  VkDescriptorSet m_descriptorSet;
+  VkPipelineLayout m_pipelineLayout = nullptr;
+  VkPipeline m_pipeline = nullptr;
+  VkDescriptorSetLayout m_descriptorSetLayout = nullptr;
+  VkDescriptorSet m_descriptorSet = nullptr;
   std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
   std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
-  VkDescriptorPool m_descriptorPool;
+  VkDescriptorPool m_descriptorPool = nullptr;
+
+  bool m_setupPerformed = false;
 };

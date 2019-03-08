@@ -49,6 +49,9 @@
     <Filter Include="Materials">
       <UniqueIdentifier>{6ceb814f-1b2d-4af8-9440-086b5bd377ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Content\assets">
+      <UniqueIdentifier>{1e9f632a-3678-481f-b7cb-74ceb1a5c612}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\vks\benchmark.hpp">
@@ -234,6 +237,15 @@
     <ClInclude Include="source\systems\AudioSystem.h">
       <Filter>Systems</Filter>
     </ClInclude>
+    <ClInclude Include="source\UniAssetManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UniAsset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UniImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\vks\VulkanAndroid.cpp">
@@ -329,9 +341,6 @@
     <ClCompile Include="source\components\ModelComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="source\UniModelMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\systems\ModelRenderSystem.cpp">
       <Filter>Systems</Filter>
     </ClCompile>
@@ -343,6 +352,18 @@
     </ClCompile>
     <ClCompile Include="source\systems\AudioSystem.cpp">
       <Filter>Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniAssetManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniAsset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UniImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\vks\VulkanTexture.cpp">
+      <Filter>Source Files\vks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -377,6 +398,10 @@
     </None>
     <None Include="data\levels\levelschema.json">
       <Filter>Content</Filter>
+    </None>
+    <None Include="ClassDiagram.cd" />
+    <None Include="data\assets\assets.json">
+      <Filter>Content\assets</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -101,6 +101,7 @@
       <CompileAs>CompileAsCpp</CompileAs>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -161,7 +162,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;..\external\mango\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\external;..\external\gainput;..\external\imgui;..\external\stb;..\external\glm;..\external\gli;..\external\assimp;..\external\json\single_include;..\external\mango\include;..\external\fmod\lowlevel\inc;..\external\fmod\studio\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;VK_EXAMPLE_DATA_DIR="data/";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -169,10 +170,11 @@
       <CompileAs>CompileAsCpp</CompileAs>
       <EnableEnhancedInstructionSet>
       </EnableEnhancedInstructionSet>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\libs\assimp;..\libs\gainput;..\libs\mango;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;assimp.lib;gainput.lib;mango.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\libs\assimp;..\libs\gainput;..\libs\mango;..\external\fmod\lowlevel\lib;..\external\fmod\studio\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;assimp-vc140-mt.lib;gainput.lib;mango_debug.lib;fmodstudio64_vc.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <CustomBuildStep>
@@ -226,6 +228,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\UniAsset.cpp" />
     <ClInclude Include="..\external\imgui\imconfig.h" />
     <ClInclude Include="..\external\imgui\imgui.h" />
     <ClInclude Include="..\external\imgui\imgui_internal.h" />
@@ -236,6 +239,8 @@
     <ClInclude Include="source\3dmaths.h" />
     <ClInclude Include="source\components\AudioComponent.h" />
     <ClInclude Include="source\systems\AudioSystem.h" />
+    <ClInclude Include="source\UniAsset.h" />
+    <ClInclude Include="source\UniAssetManager.h" />
     <ClInclude Include="source\UniAudioEngine.h" />
     <ClInclude Include="source\components\Camera.h" />
     <ClInclude Include="source\components\Components.h" />
@@ -249,6 +254,7 @@
     <ClInclude Include="source\ECS.h" />
     <ClCompile Include="source\components\AudioComponent.cpp" />
     <ClCompile Include="source\systems\AudioSystem.cpp" />
+    <ClCompile Include="source\UniAssetManager.cpp" />
     <ClCompile Include="source\UniAudioEngine.cpp" />
     <ClCompile Include="source\components\ModelComponent.cpp" />
     <ClCompile Include="source\components\Movement.cpp" />
@@ -281,6 +287,7 @@
     <ClInclude Include="source\UniFrustum.hpp" />
     <ClInclude Include="source\Geometry.hpp" />
     <ClInclude Include="source\UniEngine.h" />
+    <ClInclude Include="source\UniImporter.h" />
     <ClInclude Include="source\UniInput.h" />
     <ClInclude Include="source\UniMaterial.h" />
     <ClInclude Include="source\UniModelMesh.h" />
@@ -313,9 +320,9 @@
     <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\UniEngine.cpp" />
+    <ClCompile Include="source\UniImporter.cpp" />
     <ClCompile Include="source\UniInput.cpp" />
     <ClCompile Include="source\UniMaterial.cpp" />
-    <ClCompile Include="source\UniModelMesh.cpp" />
     <ClCompile Include="source\UniScene.cpp" />
     <ClCompile Include="source\UniSceneManager.cpp" />
     <ClCompile Include="source\UniSceneObject.cpp" />
@@ -323,6 +330,7 @@
     <ClCompile Include="source\vks\VulkanAndroid.cpp" />
     <ClCompile Include="source\vks\VulkanDebug.cpp" />
     <ClCompile Include="source\vks\vulkanexamplebase.cpp" />
+    <ClCompile Include="source\vks\VulkanTexture.cpp" />
     <ClCompile Include="source\vks\VulkanTools.cpp" />
     <ClCompile Include="source\vks\VulkanUIOverlay.cpp" />
   </ItemGroup>
@@ -379,6 +387,8 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </Text>
+    <None Include="ClassDiagram.cd" />
+    <None Include="data\assets\assets.json" />
     <None Include="data\levels\levelschema.json" />
     <None Include="data\levels\testlevel2.json" />
     <CustomBuild Include="data\shaders\uniplanet.tesc">

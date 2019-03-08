@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <assert.h>
@@ -92,8 +93,10 @@ class UniSceneRenderer {
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
   } m_vertices;
 
+  std::string m_name = "";
+
  public:
-  UniSceneRenderer() = default;
+   UniSceneRenderer(std::string name);
   ~UniSceneRenderer() = default;
 
   void Initialise();
@@ -120,6 +123,8 @@ class UniSceneRenderer {
   void BuildCommandBuffers();
   void RegisterMaterial(std::string materialID, std::shared_ptr<UniMaterial> mat);
   void UnRegisterMaterial(std::string materialID);
+  void UnRegisterMaterials();
+  
   
   template<typename T>
   std::shared_ptr<T> GetMaterialByID(std::string materialID);
@@ -148,8 +153,9 @@ template<typename T>
 std::shared_ptr<T> UniSceneRenderer::GetMaterialByID(
     std::string materialID) {
   if (m_materialInstances.find(materialID) == m_materialInstances.end()) {
-    auto mat = std::make_shared<T>(materialID);
-    RegisterMaterial(materialID, mat);
+  //  auto mat = std::make_shared<T>(materialID);
+  //  RegisterMaterial(materialID, mat);
+    return nullptr;
   }
   return std::dynamic_pointer_cast<T>(m_materialInstances.at(materialID));
 }

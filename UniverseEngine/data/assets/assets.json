@@ -1,0 +1,177 @@
+{
+    "_$schema": "assetschema.json",
+    "last_update": 0,
+    "created": 0,
+    "assets": [
+        {
+            "type": "texture2d",
+            "path": "/textures/default",
+            "filename": "default.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None_Base_Color.png",
+            "filename": "models/spaceship01/None_Base_Color.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None_Normal_DirectX.png",
+            "filename": "models/spaceship01/None_Normal_DirectX.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None_Roughness.png",
+            "filename": "models/spaceship01/None_Roughness.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None_Emissive.png",
+            "filename": "models/spaceship01/None_Emissive.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None_Metallic.png",
+            "filename": "models/spaceship01/None_Metallic.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None.001_Base_Color.png",
+            "filename": "models/spaceship01/None.001_Base_Color.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None.001_Normal_DirectX.png",
+            "filename": "models/spaceship01/None.001_Normal_DirectX.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None.001_Roughness.png",
+            "filename": "models/spaceship01/None.001_Roughness.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship01/None.001_Metallic.png",
+            "filename": "models/spaceship01/None.001_Metallic.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship02/Spaceship_BaseColor.png",
+            "filename": "models/spaceship02/Spaceship_BaseColor.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship02/Spaceship_Normal8.png",
+            "filename": "models/spaceship02/Spaceship_Normal8.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship02/Spaceship_Roughness.png",
+            "filename": "models/spaceship02/Spaceship_Roughness.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "texture2d",
+            "path": "/models/spaceship02/Spaceship_Metallic.png",
+            "filename": "models/spaceship02/Spaceship_Metallic.png",
+            "last_update": 0,
+            "format": "R8G8B8A8_UNORM"
+        },
+        {
+            "type": "model material",
+            "path": "/materials/spaceship01/material1",
+            "last_update": 0,
+            "colour": [ 0.560, 0.570, 0.580, 1.0 ],
+            "metallic": 1.0,
+            "roughness": 0.75,
+            "textureMap": "/models/spaceship01/None_Base_Color.png",
+            "normalMap": "/models/spaceship01/None_Normal_DirectX.png",
+            "roughnessMap": "/models/spaceship01/None_Roughness.png",
+            "emissiveMap": "/models/spaceship01/None_Emissive.png",
+            "metallicMap": "/models/spaceship01/None_Metallic.png"
+        },
+        {
+            "type": "model material",
+            "path": "/materials/spaceship01/material2",
+            "last_update": 0,
+            "colour": [ 0.560, 0.570, 0.580, 1.0 ],
+            "metallic": 1.0,
+            "roughness": 0.75,
+            "textureMap": "/models/spaceship01/None.001_Base_Color.png",
+            "normalMap": "/models/spaceship01/None.001_Normal_DirectX.png",
+            "roughnessMap": "/models/spaceship01/None.001_Roughness.png",
+            "metallicMap": "/models/spaceship01/None.001_Metallic.png"
+        },
+        {
+            "type": "model material",
+            "path": "/materials/spaceship02/material",
+            "last_update": 0,
+            "colour": [ 0.560, 0.570, 0.580, 1.0 ],
+            "metallic": 1.0,
+            "roughness": 0.75,
+            "textureMap": "/models/spaceship02/Spaceship_BaseColor.png",
+            "normalMap": "/models/spaceship02/Spaceship_Normal8.png",
+            "roughnessMap": "/models/spaceship02/Spaceship_Roughness.png",
+            "metallicMap": "/models/spaceship02/Spaceship_Metallic.png"
+        },
+        {
+            "type": "audio",
+            "path": "/audio/engine_loop",
+            "filename": "audio/engine_loop.wav",
+            "last_update": 0,
+            "3d": true,
+            "looping": true
+        },
+        {
+            "type": "audio",
+            "path": "/audio/spacewind",
+            "filename": "audio/spacewind.mp3",
+            "last_update": 0,
+            "3d": false,
+            "looping": true
+        },
+        {
+            "type": "model",
+            "path": "/models/spaceship01/spaceship.obj",
+            "filename": "models/spaceship01/spaceship.obj",
+            "last_update": 0,
+            "materials": [ "/materials/spaceship01/material1", "/materials/spaceship01/material2" ],
+            "createScale": [ 1, 1, 1 ],
+            "createUVScale": [ 1, 1 ]
+        },
+        {
+            "type": "model",
+            "path": "/models/spaceship02/Spaceship.obj",
+            "filename": "models/spaceship02/Spaceship.obj",
+            "last_update": 0,
+            "materials": [ "/materials/spaceship02/material" ],
+            "createScale": [ 0.02, 0.02, 0.02 ],
+            "createUVScale": [ 1, 1 ]
+        }
+    ]
+
+}

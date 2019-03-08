@@ -28,6 +28,12 @@ void alignedFree(void* data) {
 #endif
 }
 
+UniSceneRenderer::UniSceneRenderer(std::string name)
+{
+  m_name = name;
+  std::cout << "******************** SCENERENDER!!! " << name << " ********************" << std::endl;
+}
+
 void UniSceneRenderer::Initialise() {
   std::cout << "Prepare vertex descriptions..." << std::endl;
   SetupVertexDescriptions();
@@ -53,16 +59,16 @@ void UniSceneRenderer::Initialise() {
 
 void UniSceneRenderer::ShutDown() {
 
-  for (const auto& mat : m_materialInstances) {
-    mat.second->Destroy();
-  }
-
   auto engine = UniEngine::GetInstance();
   auto device = engine->GetDevice();
 
+  std::cout << "Destroying Pipeline layout" << std::endl;
   vkDestroyPipelineLayout(device, m_pipelineLayouts.forward, nullptr);
-  vkDestroyPipeline(device, m_pipelines.forward, nullptr);
+  /*std::cout << "Destroying Pipeline" << std::endl;
+  vkDestroyPipeline(device, m_pipelines.forward, nullptr);*/
+  std::cout << "Destroying descset layout" << std::endl;
   vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
+  std::cout << "Destroying descset" << std::endl;
   vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
 
   // Uniform buffers
@@ -327,12 +333,13 @@ void UniSceneRenderer::SetupDescriptorSets() {
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1,
           &m_uniformBuffers.fsLights.descriptor),
-      // Binding 1 : Fragment shader uniform buffer
+      // Binding 2 : modelviews
       vks::initializers::writeDescriptorSet(
           m_descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 2,
           &m_uniformBuffers.modelViews.descriptor),
 
   };
+
 
   vkUpdateDescriptorSets(device,
                          static_cast<uint32_t>(m_writeDescriptorSets.size()),
@@ -516,11 +523,16 @@ void UniSceneRenderer::UpdateCamera(float width, float height) {
 }
 
 void UniSceneRenderer::RegisterMaterial(std::string materialID, std::shared_ptr<UniMaterial> mat) {
-  m_materialInstances.emplace(materialID, mat);
+  m_materialInstances.insert({ materialID, mat });
 }
 
 void UniSceneRenderer::UnRegisterMaterial(std::string materialID) {
   m_materialInstances.erase(m_materialInstances.find(materialID));
+}
+
+void UniSceneRenderer::UnRegisterMaterials()
+{
+  m_materialInstances = {};
 }
 
 std::string UniSceneRenderer::GetShader(std::string shader) {

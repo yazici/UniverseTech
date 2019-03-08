@@ -72,7 +72,7 @@ void UniAudioEngine::UnLoadSound(const std::string& strSoundName) {
   auto tFoundIt = GetImplementation()->mSounds.find(strSoundName);
   if (tFoundIt == GetImplementation()->mSounds.end())
     return;
-
+  std::cout << "Unloading sound " << strSoundName << std::endl;
   UniAudioEngine::ErrorCheck(tFoundIt->second->release());
   GetImplementation()->mSounds.erase(tFoundIt);
 }
@@ -89,7 +89,7 @@ void UniAudioEngine::Set3dListenerAndOrientation(const glm::vec3 & vPos, const g
 
 int UniAudioEngine::PlaySoundFile(const string & strSoundName,
   const glm::vec3 & vPosition,
-  float fVolumedB) {
+  float fVolumePercent) {
   int nChannelId = GetImplementation()->mnNextChannelId++;
   auto tFoundIt = GetImplementation()->mSounds.find(strSoundName);
   if (tFoundIt == GetImplementation()->mSounds.end()) {
@@ -109,7 +109,7 @@ int UniAudioEngine::PlaySoundFile(const string & strSoundName,
       FMOD_VECTOR position = VectorToFmod(vPosition);
       UniAudioEngine::ErrorCheck(pChannel->set3DAttributes(&position, nullptr));
     }
-    UniAudioEngine::ErrorCheck(pChannel->setVolume(dbToVolume(fVolumedB)));
+    UniAudioEngine::ErrorCheck(pChannel->setVolume(fVolumePercent));
     UniAudioEngine::ErrorCheck(pChannel->setPaused(false));
     GetImplementation()->mChannels[nChannelId] = pChannel;
   }
@@ -132,6 +132,20 @@ void UniAudioEngine::SetChannelVolume(int nChannelId, float fVolumedB) {
     return;
 
   UniAudioEngine::ErrorCheck(tFoundIt->second->setVolume(dbToVolume(fVolumedB)));
+}
+
+bool UniAudioEngine::IsPlaying(int nChannelId) const
+{
+  auto tFoundIt = GetImplementation()->mChannels.find(nChannelId);
+  if (tFoundIt == GetImplementation()->mChannels.end())
+    return false;
+
+  bool bIsPlaying = false;
+  //std::cout << "Checking if channel " << nChannelId << " is playing" << std::endl;
+  UniAudioEngine::ErrorCheck(GetImplementation()->mChannels[nChannelId]->isPlaying(&bIsPlaying));
+
+  return bIsPlaying;
+
 }
 
 void UniAudioEngine::LoadBank(const std::string & strBankName,
@@ -173,6 +187,19 @@ void UniAudioEngine::PlayEvent(const string & strEventName) {
       return;
   }
   tFoundit->second->start();
+}
+
+void UniAudioEngine::StopChannel(int nChannelId)
+{
+  auto tFoundIt = GetImplementation()->mChannels.find(nChannelId);
+  if (tFoundIt == GetImplementation()->mChannels.end())
+    return;
+
+  if(IsPlaying(nChannelId)){
+    UniAudioEngine::ErrorCheck(GetImplementation()->mChannels[nChannelId]->stop());
+    Update();
+  }
+
 }
 
 void UniAudioEngine::StopEvent(const string & strEventName, bool bImmediate) {
@@ -226,6 +253,15 @@ void UniAudioEngine::SetEventParameter(const string & strEventName,
 }
 
 
+void UniAudioEngine::StopAllChannels()
+{
+  Update();
+
+  for (auto& [k, channel] : GetImplementation()->mChannels) {
+    StopChannel(k);
+  }
+}
+
 FMOD_VECTOR UniAudioEngine::VectorToFmod(const glm::vec3 & vPosition) {
   FMOD_VECTOR fVec;
   fVec.x = vPosition.x;
@@ -252,5 +288,5 @@ int UniAudioEngine::ErrorCheck(FMOD_RESULT result) {
 }
 
 void UniAudioEngine::Shutdown() {
-  GetImplementation().reset();
+  StopAllChannels();
 }

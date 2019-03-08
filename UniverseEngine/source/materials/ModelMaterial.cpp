@@ -6,6 +6,9 @@
 #include "../UniSceneRenderer.h"
 
 ModelMaterial::ModelMaterial(std::string name) {
+
+  std::cout << "### MODELMATERIAL " << name << " CREATED ###" << std::endl;
+  
   auto engine = UniEngine::GetInstance();
   auto aPath = engine->getAssetPath();
   m_Name = name;

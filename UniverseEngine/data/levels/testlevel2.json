@@ -1,19 +1,54 @@
 ﻿{
+    "_$schema": "levelschema.json",
     "level": {
-        "name": "Second Level",
+        "name": "Test Level",
         "origin": [ 0, 0, 0 ],
         "playerStart": {
-            "position": [0, 0, -2200.0],
-            "rotation": [0, 0, 0]
+            "position": [ 0, -10, -100 ],
+            "rotation": [ 0, 0, 0 ]
         },
         "sceneObjects": [
             {
-                "type": "light",
+                "name": "Audio Player",
+                "position": [ 0, 0, 0 ],
+                "rotation": [ 0, 0, 0 ],
+                "enabled": true,
+                "components": [
+                    {
+                        "type": "audio",
+                        "asset": "/audio/spacewind",
+                        "volume": 30,
+                        "paused": false
+                    }
+                ]
+            },
+            {
+                "name": "Space Ship 2",
+                "position": [ 10, 0, 10 ],
+                "rotation": [ 0, 0, 0 ],
+                "enabled": true,
+                "components": [
+                    {
+                        "type": "model",
+                        "asset": "/models/spaceship02/Spaceship.obj"
+                    },
+                    {
+                        "type": "movement",
+                        "rotation": [ 0, -30, 0 ]
+                    }
+                ]
+            },
+            {
                 "name": "light-sun",
-                "position": [ 1100.0, 300, 400.0 ],
-                "radius": 50000.0,
-                "color": [ 1, 0.8, 0.6, 1 ],
-                "on": true
+                "position": [ 0, 1.0, -0.3 ],
+                "components": [
+                    {
+                        "type": "light",
+                        "radius": 0.0,
+                        "color": [ 1.0, 0.9, 0.5, 1 ],
+                        "on": true
+                    }
+                ]
             }
         ]
     }

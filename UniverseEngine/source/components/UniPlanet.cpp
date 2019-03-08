@@ -544,7 +544,7 @@ uint32_t UniPlanet::AddNoiseLayer(NoiseType type,
 
 void UniPlanet::MakeRampTexture() {
   auto engine = UniEngine::GetInstance();
-  std::string path = getAssetPath() + "textures/terrain-ramp.png";
+  std::string path = engine->getAssetPath() + "textures/terrain-ramp.png";
   int texWidth, texHeight, texChannels;
   stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels,
                               STBI_rgb_alpha);

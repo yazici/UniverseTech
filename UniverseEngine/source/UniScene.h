@@ -11,6 +11,7 @@ class UniEngine;
 class UniScene {
 public:
 	UniScene();
+  UniScene(std::string name);
 	~UniScene();
 
 	ECS::ComponentHandle<CameraComponent> GetCameraComponent() { return m_CurrentCamera->m_Entity->get<CameraComponent>(); }

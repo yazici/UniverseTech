@@ -37,31 +37,22 @@ struct Implementation {
 class UniAudioEngine {
 public:
   static shared_ptr<Implementation> GetImplementation();
-  static void Init();
-  static void Update();
-  static void Shutdown();
+  void Init();
+  void Update();
+  void Shutdown();
   static int ErrorCheck(FMOD_RESULT result);
 
   void LoadBank(const string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags);
   void LoadEvent(const string& strEventName);
-  void LoadSound(const string& strSoundName,
-    bool b3d = true,
-    bool bLooping = false,
-    bool bStream = false);
+  void LoadSound(const string& strSoundName, bool b3d = true, bool bLooping = false, bool bStream = false);
   void UnLoadSound(const string& strSoundName);
   void Set3dListenerAndOrientation(const glm::vec3& vPos, const glm::vec3& vUp, const glm::vec3& vForward, const glm::vec3& vVelocity = { 0, 0, 0 });
-  int PlaySoundFile(const string& strSoundName,
-    const glm::vec3& vPosition = { 0, 0, 0 },
-    float fVolumedB = 0.0f);
+  int PlaySoundFile(const string& strSoundName, const glm::vec3& vPosition = { 0, 0, 0 }, float fVolumePercent = 50.0f);
   void PlayEvent(const string& strEventName);
   void StopChannel(int nChannelId);
   void StopEvent(const string& strEventName, bool bImmediate = false);
-  void GetEventParameter(const string& strEventName,
-    const string& strEventParameter,
-    float* parameter);
-  void SetEventParameter(const string& strEventName,
-    const string& strParameterName,
-    float fValue);
+  void GetEventParameter(const string& strEventName, const string& strEventParameter, float* parameter);
+  void SetEventParameter(const string& strEventName, const string& strParameterName, float fValue);
   void StopAllChannels();
   void SetChannel3dPosition(int nChannelId, const glm::vec3& vPosition);
   void SetChannelVolume(int nChannelId, float fVolumedB);
