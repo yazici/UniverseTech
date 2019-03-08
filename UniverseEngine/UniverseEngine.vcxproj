@@ -170,10 +170,11 @@
       <CompileAs>CompileAsCpp</CompileAs>
       <EnableEnhancedInstructionSet>
       </EnableEnhancedInstructionSet>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\libs\assimp;..\libs\gainput;..\libs\mango;..\external\fmod\lowlevel\lib;..\external\fmod\studio\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;assimp-vc140-mt.lib;gainput.lib;mango.lib;fmodstudio64_vc.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;assimp-vc140-mt.lib;gainput.lib;mango_debug.lib;fmodstudio64_vc.lib;fmod64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <CustomBuildStep>

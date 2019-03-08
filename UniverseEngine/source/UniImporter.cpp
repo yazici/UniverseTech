@@ -93,7 +93,7 @@ std::shared_ptr<UniAsset> UniModelImporter::Import(std::shared_ptr<UniAsset> ass
   std::vector<std::string> materials = asset->m_settings.at("materials");
 
 
-  std::cout << "Creating model path: " << asset->m_path << std::endl;
+  //std::cout << "Creating model path: " << asset->m_path << std::endl;
 
 
   glm::vec3 createScale = { asset->m_settings.at("createScale")[0], asset->m_settings.at("createScale")[1],
@@ -116,9 +116,18 @@ std::shared_ptr<UniAsset> UniModelImporter::Import(std::shared_ptr<UniAsset> ass
     aiProcess_FindInvalidData | aiProcess_GenSmoothNormals;
 
   auto engine = UniEngine::GetInstance();
-  auto renderer = engine->SceneRenderer();
 
-  model->loadFromFile(asset->m_sourceFile, renderer->GetVertexLayout(),
+  // TODO - this should be synced with the renderer!
+  auto vertexLayout = uni::VertexLayout({
+      uni::VERTEX_COMPONENT_POSITION,
+      uni::VERTEX_COMPONENT_UV,
+      uni::VERTEX_COMPONENT_COLOR,
+      uni::VERTEX_COMPONENT_NORMAL,
+      uni::VERTEX_COMPONENT_TANGENT,
+      uni::VERTEX_COMPONENT_MATERIAL_ID
+    });
+
+  model->loadFromFile(asset->m_sourceFile, vertexLayout,
     &mci, engine->vulkanDevice, engine->GetQueue(), materials,
     testFlags);
 
@@ -149,7 +158,7 @@ std::shared_ptr<UniAsset> MaterialImporter::Import(std::shared_ptr<UniAsset> ass
     return materialAsset;
 
 
-  std::cout << "Loading model material: " << asset->m_path << std::endl;
+  //std::cout << "Loading model material: " << asset->m_path << std::endl;
   // 	m_Name = jsonData["name"];
   std::string materialID = asset->m_path;
 
@@ -236,9 +245,6 @@ std::shared_ptr<UniAsset> MaterialImporter::Import(std::shared_ptr<UniAsset> ass
     roughness = so.at("roughness");
   }
 
-  if (materialID == "/materials/spaceship01/material1") {
-    std::cout << "Importing the material asset!" << std::endl;
-  }
 
   auto material = std::make_shared<ModelMaterial>(materialID);
   material->LoadTexture("texture", texturePath);
@@ -261,7 +267,7 @@ std::shared_ptr<UniAsset> MaterialImporter::Import(std::shared_ptr<UniAsset> ass
   material->SetUseEmissive(useEmissive);
   material->SetUseAO(useAO);
 
-  std::cout << "There are now " << material->m_Textures.size() << " textures and " << material->m_TexturePaths.size() << " paths registered with " << material->GetName() << std::endl;
+  //std::cout << "There are now " << material->m_Textures.size() << " textures and " << material->m_TexturePaths.size() << " paths registered with " << material->GetName() << std::endl;
 
   materialAsset->m_material = material;
 

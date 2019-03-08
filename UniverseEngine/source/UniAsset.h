@@ -60,6 +60,7 @@ public:
   std::shared_ptr<ModelMaterial> m_material;
 
   void Destroy() override {
+    std::cout << "Destroying material for asset " << m_path << std::endl;
     m_material->Destroy();
   }
 };

@@ -131,7 +131,7 @@ struct Model {
   struct Dimension {
     glm::vec3 min = glm::vec3(FLT_MAX);
     glm::vec3 max = glm::vec3(-FLT_MAX);
-    glm::vec3 size;
+    glm::vec3 size = glm::vec3(0);
   } dim;
 
   /** @brief Release all Vulkan resources of this model */

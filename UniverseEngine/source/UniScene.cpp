@@ -6,6 +6,7 @@
 #include "Materials.h"
 #include "UniEngine.h"
 #include "UniAudioEngine.h"
+#include "UniSceneManager.h"
 #include "UniSceneRenderer.h"
 #include "components/Components.h"
 #include "systems/Systems.h"
@@ -15,7 +16,15 @@
 
 using json = nlohmann::json;
 
-UniScene::UniScene() {}
+UniScene::UniScene() {
+  m_World = nullptr;
+}
+
+UniScene::UniScene(std::string name)
+{
+  m_World = nullptr;
+  m_Name = name;
+}
 
 UniScene::~UniScene() {}
 
@@ -45,7 +54,7 @@ void UniScene::Initialize() {
 void UniScene::Load(std::string filename) {
 
   auto assetManager = UniEngine::GetInstance()->AssetManager();
-  auto renderer = UniEngine::GetInstance()->SceneRenderer();
+  auto renderer = UniEngine::GetInstance()->SceneManager()->SceneRenderer(m_Name);
 
   std::ifstream t(filename);
   std::stringstream buffer;
@@ -71,7 +80,7 @@ void UniScene::Load(std::string filename) {
   for (const auto& row : level.at("sceneObjects")) {
     std::string soName = row.at("name");
 
-    glm::vec3 lpos;
+    glm::vec3 lpos = { 0, 0, 0 };
     if (row.find("position") != row.end()) {
       auto pos = row.at("position");
       lpos = glm::vec3(pos[0], pos[1], pos[2]);

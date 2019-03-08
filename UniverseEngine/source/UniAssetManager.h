@@ -130,9 +130,9 @@ template<typename T>
 std::shared_ptr<T> UniAssetManager::GetAsset(std::string path) {
   if (path.empty())
     return nullptr;
-  std::cout << "Retrieving asset " + path << std::endl;
+  //std::cout << "Retrieving asset " + path << std::endl;
   std::shared_ptr<UniAsset> asset = GetAsset(path);
-  std::cout << "Got UniAsset at " << asset->m_path << std::endl;
+  //std::cout << "Got UniAsset at " << asset->m_path << std::endl;
   std::shared_ptr<T> ret = std::dynamic_pointer_cast<T>(asset);
   return ret;
 }

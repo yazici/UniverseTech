@@ -7,15 +7,19 @@
 
 
 class AudioSystem : public ECS::EntitySystem,
-      public ECS::EventSubscriber<LevelStartEvent> {
+      public ECS::EventSubscriber<LevelStartEvent>,
+  public ECS::EventSubscriber<ECS::Events::OnComponentRemoved<AudioComponent>>
+{
  public:
 
   virtual ~AudioSystem() {}
 
   virtual void receive(ECS::World* world, const LevelStartEvent& event) override;
+  virtual void receive(ECS::World* world, const ECS::Events::OnComponentRemoved<AudioComponent>& event) override;
 
   virtual void configure(ECS::World* world) override {
     world->subscribe<LevelStartEvent>(this);
+    world->subscribe<ECS::Events::OnComponentRemoved<AudioComponent>>(this);
   }
 
   virtual void unconfigure(ECS::World* world) override {

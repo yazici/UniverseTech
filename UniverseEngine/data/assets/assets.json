@@ -140,10 +140,18 @@
         },
         {
             "type": "audio",
-            "path": "/audio/spacewind",
+            "path": "/audio/engine_loop",
             "filename": "audio/engine_loop.wav",
             "last_update": 0,
             "3d": true,
+            "looping": true
+        },
+        {
+            "type": "audio",
+            "path": "/audio/spacewind",
+            "filename": "audio/spacewind.mp3",
+            "last_update": 0,
+            "3d": false,
             "looping": true
         },
         {

@@ -7,6 +7,9 @@
 #include "UniAsset.h"
 
 UniMaterial::UniMaterial(std::string name) {
+
+  std::cout << "### UNIMATERIAL " << name << " CREATED ###" << std::endl;
+
   auto engine = UniEngine::GetInstance();
   auto aPath = engine->getAssetPath();
   m_Name = name;
@@ -16,28 +19,32 @@ UniMaterial::UniMaterial(std::string name) {
 
 void UniMaterial::SetupMaterial(
   VkGraphicsPipelineCreateInfo & pipelineCreateInfo) {
-  VkGraphicsPipelineCreateInfo localPCI = pipelineCreateInfo;
 
-  auto engine = UniEngine::GetInstance();
-  auto device = engine->GetDevice();
+  if (!m_setupPerformed) {
 
-  // Buffer for material properties to be used in both shader stages
-  VK_CHECK_RESULT(engine->vulkanDevice->createBuffer(
-    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-    VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    &m_MaterialPropertyBuffer, sizeof(m_MaterialProperties)));
-  VK_CHECK_RESULT(m_MaterialPropertyBuffer.map());
+    VkGraphicsPipelineCreateInfo localPCI = pipelineCreateInfo;
 
-  memcpy(m_MaterialPropertyBuffer.mapped, &m_MaterialProperties,
-    sizeof(m_MaterialProperties));
+    auto engine = UniEngine::GetInstance();
+    auto device = engine->GetDevice();
 
-  SetupDescriptorSetLayout(SceneRenderer());
-  PreparePipelines(SceneRenderer(), pipelineCreateInfo);
-  SetupDescriptorPool(SceneRenderer());
-  SetupDescriptorSets(SceneRenderer());
+    // Buffer for material properties to be used in both shader stages
+    VK_CHECK_RESULT(engine->vulkanDevice->createBuffer(
+      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+      &m_MaterialPropertyBuffer, sizeof(m_MaterialProperties)));
+    VK_CHECK_RESULT(m_MaterialPropertyBuffer.map());
 
-  m_setupPerformed = true;
+    memcpy(m_MaterialPropertyBuffer.mapped, &m_MaterialProperties,
+      sizeof(m_MaterialProperties));
+
+    SetupDescriptorSetLayout(SceneRenderer());
+    PreparePipelines(SceneRenderer(), pipelineCreateInfo);
+    SetupDescriptorPool(SceneRenderer());
+    SetupDescriptorSets(SceneRenderer());
+
+    m_setupPerformed = true;
+  }
 }
 
 /*
@@ -301,7 +308,7 @@ std::shared_ptr<vks::Buffer> UniMaterial::GetBuffer(std::string buffer) {
 
 std::shared_ptr<vks::Texture2D> UniMaterial::GetTexture(std::string name) {
 
-  std::cout << "There are " << m_TexturePaths.size() << " texture paths registered with " << m_Name << std::endl;
+  // std::cout << "There are " << m_TexturePaths.size() << " texture paths registered with " << m_Name << std::endl;
 
   auto texturePath = m_TexturePaths.at(name);
   auto engine = UniEngine::GetInstance();
@@ -317,13 +324,14 @@ void UniMaterial::SetTexture(std::string name,
 }
 
 std::shared_ptr<UniSceneRenderer> UniMaterial::SceneRenderer() {
-  return UniEngine::GetInstance()->SceneRenderer();
+  return UniEngine::GetInstance()->SceneManager()->SceneRenderer();
 }
 
 void UniMaterial::Destroy() {
   std::cout << "Destroying base material..." << std::endl;
 
   if (m_setupPerformed) {
+
     auto engine = UniEngine::GetInstance();
     auto device = engine->GetDevice();
 
@@ -339,6 +347,9 @@ void UniMaterial::Destroy() {
     vkDestroyPipeline(device, m_pipeline, nullptr);
     vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
     vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
+  }
+  else {
+    std::cout << "Base material not setup, no destruction called..." << std::endl;
   }
 
 }

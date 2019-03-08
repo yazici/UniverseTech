@@ -28,6 +28,12 @@ void alignedFree(void* data) {
 #endif
 }
 
+UniSceneRenderer::UniSceneRenderer(std::string name)
+{
+  m_name = name;
+  std::cout << "******************** SCENERENDER!!! " << name << " ********************" << std::endl;
+}
+
 void UniSceneRenderer::Initialise() {
   std::cout << "Prepare vertex descriptions..." << std::endl;
   SetupVertexDescriptions();
@@ -56,9 +62,13 @@ void UniSceneRenderer::ShutDown() {
   auto engine = UniEngine::GetInstance();
   auto device = engine->GetDevice();
 
+  std::cout << "Destroying Pipeline layout" << std::endl;
   vkDestroyPipelineLayout(device, m_pipelineLayouts.forward, nullptr);
-  vkDestroyPipeline(device, m_pipelines.forward, nullptr);
+  /*std::cout << "Destroying Pipeline" << std::endl;
+  vkDestroyPipeline(device, m_pipelines.forward, nullptr);*/
+  std::cout << "Destroying descset layout" << std::endl;
   vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
+  std::cout << "Destroying descset" << std::endl;
   vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
 
   // Uniform buffers
@@ -518,6 +528,11 @@ void UniSceneRenderer::RegisterMaterial(std::string materialID, std::shared_ptr<
 
 void UniSceneRenderer::UnRegisterMaterial(std::string materialID) {
   m_materialInstances.erase(m_materialInstances.find(materialID));
+}
+
+void UniSceneRenderer::UnRegisterMaterials()
+{
+  m_materialInstances = {};
 }
 
 std::string UniSceneRenderer::GetShader(std::string shader) {

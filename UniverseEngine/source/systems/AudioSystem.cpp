@@ -13,7 +13,7 @@ void AudioSystem::receive(ECS::World* world, const LevelStartEvent& event) {
       ECS::ComponentHandle<TransformComponent> transform) {
 
         if (audio->m_isPlaying) {
-          UniEngine::GetInstance()->AudioManager()->PlaySoundFile(
+          audio->m_channel = UniEngine::GetInstance()->AudioManager()->PlaySoundFile(
             audio->m_filename, transform->GetPosition(), audio->m_volume);
 
           std::cout << "Playing audio: " << audio->m_filename << " at " << glm::to_string<glm::vec3>(transform->GetPosition()) << std::endl;
@@ -21,6 +21,20 @@ void AudioSystem::receive(ECS::World* world, const LevelStartEvent& event) {
 
     });
 }
+
+void AudioSystem::receive(ECS::World* world, const ECS::Events::OnComponentRemoved<AudioComponent>& event) {
+  auto engine = UniEngine::GetInstance();
+  auto renderer = engine->SceneRenderer();
+
+  auto audio = event.component;
+  if (audio->m_isPlaying) {
+    //std::cout << "Stopping audio channel " << audio->m_channel << std::endl;
+    UniEngine::GetInstance()->AudioManager()->StopChannel(audio->m_channel);
+    //std::cout << "Stopped audio channel " << audio->m_channel << std::endl;
+  }
+
+}
+
 
 void AudioSystem::tick(ECS::World* world, float deltaTime) {
 

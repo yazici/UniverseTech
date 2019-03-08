@@ -80,9 +80,9 @@ void UniAssetManager::CheckImported(std::vector<std::string> assets)
 
 bool UniAssetManager::ImportAll()
 {
-
-  concurrency::parallel_for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
-  //for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
+  //concurrency::parallel_for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
+  for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
+    //std::cout << "Importing asset " << kv.first << std::endl;
     auto _ = GetRegistry()->Import(kv.second->m_type, kv.second);
     });
 

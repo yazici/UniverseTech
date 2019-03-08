@@ -34,7 +34,7 @@ public:
 
   std::string GetShader(std::string name) { return m_Shaders.at(name); }
   void SetShader(std::string name, std::string shader) {
-    m_Shaders[name] = shader;
+    m_Shaders.insert({ name, shader });
   }
   void SetIndexCount(uint32_t count = 0) { m_IndexCount = count; }
   virtual void SetupMaterial(VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
@@ -117,7 +117,7 @@ protected:
   std::vector<ECS::ComponentHandle<ModelComponent>> m_models;
 
   std::string m_Name;
-  uint32_t m_IndexCount;
+  uint32_t m_IndexCount = 0;
 
 public:
   std::map<std::string, std::shared_ptr<vks::Texture2D>> m_Textures;
@@ -127,13 +127,13 @@ protected:
   std::map<std::string, std::string> m_Shaders;
   std::map<std::string, std::shared_ptr<vks::Buffer>> m_Buffers;
 
-  VkPipelineLayout m_pipelineLayout;
-  VkPipeline m_pipeline;
-  VkDescriptorSetLayout m_descriptorSetLayout;
-  VkDescriptorSet m_descriptorSet;
+  VkPipelineLayout m_pipelineLayout = nullptr;
+  VkPipeline m_pipeline = nullptr;
+  VkDescriptorSetLayout m_descriptorSetLayout = nullptr;
+  VkDescriptorSet m_descriptorSet = nullptr;
   std::vector<VkDescriptorSetLayoutBinding> m_setLayoutBindings;
   std::vector<VkWriteDescriptorSet> m_writeDescriptorSets;
-  VkDescriptorPool m_descriptorPool;
+  VkDescriptorPool m_descriptorPool = nullptr;
 
   bool m_setupPerformed = false;
 };

@@ -17,14 +17,13 @@
 void UniEngine::Shutdown() {
   std::cout << "Shutting down..." << std::endl;
 
-  AssetManager()->Shutdown();
   SceneManager()->Shutdown();
-  SceneRenderer()->ShutDown();
   AudioManager()->Shutdown();
+  AssetManager()->Shutdown();
+
 
 
   m_SceneManager.reset();
-  m_SceneRenderer.reset();
   m_InputManager.reset();
   m_AudioManager.reset();
   m_AssetManager.reset();
@@ -38,7 +37,6 @@ UniEngine::~UniEngine() {
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
   m_AssetManager = std::make_shared<UniAssetManager>(getAssetPath() + "assets");
   m_SceneManager = std::make_shared<UniSceneManager>();
-  m_SceneRenderer = std::make_shared<UniSceneRenderer>();
   m_AudioManager = std::make_shared<UniAudioEngine>();
 
   title = "Universe Tech Test";
@@ -140,14 +138,15 @@ void UniEngine::prepare() {
   AssetManager()->ImportAll();
 
   std::cout << "Load level data..." << std::endl;
-  SceneManager()->LoadScene("testlevel");
+  SceneManager()->LoadScene("testlevel2");
+  SceneManager()->ActivateScene("testlevel2");
 
-  SceneRenderer()->Initialise();
-
+  SetupOverlay();
 
   prepared = true;
   std::cout << "Initialization complete." << std::endl;
 }
+
 
 void UniEngine::SetupInput() {
   m_InputManager = std::make_shared<UniInput>();
@@ -215,6 +214,37 @@ void UniEngine::SetupInput() {
             {UniInput::ButtonRightClick, newValue ? 1.f : 0.f});
       });
 }
+
+void UniEngine::SetupOverlay()
+{
+  settings.overlay = settings.overlay && (!benchmark.active);
+  if (settings.overlay) {
+    vks::UIOverlayCreateInfo overlayCreateInfo = {};
+    // Setup default overlay creation info
+    overlayCreateInfo.device = vulkanDevice;
+    overlayCreateInfo.copyQueue = queue;
+    overlayCreateInfo.framebuffers = frameBuffers;
+    overlayCreateInfo.colorformat = swapChain.colorFormat;
+    overlayCreateInfo.depthformat = depthFormat;
+    overlayCreateInfo.width = width;
+    overlayCreateInfo.height = height;
+    // Virtual function call for example to customize overlay creation
+    OnSetupUIOverlay(overlayCreateInfo);
+    // Load default shaders if not specified by example
+    if (overlayCreateInfo.shaders.empty()) {
+      overlayCreateInfo.shaders = {
+          loadShader(getAssetPath() + "shaders/base/uioverlay.vert.spv",
+                     VK_SHADER_STAGE_VERTEX_BIT),
+          loadShader(getAssetPath() + "shaders/base/uioverlay.frag.spv",
+                     VK_SHADER_STAGE_FRAGMENT_BIT),
+      };
+    }
+    UIOverlay = new vks::UIOverlay(overlayCreateInfo);
+    updateOverlay();
+
+  }
+}
+
 
 void UniEngine::draw() {
   VulkanExampleBase::prepareFrame();
@@ -379,4 +409,9 @@ void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
       }
     }
   }
+}
+
+std::shared_ptr<UniSceneRenderer> UniEngine::SceneRenderer()
+{
+  return m_SceneManager->SceneRenderer();
 }

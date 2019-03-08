@@ -16,17 +16,20 @@ class UniSceneManager {
 
   size_t m_CurrentSceneIdx = 0;
 
-  std::shared_ptr<UniSceneRenderer> m_renderer;
+  std::string m_currentScene = "";
+
+  std::map<std::string, std::shared_ptr<UniSceneRenderer>> m_renderers;
 
  public:
   UniSceneManager() = default;
   ~UniSceneManager() = default;
 
-  std::shared_ptr<UniScene> m_CurrentScene;
+  std::map<std::string, std::shared_ptr<UniScene>> m_scenes;
 
   void Initialise();
   void LoadScene(std::string sceneName);
-  void UnloadCurrentScene();
+  void ActivateScene(std::string sceneName);
+  void UnloadScene(std::string sceneName);
   void LoadAssets(std::string sceneName);
   void RequestNewScene(std::string sceneName);
   void CycleScenes();
@@ -35,6 +38,9 @@ class UniSceneManager {
   void Tick(float frameTimer);
   bool CheckNewScene();
 
+  std::shared_ptr<UniSceneRenderer> SceneRenderer();
+
+  std::shared_ptr<UniSceneRenderer> SceneRenderer(std::string sceneName);
   ECS::ComponentHandle<CameraComponent> CurrentCamera() {
     return CurrentScene()->GetCameraComponent();
   }

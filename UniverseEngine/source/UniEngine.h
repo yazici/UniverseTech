@@ -64,7 +64,6 @@ class UniEngine final : public VulkanExampleBase {
  private:
   std::shared_ptr<UniSceneManager> m_SceneManager;
   std::shared_ptr<UniInput> m_InputManager;
-  std::shared_ptr<UniSceneRenderer> m_SceneRenderer;
   std::shared_ptr<UniAudioEngine> m_AudioManager;
   std::shared_ptr<UniAssetManager> m_AssetManager;
 
@@ -74,7 +73,7 @@ class UniEngine final : public VulkanExampleBase {
 
  public:
   std::shared_ptr<UniSceneManager> SceneManager(){ return m_SceneManager; }
-  std::shared_ptr<UniSceneRenderer> SceneRenderer() { return m_SceneRenderer; }
+  std::shared_ptr<UniSceneRenderer> SceneRenderer();
   void windowResized() override;
   std::shared_ptr<UniInput> InputManager() { return m_InputManager; }
   std::shared_ptr<UniAudioEngine> AudioManager() { return m_AudioManager; }
@@ -90,7 +89,7 @@ class UniEngine final : public VulkanExampleBase {
 
   std::vector<VkCommandBuffer> &GetCommandBuffers() { return drawCmdBuffers; }
   std::vector<VkFramebuffer> &GetFrameBuffers() {return frameBuffers; }
-
+  void SetupOverlay();
   std::mutex m_QueueMutex;
 
 
