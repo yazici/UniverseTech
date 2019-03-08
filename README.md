@@ -17,6 +17,7 @@ Base engine capabilities in current version:
 - Entity Component System architecture for data-driven behaviour models.
 - Scene graph with object hierarchy, full object lifecycle.
 - Event-driven model to allow loosely-couple object behaviours.
+- FMOD audio engine supporting positional and stereo audio emitters.
 - GUI overlay with input handling.
 - Multithreading.
 - Input management.
