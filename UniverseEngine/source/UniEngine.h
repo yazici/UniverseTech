@@ -21,13 +21,17 @@
 // todo: check if hardware supports sample number (or select max. supported)
 #define SAMPLE_COUNT VK_SAMPLE_COUNT_8_BIT
 
-
+namespace uni {
+  namespace assets {
+    class UniAssetManager;
+  }
+}
 // forward declarations
 class UniSceneManager;
 class UniSceneRenderer;
 class UniInput;
 class UniAudioEngine;
-class UniAssetManager;
+
 
 class UniEngine final : public VulkanExampleBase {
  private:
@@ -65,7 +69,7 @@ class UniEngine final : public VulkanExampleBase {
   std::shared_ptr<UniSceneManager> m_SceneManager;
   std::shared_ptr<UniInput> m_InputManager;
   std::shared_ptr<UniAudioEngine> m_AudioManager;
-  std::shared_ptr<UniAssetManager> m_AssetManager;
+  std::shared_ptr<uni::assets::UniAssetManager> m_AssetManager;
 
   bool m_CamPaused = false;
   float m_PlanetZOffset = 0;
@@ -77,7 +81,7 @@ class UniEngine final : public VulkanExampleBase {
   void windowResized() override;
   std::shared_ptr<UniInput> InputManager() { return m_InputManager; }
   std::shared_ptr<UniAudioEngine> AudioManager() { return m_AudioManager; }
-  std::shared_ptr<UniAssetManager> AssetManager() { return m_AssetManager; }
+  std::shared_ptr<uni::assets::UniAssetManager> AssetManager() { return m_AssetManager; }
   void SetupInput();
 
   void handleWMMessages(MSG& msg) override;

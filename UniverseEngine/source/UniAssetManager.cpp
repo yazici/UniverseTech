@@ -8,7 +8,7 @@
 #include <ppl.h>
 
 using json = nlohmann::json;
-
+using namespace uni::assets;
 
 UniAssetManager::UniAssetManager(std::string basePath, std::string registryFile)
 {

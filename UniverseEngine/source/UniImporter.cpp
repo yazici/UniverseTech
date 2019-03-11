@@ -6,6 +6,7 @@
 #include "UniAudioEngine.h"
 
 using namespace uni::import;
+using namespace uni::assets;
 
 
 std::shared_ptr<UniAsset> UniTexture2DImporter::Import(std::shared_ptr<UniAsset> asset, bool force)

@@ -35,7 +35,7 @@ UniEngine::~UniEngine() {
 }
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
-  m_AssetManager = std::make_shared<UniAssetManager>(getAssetPath() + "assets");
+  m_AssetManager = std::make_shared<uni::assets::UniAssetManager>(getAssetPath() + "assets");
   m_SceneManager = std::make_shared<UniSceneManager>();
   m_AudioManager = std::make_shared<UniAudioEngine>();
 
