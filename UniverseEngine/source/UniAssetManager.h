@@ -19,12 +19,12 @@ namespace uni::import
 	    m_factories.insert(std::pair<std::string, std::shared_ptr<UniImporter>>(assetType, importer));
 	  }
 	
-	  std::shared_ptr<UniAsset> Import(std::string assetType, std::shared_ptr<UniAsset> asset, bool force = false)
+	  std::shared_ptr<uni::assets::UniAsset> Import(std::string assetType, std::shared_ptr<uni::assets::UniAsset> asset, bool force = false)
 	  {
 	    return m_factories.at(assetType)->Import(asset, force);
 	  }
 	
-	  std::shared_ptr<UniAsset> LoadAsset(std::string assetType, json data)
+	  std::shared_ptr<uni::assets::UniAsset> LoadAsset(std::string assetType, json data)
 	  {
 	    return m_factories.at(assetType)->LoadAsset(data);
 	  }

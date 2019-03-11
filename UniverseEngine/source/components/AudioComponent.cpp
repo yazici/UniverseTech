@@ -3,6 +3,8 @@
 #include "../UniAssetManager.h"
 #include "../UniAsset.h"
 
+using namespace uni::assets;
+
 AudioComponent::AudioComponent(std::string path)
 {
   auto asset = UniEngine::GetInstance()->AssetManager()->GetAsset<UniAssetAudio>(path);

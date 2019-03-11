@@ -282,7 +282,7 @@ void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
 
   auto engine = UniEngine::GetInstance();
   auto mgr = engine->AssetManager();
-  auto asset = mgr->GetAsset<UniAssetTexture2D>(texturePath);
+  auto asset = mgr->GetAsset<uni::assets::UniAssetTexture2D>(texturePath);
 
   m_TexturePaths.insert({ name, texturePath });
 
@@ -313,7 +313,7 @@ std::shared_ptr<vks::Texture2D> UniMaterial::GetTexture(std::string name) {
   auto texturePath = m_TexturePaths.at(name);
   auto engine = UniEngine::GetInstance();
   auto mgr = engine->AssetManager();
-  auto asset = mgr->GetAsset<UniAssetTexture2D>(texturePath);
+  auto asset = mgr->GetAsset<uni::assets::UniAssetTexture2D>(texturePath);
 
   return asset->m_texture;
 }

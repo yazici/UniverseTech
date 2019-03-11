@@ -141,7 +141,7 @@ void UniScene::Load(std::string filename) {
       if (component.at("type") == "model") {
         std::cout << "Assigning model component: " << component.at("asset") << std::endl;
 
-        auto asset = assetManager->GetAsset<UniAssetModel>(component.at("asset"));
+        auto asset = assetManager->GetAsset<uni::assets::UniAssetModel>(component.at("asset"));
 
         ECS::ComponentHandle<ModelComponent> model =
           sceneObject->AddComponent<ModelComponent>(asset->m_path);
@@ -151,7 +151,7 @@ void UniScene::Load(std::string filename) {
         for (const auto& mat : asset->m_materials) {
           
           if (renderer->GetMaterialByID<ModelMaterial>(mat) == nullptr) {
-            auto matAsset = assetManager->GetAsset<UniAssetMaterial>(mat);
+            auto matAsset = assetManager->GetAsset<uni::assets::UniAssetMaterial>(mat);
             renderer->RegisterMaterial(mat, matAsset->m_material);
           }
         }
