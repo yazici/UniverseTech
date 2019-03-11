@@ -34,7 +34,7 @@ struct Implementation {
 };
 
 
-class UniAudioEngine {
+class AudioEngine {
 public:
   static shared_ptr<Implementation> GetImplementation();
   void Init();

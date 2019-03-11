@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../UniMaterial.h"
+#include "../Material.h"
 
 class ModelComponent;
 
-class ModelMaterial : public UniMaterial {
+class ModelMaterial : public Material {
 private:
   std::vector<std::shared_ptr<ModelComponent>> m_models;
 

@@ -6,7 +6,7 @@
 #include "../3dmaths.h"
 
 
-class UniSceneObject;
+class SceneObject;
 
 struct TransformComponent {
 
@@ -38,9 +38,9 @@ struct TransformComponent {
 	glm::vec3 m_Up;
 	glm::vec3 m_Right;
 
-	std::shared_ptr<UniSceneObject> m_Parent;
+	std::shared_ptr<SceneObject> m_Parent;
 
-	void SetParent(std::shared_ptr<UniSceneObject> parent);
+	void SetParent(std::shared_ptr<SceneObject> parent);
 
 	void SetPosition(const glm::vec3 &pos);
 

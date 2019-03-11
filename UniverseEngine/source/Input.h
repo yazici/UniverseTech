@@ -7,11 +7,11 @@
 #include <vector>
 #include <utility>
 
-class UniInput;
+class Input;
 
-class UniMappedButtonListener : public gainput::MappedInputListener {
+class MappedButtonListener : public gainput::MappedInputListener {
 public:
-	UniMappedButtonListener(int index, UniInput& input) : index_(index), m_InputManager(input) {}
+	MappedButtonListener(int index, Input& input) : index_(index), m_InputManager(input) {}
 
 	bool OnUserButtonBool(gainput::UserButtonId button, bool oldValue, bool newValue) override;
 	bool OnUserButtonFloat(gainput::UserButtonId button, float oldValue, float newValue) override;
@@ -21,12 +21,12 @@ public:
 	}
 private:
 	int index_;
-	UniInput& m_InputManager;
+	Input& m_InputManager;
 };
 
-class UniDeviceButtonListener : public gainput::InputListener {
+class DeviceButtonListener : public gainput::InputListener {
 public: 
-	UniDeviceButtonListener(gainput::InputManager& manager, int index) : manager_(manager), index_(index) {}
+	DeviceButtonListener(gainput::InputManager& manager, int index) : manager_(manager), index_(index) {}
 	bool OnDeviceButtonBool(gainput::DeviceId deviceId, gainput::DeviceButtonId deviceButton, bool oldValue, bool newValue) override;
 
 	int GetPriority() const override {
@@ -38,7 +38,7 @@ private:
 };
 
 
-class UniInput {
+class Input {
 
 public:
 
@@ -68,12 +68,12 @@ public:
 		float Y = 0.0f;
 	};
 
-	UniInput();
-	~UniInput();
+	Input();
+	~Input();
 	gainput::InputManager m_InputManager;
 	std::unique_ptr<gainput::InputMap> m_InputMap;
-	std::unique_ptr<UniMappedButtonListener> m_Listener;
-	std::unique_ptr<UniDeviceButtonListener> m_DeviceListener;
+	std::unique_ptr<MappedButtonListener> m_Listener;
+	std::unique_ptr<DeviceButtonListener> m_DeviceListener;
 	std::map<Button, std::vector<std::function<void(bool)>>> m_ButtonCallbacks;
 	std::map<Button, std::vector<std::function<void(float)>>> m_AxisCallbacks;
 	std::vector<std::function<void(float, float)>> m_PointerPosCallbacks;

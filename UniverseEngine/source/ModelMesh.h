@@ -28,7 +28,7 @@
 #include "vks/VulkanBuffer.hpp"
 #include "vks/VulkanDevice.hpp"
 
-#include "UniMaterial.h"
+#include "Material.h"
 
 #if defined(__ANDROID__)
 #include <android/asset_manager.h>

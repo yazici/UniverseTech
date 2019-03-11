@@ -1,13 +1,13 @@
 #include "ModelRenderSystem.h"
 #include "../UniEngine.h"
-#include "../UniInput.h"
-#include "../UniSceneManager.h"
-#include "../UniSceneRenderer.h"
+#include "../Input.h"
+#include "../SceneManager.h"
+#include "../SceneRenderer.h"
 #include "../materials/ModelMaterial.h"
 
 void ModelRenderSystem::receive(ECS::World* world, const RenderEvent& event) {
   auto engine = UniEngine::GetInstance();
-  auto renderer = engine->SceneRenderer();
+  auto renderer = engine->GetSceneRenderer();
 
   std::cout << "Render system received render event." << std::endl;
 

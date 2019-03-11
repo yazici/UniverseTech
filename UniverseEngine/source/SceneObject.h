@@ -6,18 +6,18 @@
 #include "components/Components.h"
 #include "glm/glm.hpp"
 
-class UniScene;
+class Scene;
 
-class UniSceneObject {
+class SceneObject {
  public:
-  UniSceneObject(std::string name = "unnamed object") { m_Name = name; }
-  virtual ~UniSceneObject() = default;
+  SceneObject(std::string name = "unnamed object") { m_Name = name; }
+  virtual ~SceneObject() = default;
 
-  std::shared_ptr<UniSceneObject> m_Parent;
+  std::shared_ptr<SceneObject> m_Parent;
 
-  void SetScene(UniScene* scene);
+  void SetScene(Scene* scene);
   void SetEntity(ECS::Entity* ent, glm::vec3 pos);
-  void SetParent(std::shared_ptr<UniSceneObject> parent);
+  void SetParent(std::shared_ptr<SceneObject> parent);
 
   ECS::Entity* m_Entity = nullptr;
 
@@ -40,18 +40,18 @@ class UniSceneObject {
   void Destroy() {};
 
  protected:
-  UniScene* m_Scene;
+  Scene* m_Scene;
   std::string m_Name = "object";
   bool m_IsRendered = false;
   uint32_t m_renderIndex = 0;
 };
 
 template <class T, class... _Types>
-ECS::ComponentHandle<T> UniSceneObject::AddComponent(_Types&&... _Args) {
+ECS::ComponentHandle<T> SceneObject::AddComponent(_Types&&... _Args) {
   return m_Entity->assign<T>(_Args...);
 }
 
 template <class T>
-ECS::ComponentHandle<T> UniSceneObject::GetComponent() {
+ECS::ComponentHandle<T> SceneObject::GetComponent() {
   return m_Entity->get<T>();
 }

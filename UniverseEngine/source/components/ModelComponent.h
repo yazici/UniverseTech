@@ -2,8 +2,8 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include "../3dmaths.h"
-#include "../UniModelMesh.h"
-#include "../UniSceneObject.h"
+#include "../ModelMesh.h"
+#include "../SceneObject.h"
 //#include "vks/VulkanTexture.hpp"
 //#include "vulkan/vulkan_core.h"
 //#include "materials/ModelMaterial.h"
@@ -20,10 +20,10 @@ public:
   std::vector<std::string> m_Materials;
   std::shared_ptr<uni::Model> m_Model;
 
-  void SetSceneObject(std::shared_ptr<UniSceneObject> so) {
+  void SetSceneObject(std::shared_ptr<SceneObject> so) {
     m_SceneObject = so;
   }
-  std::shared_ptr<UniSceneObject> GetSceneObject() { return m_SceneObject; }
+  std::shared_ptr<SceneObject> GetSceneObject() { return m_SceneObject; }
 
   std::vector<std::string> GetMaterialIDs() { return m_Materials; }
 
@@ -32,6 +32,6 @@ public:
 protected:
   std::string m_Name = "";
   bool m_IsRendered = true;
-  std::shared_ptr<UniSceneObject> m_SceneObject;
+  std::shared_ptr<SceneObject> m_SceneObject;
   
 };

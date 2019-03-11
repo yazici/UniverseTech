@@ -129,29 +129,14 @@
     <ClInclude Include="source\UniEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\UniScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\UniSceneObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\ECS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Geometry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\UniFrustum.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\vks\frustum.hpp">
       <Filter>Header Files\vks</Filter>
-    </ClInclude>
-    <ClInclude Include="source\UniInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\UniMaterial.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\factory.h">
       <Filter>Header Files</Filter>
@@ -183,9 +168,6 @@
     <ClInclude Include="source\components\Transform.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="source\components\UniPlanet.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="source\systems\GravitySystem.h">
       <Filter>Systems</Filter>
     </ClInclude>
@@ -204,12 +186,6 @@
     <ClInclude Include="source\3dmaths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\UniSceneManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\UniSceneRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\materials\PlanetMaterial.h">
       <Filter>Materials</Filter>
     </ClInclude>
@@ -222,14 +198,8 @@
     <ClInclude Include="source\components\ModelComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="source\UniModelMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\systems\ModelRenderSystem.h">
       <Filter>Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="source\UniAudioEngine.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\components\AudioComponent.h">
       <Filter>Components</Filter>
@@ -237,14 +207,44 @@
     <ClInclude Include="source\systems\AudioSystem.h">
       <Filter>Systems</Filter>
     </ClInclude>
-    <ClInclude Include="source\UniAssetManager.h">
+    <ClInclude Include="source\Asset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\UniAsset.h">
+    <ClInclude Include="source\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\UniImporter.h">
+    <ClInclude Include="source\ModelMesh.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\AssetManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\AudioEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Importer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\SceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\SceneObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\SceneRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Frustum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\components\Planet.h">
+      <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -275,22 +275,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\UniScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniSceneObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\UniEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniFrustum.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniMaterial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\FastNoise.cpp">
@@ -311,9 +296,6 @@
     <ClCompile Include="source\components\Transform.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="source\components\UniPlanet.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
     <ClCompile Include="source\systems\GravitySystem.cpp">
       <Filter>Systems</Filter>
     </ClCompile>
@@ -325,12 +307,6 @@
     </ClCompile>
     <ClCompile Include="source\components\PlayerControl.cpp">
       <Filter>Components</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniSceneManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniSceneRenderer.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\materials\PlanetMaterial.cpp">
       <Filter>Materials</Filter>
@@ -344,26 +320,50 @@
     <ClCompile Include="source\systems\ModelRenderSystem.cpp">
       <Filter>Systems</Filter>
     </ClCompile>
-    <ClCompile Include="source\UniAudioEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\components\AudioComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="source\systems\AudioSystem.cpp">
       <Filter>Systems</Filter>
     </ClCompile>
-    <ClCompile Include="source\UniAssetManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniAsset.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\UniImporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\vks\VulkanTexture.cpp">
       <Filter>Source Files\vks</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Asset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\AssetManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\AudioEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Importer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SceneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SceneObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SceneRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Frustum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\components\Planet.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

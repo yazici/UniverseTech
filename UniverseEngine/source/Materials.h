@@ -1,4 +1,4 @@
 #pragma once
 
-#include "UniMaterial.h"
+#include "Material.h"
 #include "materials/ModelMaterial.h"

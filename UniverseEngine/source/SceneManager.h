@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "UniScene.h"
+#include "Scene.h"
  
-class UniSceneRenderer;
+class SceneRenderer;
 
-class UniSceneManager {
+class SceneManager {
  private:
   bool m_UpdateScene = false;
   std::string m_NextScene = "";
@@ -18,13 +18,13 @@ class UniSceneManager {
 
   std::string m_currentScene = "";
 
-  std::map<std::string, std::shared_ptr<UniSceneRenderer>> m_renderers;
+  std::map<std::string, std::shared_ptr<SceneRenderer>> m_renderers;
 
  public:
-  UniSceneManager() = default;
-  ~UniSceneManager() = default;
+  SceneManager() = default;
+  ~SceneManager() = default;
 
-  std::map<std::string, std::shared_ptr<UniScene>> m_scenes;
+  std::map<std::string, std::shared_ptr<Scene>> m_scenes;
 
   void Initialise();
   void LoadScene(std::string sceneName);
@@ -34,13 +34,13 @@ class UniSceneManager {
   void RequestNewScene(std::string sceneName);
   void CycleScenes();
   void Shutdown();
-  std::shared_ptr<UniScene> CurrentScene();
+  std::shared_ptr<Scene> CurrentScene();
   void Tick(float frameTimer);
   bool CheckNewScene();
 
-  std::shared_ptr<UniSceneRenderer> SceneRenderer();
+  std::shared_ptr<SceneRenderer> GetSceneRenderer();
 
-  std::shared_ptr<UniSceneRenderer> SceneRenderer(std::string sceneName);
+  std::shared_ptr<SceneRenderer> GetSceneRenderer(std::string sceneName);
   ECS::ComponentHandle<CameraComponent> CurrentCamera() {
     return CurrentScene()->GetCameraComponent();
   }
@@ -50,6 +50,6 @@ class UniSceneManager {
 };
 
 template <typename T>
-void UniSceneManager::EmitEvent(const T& event) {
+void SceneManager::EmitEvent(const T& event) {
   CurrentScene()->m_World->emit<T>(event);
 }

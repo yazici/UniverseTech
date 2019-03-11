@@ -41,10 +41,10 @@ struct FrustumCorners {
 
 };
 
-class UniFrustum {
+class Frustum {
 public:
-	UniFrustum();
-	~UniFrustum();
+	Frustum();
+	~Frustum();
 
 	void Update();
 

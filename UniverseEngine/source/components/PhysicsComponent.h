@@ -5,7 +5,7 @@
 #include "../ECS.h"
 #include "../3dmaths.h"
 
-class UniSceneObject;
+class SceneObject;
 
 class PhysicsComponent {
 public:
@@ -26,7 +26,7 @@ public:
 		std::cout << "Radius: " << radius << ", Density: " << density << ". Setting mass: " << m_Mass << "kg" << std::endl;
 	}
 
-	std::shared_ptr<UniSceneObject> m_SceneObject;
+	std::shared_ptr<SceneObject> m_SceneObject;
 
 	double m_Mass = 0.0;
 	bool m_IsStatic = false;
@@ -44,6 +44,6 @@ public:
 	void AddForceAt(glm::dvec3 force, glm::dvec3 pos);
 	void AddAngularVelocity(const glm::vec3 &angular);
 	void FullStop() { m_Velocity = glm::dvec3(0); m_AngularVelocity = glm::dvec3(0); }
-	void SetSceneObject(std::shared_ptr<UniSceneObject> so) { m_SceneObject = so; }
+	void SetSceneObject(std::shared_ptr<SceneObject> so) { m_SceneObject = so; }
 };
 

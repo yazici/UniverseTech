@@ -6,7 +6,7 @@
 #include "../vks/frustum.hpp"
 #include "../3dmaths.h"
 
-class UniPlanet{
+class Planet{
 public:
 	enum NoiseType {
 		SIMPLEX,
@@ -55,10 +55,10 @@ public:
 	vks::Frustum frustum;
 
 
-	UniPlanet(double radius = 1.0, double maxHeightOffset = 0.1, double maxDepthOffset = 0.1, uint16_t gridSize = 10, bool hasOcean = false);
+	Planet(double radius = 1.0, double maxHeightOffset = 0.1, double maxDepthOffset = 0.1, uint16_t gridSize = 10, bool hasOcean = false);
 
 	void Destroy();
-	virtual ~UniPlanet() { Destroy(); }
+	virtual ~Planet() { Destroy(); }
 
 	void Initialize();
 	void CreateGrid();

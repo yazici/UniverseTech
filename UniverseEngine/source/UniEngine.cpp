@@ -2,12 +2,12 @@
 #include "UniEngine.h"
 #include <assert.h>
 #include <algorithm>
-#include "UniAudioEngine.h"
-#include "UniInput.h"
-#include "UniMaterial.h"
-#include "UniSceneManager.h"
-#include "UniSceneRenderer.h"
-#include "UniAssetManager.h"
+#include "AudioEngine.h"
+#include "Input.h"
+#include "Material.h"
+#include "SceneManager.h"
+#include "SceneRenderer.h"
+#include "AssetManager.h"
 #include "components/Components.h"
 #include "systems/events.h"
 #include "vks/VulkanTools.h"
@@ -17,9 +17,9 @@
 void UniEngine::Shutdown() {
   std::cout << "Shutting down..." << std::endl;
 
-  SceneManager()->Shutdown();
-  AudioManager()->Shutdown();
-  AssetManager()->Shutdown();
+  GetSceneManager()->Shutdown();
+  GetAudioManager()->Shutdown();
+  GetAssetManager()->Shutdown();
 
 
 
@@ -35,9 +35,9 @@ UniEngine::~UniEngine() {
 }
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
-  m_AssetManager = std::make_shared<uni::assets::UniAssetManager>(getAssetPath() + "assets");
-  m_SceneManager = std::make_shared<UniSceneManager>();
-  m_AudioManager = std::make_shared<UniAudioEngine>();
+  m_AssetManager = std::make_shared<uni::assets::AssetManager>(getAssetPath() + "assets");
+  m_SceneManager = std::make_shared<SceneManager>();
+  m_AudioManager = std::make_shared<AudioEngine>();
 
   title = "Universe Tech Test";
   paused = false;
@@ -120,7 +120,7 @@ void UniEngine::prepare() {
   std::cout << "Initialize engine..." << std::endl;
 
   std::cout << "Initialize scenegraph..." << std::endl;
-  SceneManager()->Initialise();
+  GetSceneManager()->Initialise();
 
   std::cout << "Initialize input manager..." << std::endl;
   SetupInput();
@@ -129,17 +129,17 @@ void UniEngine::prepare() {
   VulkanExampleBase::prepare();
 
   std::cout << "Create an audio manager..." << std::endl;
-  AudioManager()->Init();
+  GetAudioManager()->Init();
 
   std::cout << "Loading asset registry..." << std::endl;
-  AssetManager()->LoadRegistry();
+  GetAssetManager()->LoadRegistry();
 
   std::cout << "Import all assets ..." << std::endl;
-  AssetManager()->ImportAll();
+  GetAssetManager()->ImportAll();
 
   std::cout << "Load level data..." << std::endl;
-  SceneManager()->LoadScene("testlevel2");
-  SceneManager()->ActivateScene("testlevel2");
+  GetSceneManager()->LoadScene("testlevel2");
+  GetSceneManager()->ActivateScene("testlevel2");
 
   SetupOverlay();
 
@@ -149,69 +149,69 @@ void UniEngine::prepare() {
 
 
 void UniEngine::SetupInput() {
-  m_InputManager = std::make_shared<UniInput>();
+  m_InputManager = std::make_shared<Input>();
   m_InputManager->Initialize();
 
-  m_InputManager->OnPress(UniInput::ButtonQuit,
+  m_InputManager->OnPress(Input::ButtonQuit,
                           [this]() { m_QuitMessageReceived = true; });
-  m_InputManager->OnRelease(UniInput::ButtonPause,
+  m_InputManager->OnRelease(Input::ButtonPause,
                             [this]() { paused = !paused; });
 
-  m_InputManager->OnRelease(UniInput::ButtonExperiment, [this]() {
-    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonExperiment, 1.0f});
+  m_InputManager->OnRelease(Input::ButtonExperiment, [this]() {
+    GetSceneManager()->EmitEvent<InputEvent>({Input::ButtonExperiment, 1.0f});
   });
 
-  m_InputManager->OnRelease(UniInput::ButtonBoostUp, [this]() {
-    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonBoostUp, 1.0f});
+  m_InputManager->OnRelease(Input::ButtonBoostUp, [this]() {
+    GetSceneManager()->EmitEvent<InputEvent>({Input::ButtonBoostUp, 1.0f});
   });
-  m_InputManager->OnRelease(UniInput::ButtonBoostDown, [this]() {
-    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonBoostDown, 1.0f});
-  });
-
-  m_InputManager->OnPress(UniInput::ButtonRollLeft, [this]() {
-    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonRollLeft, 1.0f});
-  });
-  m_InputManager->OnRelease(UniInput::ButtonRollLeft, [this]() {
-    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonRollLeft, 0.0f});
-  });
-  m_InputManager->OnPress(UniInput::ButtonRollRight, [this]() {
-    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonRollRight, 1.0f});
-  });
-  m_InputManager->OnRelease(UniInput::ButtonRollRight, [this]() {
-    SceneManager()->EmitEvent<InputEvent>({UniInput::ButtonRollRight, 0.0f});
+  m_InputManager->OnRelease(Input::ButtonBoostDown, [this]() {
+    GetSceneManager()->EmitEvent<InputEvent>({Input::ButtonBoostDown, 1.0f});
   });
 
+  m_InputManager->OnPress(Input::ButtonRollLeft, [this]() {
+    GetSceneManager()->EmitEvent<InputEvent>({Input::ButtonRollLeft, 1.0f});
+  });
+  m_InputManager->OnRelease(Input::ButtonRollLeft, [this]() {
+    GetSceneManager()->EmitEvent<InputEvent>({Input::ButtonRollLeft, 0.0f});
+  });
+  m_InputManager->OnPress(Input::ButtonRollRight, [this]() {
+    GetSceneManager()->EmitEvent<InputEvent>({Input::ButtonRollRight, 1.0f});
+  });
+  m_InputManager->OnRelease(Input::ButtonRollRight, [this]() {
+    GetSceneManager()->EmitEvent<InputEvent>({Input::ButtonRollRight, 0.0f});
+  });
+
   m_InputManager->RegisterFloatCallback(
-      UniInput::AxisYaw, [this](float oldValue, float newValue) {
-        SceneManager()->EmitEvent<InputEvent>({UniInput::AxisYaw, newValue});
+      Input::AxisYaw, [this](float oldValue, float newValue) {
+        GetSceneManager()->EmitEvent<InputEvent>({Input::AxisYaw, newValue});
       });
   m_InputManager->RegisterFloatCallback(
-      UniInput::AxisPitch, [this](float oldValue, float newValue) {
-        SceneManager()->EmitEvent<InputEvent>({UniInput::AxisPitch, newValue});
+      Input::AxisPitch, [this](float oldValue, float newValue) {
+        GetSceneManager()->EmitEvent<InputEvent>({Input::AxisPitch, newValue});
       });
   m_InputManager->RegisterFloatCallback(
-      UniInput::AxisThrust, [this](float oldValue, float newValue) {
-        SceneManager()->EmitEvent<InputEvent>({UniInput::AxisThrust, newValue});
+      Input::AxisThrust, [this](float oldValue, float newValue) {
+        GetSceneManager()->EmitEvent<InputEvent>({Input::AxisThrust, newValue});
       });
   m_InputManager->RegisterFloatCallback(
-      UniInput::AxisReverse, [this](float oldValue, float newValue) {
-        SceneManager()->EmitEvent<InputEvent>(
-            {UniInput::AxisThrust, -newValue});
+      Input::AxisReverse, [this](float oldValue, float newValue) {
+        GetSceneManager()->EmitEvent<InputEvent>(
+            {Input::AxisThrust, -newValue});
       });
   m_InputManager->RegisterFloatCallback(
-      UniInput::AxisStrafe, [this](float oldValue, float newValue) {
-        SceneManager()->EmitEvent<InputEvent>(
-            {UniInput::AxisStrafe, -newValue});
+      Input::AxisStrafe, [this](float oldValue, float newValue) {
+        GetSceneManager()->EmitEvent<InputEvent>(
+            {Input::AxisStrafe, -newValue});
       });
   m_InputManager->RegisterFloatCallback(
-      UniInput::AxisAscend, [this](float oldValue, float newValue) {
-        SceneManager()->EmitEvent<InputEvent>(
-            {UniInput::AxisAscend, -newValue});
+      Input::AxisAscend, [this](float oldValue, float newValue) {
+        GetSceneManager()->EmitEvent<InputEvent>(
+            {Input::AxisAscend, -newValue});
       });
   m_InputManager->RegisterBoolCallback(
-      UniInput::ButtonRightClick, [this](bool oldValue, bool newValue) {
-        SceneManager()->EmitEvent<InputEvent>(
-            {UniInput::ButtonRightClick, newValue ? 1.f : 0.f});
+      Input::ButtonRightClick, [this](bool oldValue, bool newValue) {
+        GetSceneManager()->EmitEvent<InputEvent>(
+            {Input::ButtonRightClick, newValue ? 1.f : 0.f});
       });
 }
 
@@ -269,25 +269,25 @@ void UniEngine::render() {
 
   draw();
 
-  SceneRenderer()->Render();
+  GetSceneRenderer()->Render();
 
   if (!paused) {
-    SceneManager()->Tick(frameTimer);
+    GetSceneManager()->Tick(frameTimer);
   }
 
-  if (SceneManager()->CheckNewScene()) {
+  if (GetSceneManager()->CheckNewScene()) {
     m_InputManager.reset();
     SetupInput();
   }
 }
 
 void UniEngine::viewChanged() {
-  SceneRenderer()->ViewChanged();
+  GetSceneRenderer()->ViewChanged();
 }
 
 void UniEngine::windowResized() {
-  SceneManager()->CurrentCamera()->aspect = (float)width / (float)height;
-  SceneManager()->CurrentCamera()->CalculateProjection();
+  GetSceneManager()->CurrentCamera()->aspect = (float)width / (float)height;
+  GetSceneManager()->CurrentCamera()->CalculateProjection();
 }
 
 void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
@@ -296,10 +296,10 @@ void UniEngine::OnUpdateUIOverlay(vks::UIOverlay* overlay) {
       ToggleWireframe();
     }*/
     if (overlay->checkBox("Pause camera position", &m_CamPaused)) {
-      SceneManager()->EmitEvent<CameraPauseEvent>({m_CamPaused});
+      GetSceneManager()->EmitEvent<CameraPauseEvent>({m_CamPaused});
     }
 
-    SceneManager()
+    GetSceneManager()
         ->CurrentScene()
         ->m_World
         ->each<PlayerControlComponent, TransformComponent, PhysicsComponent>(
@@ -332,8 +332,8 @@ void UniEngine::updateOverlay() {
   io.DeltaTime = frameTimer;
 
   io.MousePos = ImVec2(pos.X, pos.Y);
-  io.MouseDown[0] = m_InputManager->GetButtonState(UniInput::ButtonClick);
-  io.MouseDown[1] = m_InputManager->GetButtonState(UniInput::ButtonRightClick);
+  io.MouseDown[0] = m_InputManager->GetButtonState(Input::ButtonClick);
+  io.MouseDown[1] = m_InputManager->GetButtonState(Input::ButtonRightClick);
 
   ImGui::NewFrame();
 
@@ -393,17 +393,17 @@ void UniEngine::updateOverlay() {
 }
 
 void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
-  for (const auto& so : SceneManager()->CurrentScene()->m_SceneObjects) {
-    if (so->GetComponent<UniPlanet>()) {
+  for (const auto& so : GetSceneManager()->CurrentScene()->m_SceneObjects) {
+    if (so->GetComponent<Planet>()) {
       if (overlay->header(so->GetName().c_str())) {
-        auto camPos = SceneManager()
+        auto camPos = GetSceneManager()
                           ->CurrentScene()
                           ->GetCameraObject()
                           ->GetTransform()
                           ->GetPosition();
         auto transform = so->GetComponent<TransformComponent>();
         camPos = transform->TransformWSToLocal(camPos);
-        auto altitude = so->GetComponent<UniPlanet>()->GetAltitude(camPos);
+        auto altitude = so->GetComponent<Planet>()->GetAltitude(camPos);
         overlay->text("Alt: %.3f km", altitude / 1000.0);
         overlay->text("Dist: %.3f km", glm::length(camPos) / 1000.0);
       }
@@ -411,7 +411,7 @@ void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
   }
 }
 
-std::shared_ptr<UniSceneRenderer> UniEngine::SceneRenderer()
+std::shared_ptr<SceneRenderer> UniEngine::GetSceneRenderer()
 {
-  return m_SceneManager->SceneRenderer();
+  return m_SceneManager->GetSceneRenderer();
 }

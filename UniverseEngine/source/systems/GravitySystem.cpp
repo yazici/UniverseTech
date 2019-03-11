@@ -9,8 +9,8 @@ void GravitySystem::tick(ECS::World* world, float deltaTime) {
 	double biggestMass = 0.0;
 	glm::vec3 gravityDirection = glm::vec3(0.0);
 
-	world->each<TransformComponent, PhysicsComponent, UniPlanet>([&](
-		ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<PhysicsComponent> physics, ECS::ComponentHandle<UniPlanet> planet) {
+	world->each<TransformComponent, PhysicsComponent, Planet>([&](
+		ECS::Entity* ent, ECS::ComponentHandle<TransformComponent> transform, ECS::ComponentHandle<PhysicsComponent> physics, ECS::ComponentHandle<Planet> planet) {
 		auto mass = physics->m_Mass;
 		if(mass > biggestMass) {
 			biggestMass = mass;

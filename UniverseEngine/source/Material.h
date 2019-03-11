@@ -6,25 +6,25 @@
 #include "vks/VulkanModel.hpp"
 #include "vks/VulkanTexture.hpp"
 
-class UniSceneRenderer;
+class SceneRenderer;
 class ModelComponent;
 
-class UniMaterial {
+class Material {
 public:
-  UniMaterial() = default;
-  UniMaterial(std::string name);
+  Material() = default;
+  Material(std::string name);
   virtual void Destroy();
   void RegisterModel(ECS::ComponentHandle<ModelComponent> model);
   void UnRegisterModel(ECS::ComponentHandle<ModelComponent> model);
-  virtual ~UniMaterial() = default;
+  virtual ~Material() = default;
 
   virtual void SetupDescriptorSetLayout(
-    std::shared_ptr<UniSceneRenderer> renderer);
+    std::shared_ptr<SceneRenderer> renderer);
   virtual void PreparePipelines(
-    std::shared_ptr<UniSceneRenderer> renderer,
+    std::shared_ptr<SceneRenderer> renderer,
     VkGraphicsPipelineCreateInfo& pipelineCreateInfo);
-  virtual void SetupDescriptorPool(std::shared_ptr<UniSceneRenderer> renderer);
-  virtual void SetupDescriptorSets(std::shared_ptr<UniSceneRenderer> renderer);
+  virtual void SetupDescriptorPool(std::shared_ptr<SceneRenderer> renderer);
+  virtual void SetupDescriptorSets(std::shared_ptr<SceneRenderer> renderer);
 
   std::shared_ptr<vks::Buffer> GetBuffer(std::string name);
   void SetBuffer(std::string name, std::shared_ptr<vks::Buffer> buffer);
@@ -45,7 +45,7 @@ public:
     ECS::ComponentHandle<ModelComponent> model);
   VkDescriptorSet* GetDescriptorSet() { return &m_descriptorSet; }
 
-  std::shared_ptr<UniSceneRenderer> SceneRenderer();
+  std::shared_ptr<SceneRenderer> GetSceneRenderer();
 
   std::string GetName() { return m_Name; }
   void SetName(std::string name) { m_Name = name; }

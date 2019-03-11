@@ -1,19 +1,19 @@
 #include "AudioSystem.h"
-#include "../UniAudioEngine.h"
+#include "../AudioEngine.h"
 #include "../UniEngine.h"
-#include "../UniSceneRenderer.h"
-#include "../UniSceneManager.h"
+#include "../SceneRenderer.h"
+#include "../SceneManager.h"
 
 void AudioSystem::receive(ECS::World* world, const LevelStartEvent& event) {
   auto engine = UniEngine::GetInstance();
-  auto renderer = engine->SceneRenderer();
+  auto renderer = engine->GetSceneRenderer();
 
   world->each<AudioComponent, TransformComponent>(
     [&](ECS::Entity * ent, ECS::ComponentHandle<AudioComponent> audio,
       ECS::ComponentHandle<TransformComponent> transform) {
 
         if (audio->m_isPlaying) {
-          audio->m_channel = UniEngine::GetInstance()->AudioManager()->PlaySoundFile(
+          audio->m_channel = UniEngine::GetInstance()->GetAudioManager()->PlaySoundFile(
             audio->m_filename, transform->GetPosition(), audio->m_volume);
 
           std::cout << "Playing audio: " << audio->m_filename << " at " << glm::to_string<glm::vec3>(transform->GetPosition()) << std::endl;
@@ -24,12 +24,12 @@ void AudioSystem::receive(ECS::World* world, const LevelStartEvent& event) {
 
 void AudioSystem::receive(ECS::World* world, const ECS::Events::OnComponentRemoved<AudioComponent>& event) {
   auto engine = UniEngine::GetInstance();
-  auto renderer = engine->SceneRenderer();
+  auto renderer = engine->GetSceneRenderer();
 
   auto audio = event.component;
   if (audio->m_isPlaying) {
     //std::cout << "Stopping audio channel " << audio->m_channel << std::endl;
-    UniEngine::GetInstance()->AudioManager()->StopChannel(audio->m_channel);
+    UniEngine::GetInstance()->GetAudioManager()->StopChannel(audio->m_channel);
     //std::cout << "Stopped audio channel " << audio->m_channel << std::endl;
   }
 
@@ -38,7 +38,7 @@ void AudioSystem::receive(ECS::World* world, const ECS::Events::OnComponentRemov
 
 void AudioSystem::tick(ECS::World* world, float deltaTime) {
 
-  auto cam = UniEngine::GetInstance()->SceneManager()->CurrentScene()->GetCameraObject();
+  auto cam = UniEngine::GetInstance()->GetSceneManager()->CurrentScene()->GetCameraObject();
   auto transform = cam->GetComponent<TransformComponent>();
   auto physics = cam->GetComponent<PhysicsComponent>();
 
@@ -47,11 +47,11 @@ void AudioSystem::tick(ECS::World* world, float deltaTime) {
   glm::vec3 forward = transform->TransformLocalDirectionToWorldSpace({ 0, 0, 1 });
   glm::vec3 velocity = physics->m_Velocity;
 
-  UniEngine::GetInstance()->AudioManager()->Set3dListenerAndOrientation(pos, up, forward, velocity);
+  UniEngine::GetInstance()->GetAudioManager()->Set3dListenerAndOrientation(pos, up, forward, velocity);
 
   //std::cout << "Setting audio listener at " << glm::to_string<glm::vec3>(pos) << std::endl;
 
-  UniEngine::GetInstance()->AudioManager()->Update();
+  UniEngine::GetInstance()->GetAudioManager()->Update();
 
 
 }

@@ -1,13 +1,13 @@
 #include "AudioComponent.h"
 #include "../UniEngine.h"
-#include "../UniAssetManager.h"
-#include "../UniAsset.h"
+#include "../AssetManager.h"
+#include "../Asset.h"
 
 using namespace uni::assets;
 
 AudioComponent::AudioComponent(std::string path)
 {
-  auto asset = UniEngine::GetInstance()->AssetManager()->GetAsset<UniAssetAudio>(path);
+  auto asset = UniEngine::GetInstance()->GetAssetManager()->GetAsset<UniAssetAudio>(path);
 
   m_filename = asset->m_sourceFile;
   m_is3d = asset->m_is3d;

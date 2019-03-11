@@ -11,16 +11,16 @@
 
 #include <vulkan/vulkan.h>
 #include "vks/VulkanBuffer.hpp"
-#include "UniModelMesh.h"
+#include "ModelMesh.h"
 #include "vks/VulkanTexture.hpp"
 #include "vks/vulkanexamplebase.h"
 
 #define MAX_LIGHT_COUNT 1000
 
-class UniSceneManager;
-class UniMaterial;
+class SceneManager;
+class Material;
 
-class UniSceneRenderer {
+class SceneRenderer {
  protected:
   struct {
     glm::mat4 projection;
@@ -71,7 +71,7 @@ class UniSceneRenderer {
     VkPipelineLayout forward;
   } m_pipelineLayouts;
 
-  std::map<std::string, std::shared_ptr<UniMaterial>> m_materialInstances;
+  std::map<std::string, std::shared_ptr<Material>> m_materialInstances;
 
   VkDescriptorPool m_descriptorPool;
 
@@ -96,8 +96,8 @@ class UniSceneRenderer {
   std::string m_name = "";
 
  public:
-   UniSceneRenderer(std::string name);
-  ~UniSceneRenderer() = default;
+   SceneRenderer(std::string name);
+  ~SceneRenderer() = default;
 
   void Initialise();
   void ShutDown();
@@ -111,7 +111,7 @@ class UniSceneRenderer {
   void ViewChanged();
   void updateUniformBuffersScreen();
 
-  std::shared_ptr<UniSceneManager> SceneManager();
+  std::shared_ptr<SceneManager> SceneManager();
   void UpdateUniformBufferDeferredLights();
   void UpdateDynamicUniformBuffers();
 
@@ -121,7 +121,7 @@ class UniSceneRenderer {
   void SetupDescriptorPool();
   void SetupDescriptorSets();
   void BuildCommandBuffers();
-  void RegisterMaterial(std::string materialID, std::shared_ptr<UniMaterial> mat);
+  void RegisterMaterial(std::string materialID, std::shared_ptr<Material> mat);
   void UnRegisterMaterial(std::string materialID);
   void UnRegisterMaterials();
   
@@ -150,7 +150,7 @@ class UniSceneRenderer {
 };
 
 template<typename T>
-std::shared_ptr<T> UniSceneRenderer::GetMaterialByID(
+std::shared_ptr<T> SceneRenderer::GetMaterialByID(
     std::string materialID) {
   if (m_materialInstances.find(materialID) == m_materialInstances.end()) {
   //  auto mat = std::make_shared<T>(materialID);

@@ -4,20 +4,20 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "vks/VulkanTexture.hpp"
-#include "UniModelMesh.h"
+#include "ModelMesh.h"
 #include "Materials.h"
 
 using json = nlohmann::json;
 
 namespace uni::assets {
 
-  class UniAsset {
+  class Asset {
   public:
-    UniAsset() = default;
-    UniAsset(std::string t, std::string p) : m_type(t), m_path(p) {
+    Asset() = default;
+    Asset(std::string t, std::string p) : m_type(t), m_path(p) {
     };
     virtual void SetFile(std::string f) { m_sourceFile = f; }
-    virtual ~UniAsset() = default;
+    virtual ~Asset() = default;
     virtual void Destroy() {}
     virtual bool Load() { return true; }
 
@@ -33,9 +33,9 @@ namespace uni::assets {
 
   };
 
-  class UniAssetTexture2D : public UniAsset {
+  class UniAssetTexture2D : public Asset {
   public:
-    UniAssetTexture2D(std::string t, std::string p) : UniAsset(t, p) {}
+    UniAssetTexture2D(std::string t, std::string p) : Asset(t, p) {}
     std::shared_ptr<vks::Texture2D> m_texture;
 
     void Destroy() override {
@@ -44,9 +44,9 @@ namespace uni::assets {
   };
 
 
-  class UniAssetModel : public UniAsset {
+  class UniAssetModel : public Asset {
   public:
-    UniAssetModel(std::string t, std::string p) : UniAsset(t, p) {}
+    UniAssetModel(std::string t, std::string p) : Asset(t, p) {}
     std::shared_ptr<uni::Model> m_model;
     std::vector<std::string> m_materials;
 
@@ -56,9 +56,9 @@ namespace uni::assets {
   };
 
 
-  class UniAssetMaterial : public UniAsset {
+  class UniAssetMaterial : public Asset {
   public:
-    UniAssetMaterial(std::string t, std::string p) : UniAsset(t, p) {}
+    UniAssetMaterial(std::string t, std::string p) : Asset(t, p) {}
     std::shared_ptr<ModelMaterial> m_material;
 
     void Destroy() override {
@@ -69,9 +69,9 @@ namespace uni::assets {
 
 
 
-  class UniAssetAudio : public UniAsset {
+  class UniAssetAudio : public Asset {
   public:
-    UniAssetAudio(std::string t, std::string p) : UniAsset(t, p) {}
+    UniAssetAudio(std::string t, std::string p) : Asset(t, p) {}
     void Destroy() override;
     bool m_is3d = true;
     bool m_isLooping = false;

@@ -1,9 +1,9 @@
 #include "PlanetRenderSystem.h"
-#include "../components/UniPlanet.h"
+#include "../components/Planet.h"
 #include "../components/Transform.h"
 #include "../UniEngine.h"
-#include "../UniScene.h"
-#include "../UniSceneManager.h"
+#include "../Scene.h"
+#include "../SceneManager.h"
 #define GLM_FORCE_RADIANS
 #define GLM_ENABLE_EXPERIMENTAL
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -21,7 +21,7 @@ void PlanetRenderSystem::receive(ECS::World* world, const CameraPauseEvent& even
 
 void PlanetRenderSystem::receive(ECS::World* world, const PlanetZEvent& event) {
 	
-	world->each<UniPlanet>([&](ECS::Entity* entity, ECS::ComponentHandle<UniPlanet> planet) {
+	world->each<Planet>([&](ECS::Entity* entity, ECS::ComponentHandle<Planet> planet) {
 		planet->SetZOffset(event.value);
 	});
 }
@@ -29,8 +29,8 @@ void PlanetRenderSystem::receive(ECS::World* world, const PlanetZEvent& event) {
 
 void PlanetRenderSystem::tick(ECS::World* world, float deltaTime) {
 
-	world->each<UniPlanet>([&](ECS::Entity* entity, ECS::ComponentHandle<UniPlanet> planet) {
-		auto cam = UniEngine::GetInstance()->SceneManager()->CurrentScene()->GetCameraComponent();
+	world->each<Planet>([&](ECS::Entity* entity, ECS::ComponentHandle<Planet> planet) {
+		auto cam = UniEngine::GetInstance()->GetSceneManager()->CurrentScene()->GetCameraComponent();
 		auto transform = entity->get<TransformComponent>();
 		
 		auto camPos = transform->TransformWSToLocal(cam->GetPosition());

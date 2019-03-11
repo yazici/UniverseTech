@@ -3,8 +3,8 @@
 #include <map>
 #include <string>
 #include <memory>
-#include "UniImporter.h"
-#include "UniAsset.h"
+#include "Importer.h"
+#include "Asset.h"
 
 
 using namespace uni::import;
@@ -14,17 +14,17 @@ namespace uni::import
 	
 	class ImporterFactory {
 	public:
-	  void RegisterFactory(std::string assetType, std::shared_ptr<UniImporter> importer)
+	  void RegisterFactory(std::string assetType, std::shared_ptr<Importer> importer)
 	  {
-	    m_factories.insert(std::pair<std::string, std::shared_ptr<UniImporter>>(assetType, importer));
+	    m_factories.insert(std::pair<std::string, std::shared_ptr<Importer>>(assetType, importer));
 	  }
 	
-	  std::shared_ptr<uni::assets::UniAsset> Import(std::string assetType, std::shared_ptr<uni::assets::UniAsset> asset, bool force = false)
+	  std::shared_ptr<uni::assets::Asset> Import(std::string assetType, std::shared_ptr<uni::assets::Asset> asset, bool force = false)
 	  {
 	    return m_factories.at(assetType)->Import(asset, force);
 	  }
 	
-	  std::shared_ptr<uni::assets::UniAsset> LoadAsset(std::string assetType, json data)
+	  std::shared_ptr<uni::assets::Asset> LoadAsset(std::string assetType, json data)
 	  {
 	    return m_factories.at(assetType)->LoadAsset(data);
 	  }
@@ -40,18 +40,18 @@ namespace uni::import
 	  }
 	
 	private:
-	  std::unordered_map<std::string, std::shared_ptr<UniImporter>> m_factories;
+	  std::unordered_map<std::string, std::shared_ptr<Importer>> m_factories;
 	};
 }
 
 namespace uni::assets
 {
 	
-	class UniAssetManager
+	class AssetManager
 	{
 	public:
-	  UniAssetManager(std::string basePath = "", std::string registryFile = "/assets.json");
-	  ~UniAssetManager() = default;
+	  AssetManager(std::string basePath = "", std::string registryFile = "/assets.json");
+	  ~AssetManager() = default;
 	
 	  enum ReturnType {
 	    CREATED_OK,
@@ -69,7 +69,7 @@ namespace uni::assets
 	  }
 	
 	private:
-	  std::map<std::string, std::shared_ptr<UniAsset>> m_assets;
+	  std::map<std::string, std::shared_ptr<Asset>> m_assets;
 	  std::string m_basePath;
 	  std::string m_registryFile;
 	  ReturnType CheckPath(std::string path);
@@ -84,7 +84,7 @@ namespace uni::assets
 	  // Saves the registry to a file.
 	  ReturnType SaveRegistry();
 	  // Registers an asset with a path name.
-	  ReturnType RegisterAsset(std::string path, std::shared_ptr<UniAsset> asset, bool replace);
+	  ReturnType RegisterAsset(std::string path, std::shared_ptr<Asset> asset, bool replace);
 	  // Registers an asset with a path name.
 	
 	  void CheckImported(std::vector<std::string> assets);
@@ -95,25 +95,25 @@ namespace uni::assets
 	    return importerRegistry;
 	  }
 	
-	  static void RegisterImporter(std::string assetType, std::shared_ptr<UniImporter> importer) {
+	  static void RegisterImporter(std::string assetType, std::shared_ptr<Importer> importer) {
 	    GetRegistry()->RegisterFactory(assetType, importer);
 	  }
 	
-	  std::shared_ptr<UniAsset> Import(std::shared_ptr<UniAsset> asset) {
+	  std::shared_ptr<Asset> Import(std::shared_ptr<Asset> asset) {
 	    return GetRegistry()->Import(asset->m_type, asset);
 	  }
 	
-	  std::shared_ptr<UniAsset> Import(std::string assetPath) {
+	  std::shared_ptr<Asset> Import(std::string assetPath) {
 	    auto asset = GetAsset(assetPath);
 	    return GetRegistry()->Import(asset->m_type, asset);
 	  }
 	
 	
-	  std::shared_ptr<UniAsset> Import(std::string assetType, std::shared_ptr<UniAsset> asset) {
+	  std::shared_ptr<Asset> Import(std::string assetType, std::shared_ptr<Asset> asset) {
 	    return GetRegistry()->Import(assetType, asset);
 	  }
 	
-	  std::shared_ptr<UniAsset> LoadAsset(std::string assetType, json data) {
+	  std::shared_ptr<Asset> LoadAsset(std::string assetType, json data) {
 	    return GetRegistry()->LoadAsset(assetType, data);
 	  }
 	
@@ -125,7 +125,7 @@ namespace uni::assets
 	  // Deletes an asset with a path name.
 	  ReturnType DeleteAsset(std::string path);
 	  // Returns an asset at a given path
-	  std::shared_ptr<UniAsset> GetAsset(std::string path);
+	  std::shared_ptr<Asset> GetAsset(std::string path);
 	
 	  template<typename T>
 	  std::shared_ptr<T> GetAsset(std::string path);
@@ -134,11 +134,11 @@ namespace uni::assets
 
 
 template<typename T>
-std::shared_ptr<T> uni::assets::UniAssetManager::GetAsset(std::string path) {
+std::shared_ptr<T> uni::assets::AssetManager::GetAsset(std::string path) {
   if (path.empty())
     return nullptr;
   //std::cout << "Retrieving asset " + path << std::endl;
-  std::shared_ptr<UniAsset> asset = GetAsset(path);
+  std::shared_ptr<Asset> asset = GetAsset(path);
   //std::cout << "Got UniAsset at " << asset->m_path << std::endl;
   std::shared_ptr<T> ret = std::dynamic_pointer_cast<T>(asset);
   return ret;
