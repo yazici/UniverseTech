@@ -5,7 +5,7 @@
 
 using namespace uni::assets;
 
-AudioComponent::AudioComponent(std::string path)
+uni::components::AudioComponent::AudioComponent(std::string path)
 {
   auto asset = UniEngine::GetInstance()->GetAssetManager()->GetAsset<UniAssetAudio>(path);
 

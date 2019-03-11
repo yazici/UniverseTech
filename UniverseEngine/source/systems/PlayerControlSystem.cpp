@@ -6,6 +6,8 @@
 void PlayerControlSystem::receive(ECS::World* world, const InputEvent& event) {
 	//std::cout << "Got an input event!" << std::endl;
 
+  using Input = uni::input::Input;
+
 	auto input = UniEngine::GetInstance()->GetInputManager();
 
 	switch (event.axis)

@@ -6,6 +6,8 @@
 #include "AssetManager.h"
 #include "Asset.h"
 
+using namespace uni::materials;
+
 Material::Material(std::string name) {
 
   std::cout << "### UNIMATERIAL " << name << " CREATED ###" << std::endl;
@@ -60,7 +62,7 @@ void Material::SetupMaterial(
   6: AO Map
  */
 void Material::SetupDescriptorSetLayout(
-  std::shared_ptr<SceneRenderer> renderer) {
+  std::shared_ptr<uni::render::SceneRenderer> renderer) {
   // Deferred shading layout
   m_setLayoutBindings = {
     // Binding 0 : model texture map
@@ -129,7 +131,7 @@ void Material::SetupDescriptorSetLayout(
 }
 
 void Material::PreparePipelines(
-  std::shared_ptr<SceneRenderer> renderer,
+  std::shared_ptr<uni::render::SceneRenderer> renderer,
   VkGraphicsPipelineCreateInfo & pipelineCreateInfo) {
   VkGraphicsPipelineCreateInfo localPCI = pipelineCreateInfo;
   auto engine = UniEngine::GetInstance();
@@ -153,7 +155,7 @@ void Material::PreparePipelines(
 }
 
 void Material::SetupDescriptorPool(
-  std::shared_ptr<SceneRenderer> renderer) {
+  std::shared_ptr<uni::render::SceneRenderer> renderer) {
   auto engine = UniEngine::GetInstance();
   auto device = engine->GetDevice();
   auto& drawCmdBuffers = engine->GetCommandBuffers();
@@ -183,7 +185,7 @@ void Material::SetupDescriptorPool(
 }
 
 void Material::SetupDescriptorSets(
-  std::shared_ptr<SceneRenderer> renderer) {
+  std::shared_ptr<uni::render::SceneRenderer> renderer) {
   auto device = UniEngine::GetInstance()->GetDevice();
 
   VkDescriptorSetAllocateInfo allocInfo =
@@ -323,7 +325,7 @@ void Material::SetTexture(std::string name,
   m_Textures[name] = texture;
 }
 
-std::shared_ptr<SceneRenderer> Material::GetSceneRenderer() {
+std::shared_ptr<uni::render::SceneRenderer> Material::GetSceneRenderer() {
   return UniEngine::GetInstance()->GetSceneManager()->GetSceneRenderer();
 }
 

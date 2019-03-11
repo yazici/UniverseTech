@@ -12,6 +12,8 @@
 #include <stb_image.h>
 
 
+using namespace uni::components;
+
 Planet::Planet(double radius /*= 1.0*/,
                      double maxHeightOffset /*= 0.1*/,
                      double maxDepthOffset /*= 0.1*/,

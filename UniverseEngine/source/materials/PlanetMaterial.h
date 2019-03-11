@@ -1,5 +1,7 @@
 #include "../Material.h"
 
+using namespace uni::materials;
+
 class PlanetMaterial : public Material {
  public:
   struct SpecializationData {

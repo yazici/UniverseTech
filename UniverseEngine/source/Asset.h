@@ -9,6 +9,8 @@
 
 using json = nlohmann::json;
 
+using namespace uni::materials;
+
 namespace uni::assets {
 
   class Asset {

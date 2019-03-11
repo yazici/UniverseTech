@@ -3,6 +3,8 @@
 #include "UniEngine.h"
 #include "systems/Systems.h"
 
+using namespace uni::scene;
+
 std::vector<std::string> scenelist = {"testlevel2", "testlevel"};
 
 void SceneManager::Initialise() {
@@ -14,7 +16,7 @@ void SceneManager::LoadScene(std::string sceneName) {
 
   if (m_renderers.find(sceneName) == m_renderers.end()) {
     std::cout << "%%%% CREATING SCENERENDERER FOR " << sceneName << " %%%%" << std::endl;
-    auto renderer = std::make_shared<SceneRenderer>(sceneName);
+    auto renderer = std::make_shared<uni::render::SceneRenderer>(sceneName);
     m_renderers.insert({ sceneName, renderer });
   }
 
@@ -111,12 +113,12 @@ bool SceneManager::CheckNewScene() {
   return false;
 }
 
-std::shared_ptr<SceneRenderer> SceneManager::GetSceneRenderer()
+std::shared_ptr<uni::render::SceneRenderer> SceneManager::GetSceneRenderer()
 {
   return GetSceneRenderer(m_currentScene);
 }
 
-std::shared_ptr<SceneRenderer> SceneManager::GetSceneRenderer(std::string sceneName)
+std::shared_ptr<uni::render::SceneRenderer> SceneManager::GetSceneRenderer(std::string sceneName)
 {
   return m_renderers.at(sceneName);
 }

@@ -36,8 +36,8 @@ UniEngine::~UniEngine() {
 
 UniEngine::UniEngine() : VulkanExampleBase(ENABLE_VALIDATION) {
   m_AssetManager = std::make_shared<uni::assets::AssetManager>(getAssetPath() + "assets");
-  m_SceneManager = std::make_shared<SceneManager>();
-  m_AudioManager = std::make_shared<AudioEngine>();
+  m_SceneManager = std::make_shared<uni::scene::SceneManager>();
+  m_AudioManager = std::make_shared<uni::audio::AudioEngine>();
 
   title = "Universe Tech Test";
   paused = false;
@@ -149,6 +149,8 @@ void UniEngine::prepare() {
 
 
 void UniEngine::SetupInput() {
+  using Input = uni::input::Input;
+
   m_InputManager = std::make_shared<Input>();
   m_InputManager->Initialize();
 
@@ -332,8 +334,8 @@ void UniEngine::updateOverlay() {
   io.DeltaTime = frameTimer;
 
   io.MousePos = ImVec2(pos.X, pos.Y);
-  io.MouseDown[0] = m_InputManager->GetButtonState(Input::ButtonClick);
-  io.MouseDown[1] = m_InputManager->GetButtonState(Input::ButtonRightClick);
+  io.MouseDown[0] = m_InputManager->GetButtonState(uni::input::Input::ButtonClick);
+  io.MouseDown[1] = m_InputManager->GetButtonState(uni::input::Input::ButtonRightClick);
 
   ImGui::NewFrame();
 
@@ -411,7 +413,7 @@ void UniEngine::OnUpdateUserUIOverlay(vks::UIOverlay* overlay) {
   }
 }
 
-std::shared_ptr<SceneRenderer> UniEngine::GetSceneRenderer()
+std::shared_ptr<uni::render::SceneRenderer> UniEngine::GetSceneRenderer()
 {
   return m_SceneManager->GetSceneRenderer();
 }

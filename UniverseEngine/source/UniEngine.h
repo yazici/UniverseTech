@@ -25,12 +25,22 @@ namespace uni {
   namespace assets {
     class AssetManager;
   }
+  namespace scene {
+    class SceneManager;
+  }
+  namespace render {
+    class SceneRenderer;
+  }
+  namespace audio {
+    class AudioEngine;
+  }
+  namespace input {
+    class Input;
+  }
 }
 // forward declarations
-class SceneManager;
-class SceneRenderer;
-class Input;
-class AudioEngine;
+
+
 
 
 class UniEngine final : public VulkanExampleBase {
@@ -66,9 +76,9 @@ class UniEngine final : public VulkanExampleBase {
 
 
  private:
-  std::shared_ptr<SceneManager> m_SceneManager;
-  std::shared_ptr<Input> m_InputManager;
-  std::shared_ptr<AudioEngine> m_AudioManager;
+  std::shared_ptr<uni::scene::SceneManager> m_SceneManager;
+  std::shared_ptr<uni::input::Input> m_InputManager;
+  std::shared_ptr<uni::audio::AudioEngine> m_AudioManager;
   std::shared_ptr<uni::assets::AssetManager> m_AssetManager;
 
   bool m_CamPaused = false;
@@ -76,11 +86,11 @@ class UniEngine final : public VulkanExampleBase {
 
 
  public:
-  std::shared_ptr<SceneManager> GetSceneManager(){ return m_SceneManager; }
-  std::shared_ptr<SceneRenderer> GetSceneRenderer();
+  std::shared_ptr<uni::scene::SceneManager> GetSceneManager(){ return m_SceneManager; }
+  std::shared_ptr<uni::render::SceneRenderer> GetSceneRenderer();
   void windowResized() override;
-  std::shared_ptr<Input> GetInputManager() { return m_InputManager; }
-  std::shared_ptr<AudioEngine> GetAudioManager() { return m_AudioManager; }
+  std::shared_ptr<uni::input::Input> GetInputManager() { return m_InputManager; }
+  std::shared_ptr<uni::audio::AudioEngine> GetAudioManager() { return m_AudioManager; }
   std::shared_ptr<uni::assets::AssetManager> GetAssetManager() { return m_AssetManager; }
   void SetupInput();
 

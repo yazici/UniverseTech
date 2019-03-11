@@ -1,5 +1,6 @@
 #include "Frustum.hpp"
 
+using namespace uni::components;
 
 Frustum::Frustum() {
 	m_Corners = FrustumCorners();

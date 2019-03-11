@@ -5,6 +5,7 @@
 #include "../components/Components.h"
 #include "events.h"
 
+using namespace uni::components;
 
 class AudioSystem : public ECS::EntitySystem,
       public ECS::EventSubscriber<LevelStartEvent>,

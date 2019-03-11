@@ -1,5 +1,8 @@
 #include "PlayerControl.h"
 
+using namespace uni::components;
+using namespace uni::scene;
+
 bool PlayerControlComponent::HasTarget() {
 	return m_HasTarget;
 }

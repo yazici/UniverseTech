@@ -1,7 +1,8 @@
 
 #include "SceneObject.h"
 
-
+using namespace uni::scene;
+using namespace uni::components;
 
 void SceneObject::SetScene(Scene *scene) {
 	m_Scene = scene;

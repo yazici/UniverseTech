@@ -15,6 +15,8 @@
 #include <set>
 
 using json = nlohmann::json;
+using namespace uni::scene;
+using namespace uni::components;
 
 Scene::Scene() {
   m_World = nullptr;

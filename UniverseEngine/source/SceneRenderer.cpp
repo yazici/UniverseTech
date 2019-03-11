@@ -5,6 +5,9 @@
 #include "SceneRenderer.h"
 #include "systems/events.h"
 
+using namespace uni::render;
+using namespace uni::scene;
+
 // Wrapper functions for aligned memory allocation
 // There is currently no standard for this in C++ that works across all
 // platforms and vendors, so we abstract this

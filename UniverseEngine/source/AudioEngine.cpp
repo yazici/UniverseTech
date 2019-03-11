@@ -1,5 +1,7 @@
 #include "AudioEngine.h"
 
+using namespace uni::audio;
+
 Implementation::Implementation() {
   mnNextChannelId = 0;
   mpStudioSystem = nullptr;

@@ -4,7 +4,15 @@
 #include "components/Camera.h"
 #include "3dmaths.h"
 
-class Camera;
+
+namespace uni {
+  namespace components {
+    class Camera;
+  }
+}
+
+using namespace uni::components;
+
 
 enum class VolumeCheck {
 	OUTSIDE,

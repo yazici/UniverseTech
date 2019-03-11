@@ -4,6 +4,8 @@
 #include <iostream>
 #include "UniEngine.h"
 
+using namespace uni::input;
+
 Input::Input() {
 
 }

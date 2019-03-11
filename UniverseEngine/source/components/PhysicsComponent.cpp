@@ -1,5 +1,6 @@
 #include "PhysicsComponent.h"
 
+using namespace uni::components;
 
 void PhysicsComponent::AddForce(glm::dvec3 force) {
 	AddForceAt(force, glm::dvec3(0));
