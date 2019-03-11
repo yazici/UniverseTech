@@ -1,18 +1,20 @@
-#include "UniPlanet.h"
+#include "Planet.h"
 #include <assert.h>
 #include <math.h>
 #include <iostream>
 #include "../FastNoise.h"
 #include "../UniEngine.h"
-#include "../UniScene.h"
-#include "../UniSceneManager.h"
-#include "../UniSceneRenderer.h"
+#include "../Scene.h"
+#include "../SceneManager.h"
+#include "../SceneRenderer.h"
 #include "glm/gtx/quaternion.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 
-UniPlanet::UniPlanet(double radius /*= 1.0*/,
+using namespace uni::components;
+
+Planet::Planet(double radius /*= 1.0*/,
                      double maxHeightOffset /*= 0.1*/,
                      double maxDepthOffset /*= 0.1*/,
                      uint16_t gridSize /*= 10*/,
@@ -27,16 +29,16 @@ UniPlanet::UniPlanet(double radius /*= 1.0*/,
   std::cout << "Initializing planet complete." << std::endl;
 }
 
-void UniPlanet::Destroy() {
+void Planet::Destroy() {
   std::cout << "Destroying planet..." << std::endl;
 
-  auto renderer = UniEngine::GetInstance()->SceneRenderer();
+  auto renderer = UniEngine::GetInstance()->GetSceneRenderer();
   renderer->UnRegisterMaterial(m_Material->GetName());
   m_Material.reset();
 }
 
-void UniPlanet::Initialize() {
-  auto renderer = UniEngine::GetInstance()->SceneRenderer();
+void Planet::Initialize() {
+  auto renderer = UniEngine::GetInstance()->GetSceneRenderer();
 
   //m_Material = std::static_pointer_cast<PlanetMaterial>(
   //    PlanetMaterialFactory::create("planet", "testworld", m_HasOcean));
@@ -61,7 +63,7 @@ void UniPlanet::Initialize() {
             << " points and " << m_Indices.size() / 4 << " quads." << std::endl;
 }
 
-void UniPlanet::CreateGrid() {
+void Planet::CreateGrid() {
   m_GridPoints.clear();
   float increment = 2.0f / m_GridSize;
   for (float y = -1.0f; y <= 1.0f; y += increment) {
@@ -74,7 +76,7 @@ void UniPlanet::CreateGrid() {
   assert(m_GridPoints.size() == (m_GridSize + 1) * (m_GridSize + 1));
 }
 
-void UniPlanet::CreateOceanTriangles() {
+void Planet::CreateOceanTriangles() {
   m_OceanIndices.clear();
   for (int y = 0; y < m_GridSize; y++) {
     for (int x = 0; x < m_GridSize; x++) {
@@ -91,7 +93,7 @@ void UniPlanet::CreateOceanTriangles() {
   assert(m_OceanIndices.size() == m_GridSize * m_GridSize * 6);
 }
 
-void UniPlanet::CreateQuads() {
+void Planet::CreateQuads() {
   m_Indices.clear();
   for (int y = 0; y < m_GridSize; y++) {
     for (int x = 0; x < m_GridSize; x++) {
@@ -105,12 +107,12 @@ void UniPlanet::CreateQuads() {
   assert(m_Indices.size() == m_GridSize * m_GridSize * 4);
 }
 
-glm::vec3 UniPlanet::RotatePointToCamera(glm::vec3 point) {
+glm::vec3 Planet::RotatePointToCamera(glm::vec3 point) {
   glm::quat rot = glm::rotation(glm::vec3(0.f, 0.f, -1.f), m_CurrentCameraPos);
   return rot * point;
 }
 
-double UniPlanet::CalculateZOffset() {
+double Planet::CalculateZOffset() {
   double d = glm::length(m_CurrentCameraPos);
   // std::cout << "Camera distance: " << d;
   double d2 = pow(d, 2.0);
@@ -129,7 +131,7 @@ double UniPlanet::CalculateZOffset() {
   return zs;
 }
 
-double UniPlanet::CalculateOceanZOffset() {
+double Planet::CalculateOceanZOffset() {
   double d = glm::length(m_CurrentCameraPos);
   // std::cout << "Camera distance: " << d;
   double d2 = pow(d, 2.0);
@@ -148,17 +150,17 @@ double UniPlanet::CalculateOceanZOffset() {
   return zs;
 }
 
-void UniPlanet::SetCameraPosition(glm::vec3& cam) {
+void Planet::SetCameraPosition(glm::vec3& cam) {
   m_CurrentCameraPos = cam;
   // std::cout << "Camera relative to planet: " << cam.x << ", " << cam.y << ",
   // " << cam.z << std::endl;
 }
 
-double UniPlanet::GetPositionOffset(glm::vec3& pos) {
+double Planet::GetPositionOffset(glm::vec3& pos) {
   return glm::length(pos);
 }
 
-void UniPlanet::UpdateMesh() {
+void Planet::UpdateMesh() {
   m_MeshVerts.clear();
   m_OceanVerts.clear();
   auto zs = CalculateZOffset();
@@ -192,7 +194,7 @@ void UniPlanet::UpdateMesh() {
   }
 }
 
-void UniPlanet::UpdateBuffers() {
+void Planet::UpdateBuffers() {
   m_IndexCount = static_cast<uint32_t>(m_Indices.size());
   m_VertexCount = static_cast<uint32_t>(m_MeshVerts.size());
   m_OceanVertexCount = static_cast<uint32_t>(m_OceanVerts.size());
@@ -282,9 +284,9 @@ void UniPlanet::UpdateBuffers() {
   }
 }
 
-void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
+void Planet::UpdateUniformBuffers(glm::mat4& modelMat) {
   auto engine = UniEngine::GetInstance();
-  auto camera = engine->SceneManager()->CurrentScene()->GetCameraComponent();
+  auto camera = engine->GetSceneManager()->CurrentScene()->GetCameraComponent();
 
   //// Pass transformations to the shader
   m_UniformBufferData.modelMat = modelMat;
@@ -344,7 +346,7 @@ void UniPlanet::UpdateUniformBuffers(glm::mat4& modelMat) {
 
 // TODO: Fixme for pn-patch interpolation causing offset problems where shader
 // != cpp
-float UniPlanet::GetAltitude(glm::vec3& point) {
+float Planet::GetAltitude(glm::vec3& point) {
   // std::cout << "Input pos: " << point.x << ", " << point.y << ", " <<
   // point.z;
 
@@ -375,11 +377,11 @@ float UniPlanet::GetAltitude(glm::vec3& point) {
   return altitude;
 }
 
-void UniPlanet::SetZOffset(float value) {
+void Planet::SetZOffset(float value) {
   m_ZOffset = value;
 }
 
-void UniPlanet::CreateBuffers() {
+void Planet::CreateBuffers() {
   uint32_t vertexBufferSize =
       static_cast<uint32_t>(m_MeshVerts.size() * sizeof(glm::vec3));
   uint32_t oceanVertexBufferSize =
@@ -388,7 +390,7 @@ void UniPlanet::CreateBuffers() {
       static_cast<uint32_t>(m_Indices.size() * sizeof(uint32_t));
   uint32_t oceanIndexBufferSize =
       static_cast<uint32_t>(m_OceanIndices.size() * sizeof(uint32_t));
-  uint32_t ubSize = static_cast<uint32_t>(sizeof(UniPlanet::UniformBufferData));
+  uint32_t ubSize = static_cast<uint32_t>(sizeof(Planet::UniformBufferData));
   uint32_t storageBufferSize =
       static_cast<uint32_t>(m_NoiseLayers.size() * sizeof(NoiseLayerData));
 
@@ -446,7 +448,7 @@ void UniPlanet::CreateBuffers() {
   }
 }
 
-void UniPlanet::DestroyBuffers() {
+void Planet::DestroyBuffers() {
   m_IndexBuffer.destroy();
   m_VertexBuffer.destroy();
   if (m_HasOcean) {
@@ -456,7 +458,7 @@ void UniPlanet::DestroyBuffers() {
   m_UniformBuffer.destroy();
 }
 
-void UniPlanet::MakeContintentTexture() {
+void Planet::MakeContintentTexture() {
   FastNoise noise;
   noise.SetNoiseType(FastNoise::SimplexFractal);
   noise.SetFractalOctaves(3);
@@ -492,7 +494,7 @@ void UniPlanet::MakeContintentTexture() {
   m_Material->m_Textures.push_back(t);
 }
 
-void UniPlanet::UpdateStorageBuffer() {
+void Planet::UpdateStorageBuffer() {
   auto engine = UniEngine::GetInstance();
 
   vks::Buffer storageStaging;
@@ -527,11 +529,11 @@ void UniPlanet::UpdateStorageBuffer() {
   vkFreeMemory(device->logicalDevice, storageStaging.memory, nullptr);
 }
 
-double UniPlanet::GetRadius() {
+double Planet::GetRadius() {
   return m_Radius;
 }
 
-uint32_t UniPlanet::AddNoiseLayer(NoiseType type,
+uint32_t Planet::AddNoiseLayer(NoiseType type,
                                   uint32_t octaves,
                                   float seed /*=1337.0f*/) {
   auto nl = NoiseLayerData();
@@ -542,7 +544,7 @@ uint32_t UniPlanet::AddNoiseLayer(NoiseType type,
   return static_cast<uint32_t>(m_NoiseLayers.size() - 1);
 }
 
-void UniPlanet::MakeRampTexture() {
+void Planet::MakeRampTexture() {
   auto engine = UniEngine::GetInstance();
   std::string path = engine->getAssetPath() + "textures/terrain-ramp.png";
   int texWidth, texHeight, texChannels;

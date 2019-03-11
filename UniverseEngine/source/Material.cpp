@@ -1,12 +1,14 @@
-#include "UniMaterial.h"
+#include "Material.h"
 #include <array>
 #include "UniEngine.h"
-#include "UniSceneManager.h"
-#include "UniSceneRenderer.h"
-#include "UniAssetManager.h"
-#include "UniAsset.h"
+#include "SceneManager.h"
+#include "SceneRenderer.h"
+#include "AssetManager.h"
+#include "Asset.h"
 
-UniMaterial::UniMaterial(std::string name) {
+using namespace uni::materials;
+
+Material::Material(std::string name) {
 
   std::cout << "### UNIMATERIAL " << name << " CREATED ###" << std::endl;
 
@@ -17,7 +19,7 @@ UniMaterial::UniMaterial(std::string name) {
   SetShader("frag", aPath + "shaders/omnishader.frag.spv");
 }
 
-void UniMaterial::SetupMaterial(
+void Material::SetupMaterial(
   VkGraphicsPipelineCreateInfo & pipelineCreateInfo) {
 
   if (!m_setupPerformed) {
@@ -38,10 +40,10 @@ void UniMaterial::SetupMaterial(
     memcpy(m_MaterialPropertyBuffer.mapped, &m_MaterialProperties,
       sizeof(m_MaterialProperties));
 
-    SetupDescriptorSetLayout(SceneRenderer());
-    PreparePipelines(SceneRenderer(), pipelineCreateInfo);
-    SetupDescriptorPool(SceneRenderer());
-    SetupDescriptorSets(SceneRenderer());
+    SetupDescriptorSetLayout(GetSceneRenderer());
+    PreparePipelines(GetSceneRenderer(), pipelineCreateInfo);
+    SetupDescriptorPool(GetSceneRenderer());
+    SetupDescriptorSets(GetSceneRenderer());
 
     m_setupPerformed = true;
   }
@@ -59,8 +61,8 @@ void UniMaterial::SetupMaterial(
   5: Emissive Map
   6: AO Map
  */
-void UniMaterial::SetupDescriptorSetLayout(
-  std::shared_ptr<UniSceneRenderer> renderer) {
+void Material::SetupDescriptorSetLayout(
+  std::shared_ptr<uni::render::SceneRenderer> renderer) {
   // Deferred shading layout
   m_setLayoutBindings = {
     // Binding 0 : model texture map
@@ -128,8 +130,8 @@ void UniMaterial::SetupDescriptorSetLayout(
     nullptr, &m_pipelineLayout));
 }
 
-void UniMaterial::PreparePipelines(
-  std::shared_ptr<UniSceneRenderer> renderer,
+void Material::PreparePipelines(
+  std::shared_ptr<uni::render::SceneRenderer> renderer,
   VkGraphicsPipelineCreateInfo & pipelineCreateInfo) {
   VkGraphicsPipelineCreateInfo localPCI = pipelineCreateInfo;
   auto engine = UniEngine::GetInstance();
@@ -152,8 +154,8 @@ void UniMaterial::PreparePipelines(
     &localPCI, nullptr, &m_pipeline));
 }
 
-void UniMaterial::SetupDescriptorPool(
-  std::shared_ptr<UniSceneRenderer> renderer) {
+void Material::SetupDescriptorPool(
+  std::shared_ptr<uni::render::SceneRenderer> renderer) {
   auto engine = UniEngine::GetInstance();
   auto device = engine->GetDevice();
   auto& drawCmdBuffers = engine->GetCommandBuffers();
@@ -182,8 +184,8 @@ void UniMaterial::SetupDescriptorPool(
     &m_descriptorPool));
 }
 
-void UniMaterial::SetupDescriptorSets(
-  std::shared_ptr<UniSceneRenderer> renderer) {
+void Material::SetupDescriptorSets(
+  std::shared_ptr<uni::render::SceneRenderer> renderer) {
   auto device = UniEngine::GetInstance()->GetDevice();
 
   VkDescriptorSetAllocateInfo allocInfo =
@@ -235,7 +237,7 @@ void UniMaterial::SetupDescriptorSets(
     m_writeDescriptorSets.data(), 0, nullptr);
 }
 
-void UniMaterial::AddToCommandBuffer(
+void Material::AddToCommandBuffer(
   VkCommandBuffer & cmdBuffer,
   ECS::ComponentHandle<ModelComponent> model) {
   // std::cout << "Calling add to command buffer for model material." <<
@@ -246,7 +248,7 @@ void UniMaterial::AddToCommandBuffer(
 
   auto dynamicAlignment = UniEngine::GetInstance()->getDynamicAlignment();
 
-  auto renderer = SceneRenderer();
+  auto renderer = GetSceneRenderer();
 
   std::vector<VkDescriptorSet> dSets = { renderer->GetDescriptorSet(),
                                         m_descriptorSet };
@@ -278,11 +280,11 @@ void UniMaterial::AddToCommandBuffer(
     });
 }
 
-void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
+void Material::LoadTexture(std::string name, std::string texturePath) {
 
   auto engine = UniEngine::GetInstance();
-  auto mgr = engine->AssetManager();
-  auto asset = mgr->GetAsset<UniAssetTexture2D>(texturePath);
+  auto mgr = engine->GetAssetManager();
+  auto asset = mgr->GetAsset<uni::assets::UniAssetTexture2D>(texturePath);
 
   m_TexturePaths.insert({ name, texturePath });
 
@@ -294,40 +296,40 @@ void UniMaterial::LoadTexture(std::string name, std::string texturePath) {
 
 }
 
-void UniMaterial::SetBuffer(std::string name,
+void Material::SetBuffer(std::string name,
   std::shared_ptr<vks::Buffer> buffer) {
   m_Buffers[name] = buffer;
 }
 
-std::shared_ptr<vks::Buffer> UniMaterial::GetBuffer(std::string buffer) {
+std::shared_ptr<vks::Buffer> Material::GetBuffer(std::string buffer) {
   if (m_Buffers.find(buffer) == m_Buffers.end()) {
     m_Buffers[buffer] = std::make_shared<vks::Buffer>();
   }
   return m_Buffers.at(buffer);
 }
 
-std::shared_ptr<vks::Texture2D> UniMaterial::GetTexture(std::string name) {
+std::shared_ptr<vks::Texture2D> Material::GetTexture(std::string name) {
 
   // std::cout << "There are " << m_TexturePaths.size() << " texture paths registered with " << m_Name << std::endl;
 
   auto texturePath = m_TexturePaths.at(name);
   auto engine = UniEngine::GetInstance();
-  auto mgr = engine->AssetManager();
-  auto asset = mgr->GetAsset<UniAssetTexture2D>(texturePath);
+  auto mgr = engine->GetAssetManager();
+  auto asset = mgr->GetAsset<uni::assets::UniAssetTexture2D>(texturePath);
 
   return asset->m_texture;
 }
 
-void UniMaterial::SetTexture(std::string name,
+void Material::SetTexture(std::string name,
   std::shared_ptr<vks::Texture2D> texture) {
   m_Textures[name] = texture;
 }
 
-std::shared_ptr<UniSceneRenderer> UniMaterial::SceneRenderer() {
-  return UniEngine::GetInstance()->SceneManager()->SceneRenderer();
+std::shared_ptr<uni::render::SceneRenderer> Material::GetSceneRenderer() {
+  return UniEngine::GetInstance()->GetSceneManager()->GetSceneRenderer();
 }
 
-void UniMaterial::Destroy() {
+void Material::Destroy() {
   std::cout << "Destroying base material..." << std::endl;
 
   if (m_setupPerformed) {
@@ -354,11 +356,11 @@ void UniMaterial::Destroy() {
 
 }
 
-void UniMaterial::RegisterModel(ECS::ComponentHandle<ModelComponent> model) {
+void Material::RegisterModel(ECS::ComponentHandle<ModelComponent> model) {
   m_models.push_back(model);
 }
 
-void UniMaterial::UnRegisterModel(ECS::ComponentHandle<ModelComponent> model) {
+void Material::UnRegisterModel(ECS::ComponentHandle<ModelComponent> model) {
   int i = 0;
   while (i < m_models.size()) {
     if (m_models[i]->GetName() == model->GetName()) {

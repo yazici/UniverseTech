@@ -1,11 +1,14 @@
 #include "PlayerControl.h"
 
+using namespace uni::components;
+using namespace uni::scene;
+
 bool PlayerControlComponent::HasTarget() {
 	return m_HasTarget;
 }
 
-void PlayerControlComponent::SetTarget(UniSceneObject& target) {
-	m_CurrentTarget = std::make_shared<UniSceneObject>(target);
+void PlayerControlComponent::SetTarget(SceneObject& target) {
+	m_CurrentTarget = std::make_shared<SceneObject>(target);
 	m_HasTarget = true;
 }
 

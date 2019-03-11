@@ -4,7 +4,15 @@
 #include "components/Camera.h"
 #include "3dmaths.h"
 
-class Camera;
+
+namespace uni {
+  namespace components {
+    class Camera;
+  }
+}
+
+using namespace uni::components;
+
 
 enum class VolumeCheck {
 	OUTSIDE,
@@ -41,10 +49,10 @@ struct FrustumCorners {
 
 };
 
-class UniFrustum {
+class Frustum {
 public:
-	UniFrustum();
-	~UniFrustum();
+	Frustum();
+	~Frustum();
 
 	void Update();
 

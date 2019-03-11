@@ -1,18 +1,19 @@
-#include "UniFrustum.hpp"
+#include "Frustum.hpp"
 
+using namespace uni::components;
 
-UniFrustum::UniFrustum() {
+Frustum::Frustum() {
 	m_Corners = FrustumCorners();
 }
-UniFrustum::~UniFrustum() {}
+Frustum::~Frustum() {}
 
 //create transforms to prevent transforming every triangle into world space
-void UniFrustum::SetCullTransform(glm::mat4 objectWorld) {
+void Frustum::SetCullTransform(glm::mat4 objectWorld) {
 	m_CullWorld = objectWorld;
 	m_CullInverse = glm::inverse(objectWorld);
 }
 
-void UniFrustum::SetToCamera(ECS::ComponentHandle<CameraComponent> camera) {
+void Frustum::SetToCamera(ECS::ComponentHandle<CameraComponent> camera) {
 	auto mat = camera->matrices.view;
 	m_Position = glm::vec3(mat[3]);
 	m_Up = glm::vec3(mat[1]);
@@ -24,7 +25,7 @@ void UniFrustum::SetToCamera(ECS::ComponentHandle<CameraComponent> camera) {
 	m_Aspect = camera->aspect;
 }
 
-void UniFrustum::Update() {
+void Frustum::Update() {
 	//calculate generalized relative width and aspect ratio
 	float normHalfWidth = tan(glm::radians(m_FOV));
 	float aspectRatio = m_Aspect; // (float)UniEngine::GetInstance()->width / (float)UniEngine::GetInstance()->height;
@@ -86,13 +87,13 @@ void UniFrustum::Update() {
 	m_Planes.emplace_back(m_Corners.nc, m_Corners.nd, m_Corners.fc);//Bottom
 }
 
-VolumeCheck UniFrustum::ContainsPoint(const glm::vec3 &point) const {
+VolumeCheck Frustum::ContainsPoint(const glm::vec3 &point) const {
 	for(auto plane : m_Planes) {
 		if(glm::dot(plane.n, point - plane.d) < 0)return VolumeCheck::OUTSIDE;
 	}
 	return VolumeCheck::CONTAINS;
 }
-VolumeCheck UniFrustum::ContainsSphere(const Sphere &sphere) const {
+VolumeCheck Frustum::ContainsSphere(const Sphere &sphere) const {
 	VolumeCheck ret = VolumeCheck::CONTAINS;
 	for(auto plane : m_Planes) {
 		float dist = glm::dot(plane.n, sphere.pos - plane.d);
@@ -104,7 +105,7 @@ VolumeCheck UniFrustum::ContainsSphere(const Sphere &sphere) const {
 //this method will treat triangles as intersecting even though they may be outside
 //but it is faster then performing a proper intersection test with every plane
 //and it does not reject triangles that are inside but with all corners outside
-VolumeCheck UniFrustum::ContainsTriangle(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c) {
+VolumeCheck Frustum::ContainsTriangle(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c) {
 	VolumeCheck ret = VolumeCheck::CONTAINS;
 	for(auto plane : m_Planes) {
 		char rejects = 0;
@@ -119,7 +120,7 @@ VolumeCheck UniFrustum::ContainsTriangle(glm::vec3 &a, glm::vec3 &b, glm::vec3 &
 	return ret;
 }
 //same as above but with a volume generated above the triangle
-VolumeCheck UniFrustum::ContainsTriVolume(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c, float height) {
+VolumeCheck Frustum::ContainsTriVolume(glm::vec3 &a, glm::vec3 &b, glm::vec3 &c, float height) {
 	VolumeCheck ret = VolumeCheck::CONTAINS;
 	for(auto plane : m_Planes) {
 		char rejects = 0;

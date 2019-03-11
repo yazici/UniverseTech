@@ -2,8 +2,8 @@
 
 #include <array>
 #include "../UniEngine.h"
-#include "../UniSceneManager.h"
-#include "../UniSceneRenderer.h"
+#include "../SceneManager.h"
+#include "../SceneRenderer.h"
 
 ModelMaterial::ModelMaterial(std::string name) {
 

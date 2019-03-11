@@ -1,6 +1,8 @@
-#include "../UniMaterial.h"
+#include "../Material.h"
 
-class PlanetMaterial : public UniMaterial {
+using namespace uni::materials;
+
+class PlanetMaterial : public Material {
  public:
   struct SpecializationData {
     // Sets the displacement used in the tessellation shader

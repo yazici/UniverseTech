@@ -1,7 +1,9 @@
 #include "Transform.h"
-#include "../UniSceneObject.h"
+#include "../SceneObject.h"
 
-void TransformComponent::SetParent(std::shared_ptr<UniSceneObject> parent) {
+using namespace uni::components;
+
+void TransformComponent::SetParent(std::shared_ptr<uni::scene::SceneObject> parent) {
 	m_Parent = parent;
 };
 

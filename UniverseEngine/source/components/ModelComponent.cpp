@@ -1,12 +1,12 @@
 #include "ModelComponent.h"
 #include "../UniEngine.h"
-#include "../UniAssetManager.h"
-#include "../UniAsset.h"
+#include "../AssetManager.h"
+#include "../Asset.h"
 
-ModelComponent::ModelComponent(std::string path) {
-  auto asset = UniEngine::GetInstance()->AssetManager()->GetAsset<UniAssetModel>(path);
+uni::components::ModelComponent::ModelComponent(std::string path) {
+  auto asset = UniEngine::GetInstance()->GetAssetManager()->GetAsset<uni::assets::UniAssetModel>(path);
   m_Model = asset->m_model;
   m_Name = path;
 }
 
-ModelComponent::~ModelComponent() {}
+uni::components::ModelComponent::~ModelComponent() {}

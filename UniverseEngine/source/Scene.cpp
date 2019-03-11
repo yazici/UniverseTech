@@ -1,34 +1,36 @@
-#include "UniScene.h"
+#include "Scene.h"
 #include <cmath>
 #include <iosfwd>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include "Materials.h"
 #include "UniEngine.h"
-#include "UniAudioEngine.h"
-#include "UniSceneManager.h"
-#include "UniSceneRenderer.h"
+#include "AudioEngine.h"
+#include "SceneManager.h"
+#include "SceneRenderer.h"
 #include "components/Components.h"
 #include "systems/Systems.h"
-#include "UniAssetManager.h"
-#include "UniAsset.h"
+#include "AssetManager.h"
+#include "Asset.h"
 #include <set>
 
 using json = nlohmann::json;
+using namespace uni::scene;
+using namespace uni::components;
 
-UniScene::UniScene() {
+Scene::Scene() {
   m_World = nullptr;
 }
 
-UniScene::UniScene(std::string name)
+Scene::Scene(std::string name)
 {
   m_World = nullptr;
   m_Name = name;
 }
 
-UniScene::~UniScene() {}
+Scene::~Scene() {}
 
-void UniScene::Initialize() {
+void Scene::Initialize() {
   auto engine = UniEngine::GetInstance();
   m_World = ECS::World::createWorld();
   m_World->registerSystem(new MovementSystem());
@@ -40,7 +42,7 @@ void UniScene::Initialize() {
   m_World->registerSystem(new ModelRenderSystem());
   m_World->registerSystem(new AudioSystem());
 
-  m_CurrentCamera = Make<UniSceneObject>(glm::vec3(0), "player camera");
+  m_CurrentCamera = Make<SceneObject>(glm::vec3(0), "player camera");
   m_CurrentCamera->AddComponent<CameraComponent>(
     m_CurrentCamera->GetTransform(),
     (float)engine->width / (float)engine->height, 50.f, 0.01f, 10000.f);
@@ -51,10 +53,10 @@ void UniScene::Initialize() {
     m_CurrentCamera);
 }
 
-void UniScene::Load(std::string filename) {
+void Scene::Load(std::string filename) {
 
-  auto assetManager = UniEngine::GetInstance()->AssetManager();
-  auto renderer = UniEngine::GetInstance()->SceneManager()->SceneRenderer(m_Name);
+  auto assetManager = UniEngine::GetInstance()->GetAssetManager();
+  auto renderer = UniEngine::GetInstance()->GetSceneManager()->GetSceneRenderer(m_Name);
 
   std::ifstream t(filename);
   std::stringstream buffer;
@@ -86,7 +88,7 @@ void UniScene::Load(std::string filename) {
       lpos = glm::vec3(pos[0], pos[1], pos[2]);
     }
 
-    auto sceneObject = Make<UniSceneObject>(lpos, soName);
+    auto sceneObject = Make<SceneObject>(lpos, soName);
 
     if (row.find("rotation") != row.end()) {
       auto rot = row.at("rotation");
@@ -141,7 +143,7 @@ void UniScene::Load(std::string filename) {
       if (component.at("type") == "model") {
         std::cout << "Assigning model component: " << component.at("asset") << std::endl;
 
-        auto asset = assetManager->GetAsset<UniAssetModel>(component.at("asset"));
+        auto asset = assetManager->GetAsset<uni::assets::UniAssetModel>(component.at("asset"));
 
         ECS::ComponentHandle<ModelComponent> model =
           sceneObject->AddComponent<ModelComponent>(asset->m_path);
@@ -151,7 +153,7 @@ void UniScene::Load(std::string filename) {
         for (const auto& mat : asset->m_materials) {
           
           if (renderer->GetMaterialByID<ModelMaterial>(mat) == nullptr) {
-            auto matAsset = assetManager->GetAsset<UniAssetMaterial>(mat);
+            auto matAsset = assetManager->GetAsset<uni::assets::UniAssetMaterial>(mat);
             renderer->RegisterMaterial(mat, matAsset->m_material);
           }
         }
@@ -187,7 +189,7 @@ void UniScene::Load(std::string filename) {
   std::cout << "Scene fully loaded." << std::endl;
 }
 
-void UniScene::Unload() {
+void Scene::Unload() {
   std::cout << "Shutting down scene." << std::endl;
 
   m_World->destroyWorld();
@@ -198,18 +200,18 @@ void UniScene::Unload() {
   m_SceneObjects.clear();
 }
 
-void UniScene::Tick(float deltaTime) {
+void Scene::Tick(float deltaTime) {
   m_World->tick(deltaTime);
   // m_BodyTest->Update();
 }
 
-std::vector<std::shared_ptr<UniSceneObject>> UniScene::GetRenderedObjects() {
+std::vector<std::shared_ptr<SceneObject>> Scene::GetRenderedObjects() {
   if (!m_RenderedObjectCache.empty()) {
     return m_RenderedObjectCache;
   }
 
   for_each(m_SceneObjects.begin(), m_SceneObjects.end(),
-    [this](std::shared_ptr<UniSceneObject> so) {
+    [this](std::shared_ptr<SceneObject> so) {
       if (so->IsRendered()) {
         m_RenderedObjectCache.push_back(so);
       }
@@ -218,7 +220,7 @@ std::vector<std::shared_ptr<UniSceneObject>> UniScene::GetRenderedObjects() {
   return m_RenderedObjectCache;
 }
 
-void UniScene::AddSceneObject(std::shared_ptr<UniSceneObject> so) {
+void Scene::AddSceneObject(std::shared_ptr<SceneObject> so) {
   m_SceneObjects.push_back(so);
   m_RenderedObjectCache.clear();
 }

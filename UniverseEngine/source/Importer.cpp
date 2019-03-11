@@ -1,14 +1,15 @@
-#include "UniImporter.h"
-#include "UniAsset.h"
+#include "Importer.h"
+#include "Asset.h"
 #include "UniEngine.h"
-#include "UniAssetManager.h"
-#include "UniSceneRenderer.h"
-#include "UniAudioEngine.h"
+#include "AssetManager.h"
+#include "SceneRenderer.h"
+#include "AudioEngine.h"
 
 using namespace uni::import;
+using namespace uni::assets;
 
 
-std::shared_ptr<UniAsset> UniTexture2DImporter::Import(std::shared_ptr<UniAsset> asset, bool force)
+std::shared_ptr<Asset> Texture2DImporter::Import(std::shared_ptr<Asset> asset, bool force)
 {
   //std::cout << "Doing texture importer " << std::endl;
 
@@ -70,13 +71,13 @@ std::shared_ptr<UniAsset> UniTexture2DImporter::Import(std::shared_ptr<UniAsset>
 
 }
 
-std::shared_ptr<UniAsset> UniTexture2DImporter::LoadAsset(json data)
+std::shared_ptr<Asset> Texture2DImporter::LoadAsset(json data)
 {
   return CreateAsset<UniAssetTexture2D>(data);
 }
 
 
-std::shared_ptr<UniAsset> UniModelImporter::Import(std::shared_ptr<UniAsset> asset, bool force)
+std::shared_ptr<Asset> ModelImporter::Import(std::shared_ptr<Asset> asset, bool force)
 {
 
   //std::cout << "Doing model importer " << std::endl;
@@ -140,12 +141,12 @@ std::shared_ptr<UniAsset> UniModelImporter::Import(std::shared_ptr<UniAsset> ass
 
 }
 
-std::shared_ptr<UniAsset> UniModelImporter::LoadAsset(json data)
+std::shared_ptr<Asset> ModelImporter::LoadAsset(json data)
 {
   return CreateAsset<UniAssetModel>(data);
 }
 
-std::shared_ptr<UniAsset> MaterialImporter::Import(std::shared_ptr<UniAsset> asset, bool force) {
+std::shared_ptr<Asset> MaterialImporter::Import(std::shared_ptr<Asset> asset, bool force) {
 
   //std::cout << "Doing material importer " << std::endl;
 
@@ -277,12 +278,12 @@ std::shared_ptr<UniAsset> MaterialImporter::Import(std::shared_ptr<UniAsset> ass
 
 }
 
-std::shared_ptr<UniAsset> MaterialImporter::LoadAsset(json data)
+std::shared_ptr<Asset> MaterialImporter::LoadAsset(json data)
 {
   return CreateAsset<UniAssetMaterial>(data);
 }
 
-std::shared_ptr<UniAsset> AudioImporter::Import(std::shared_ptr<UniAsset> asset, bool force)
+std::shared_ptr<Asset> AudioImporter::Import(std::shared_ptr<Asset> asset, bool force)
 {
   auto audioAsset = std::dynamic_pointer_cast<UniAssetAudio>(asset);
   if (audioAsset == nullptr) {
@@ -309,7 +310,7 @@ std::shared_ptr<UniAsset> AudioImporter::Import(std::shared_ptr<UniAsset> asset,
   }
   catch (json::out_of_range err) {}
 
-  UniEngine::GetInstance()->AudioManager()->LoadSound(
+  UniEngine::GetInstance()->GetAudioManager()->LoadSound(
     audioAsset->m_sourceFile, is3d, isLooping, false);
 
   audioAsset->m_is3d = is3d;
@@ -320,17 +321,17 @@ std::shared_ptr<UniAsset> AudioImporter::Import(std::shared_ptr<UniAsset> asset,
   return audioAsset;
 }
 
-std::shared_ptr<UniAsset> AudioImporter::LoadAsset(json data)
+std::shared_ptr<Asset> AudioImporter::LoadAsset(json data)
 {
   return CreateAsset<UniAssetAudio>(data);
 }
 
 
 const bool factoriesAdded = [] {
-  UniAssetManager::RegisterImporter("texture2d", std::make_shared<UniTexture2DImporter>());
-  UniAssetManager::RegisterImporter("model", std::make_shared<UniModelImporter>());
-  UniAssetManager::RegisterImporter("model material", std::make_shared<MaterialImporter>());
-  UniAssetManager::RegisterImporter("audio", std::make_shared<AudioImporter>());
+  AssetManager::RegisterImporter("texture2d", std::make_shared<Texture2DImporter>());
+  AssetManager::RegisterImporter("model", std::make_shared<ModelImporter>());
+  AssetManager::RegisterImporter("model material", std::make_shared<MaterialImporter>());
+  AssetManager::RegisterImporter("audio", std::make_shared<AudioImporter>());
   return true;
 }();
 

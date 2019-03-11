@@ -1,6 +1,8 @@
 #include "Movement.h"
 #include <iostream>
 
+using namespace uni::components;
+
 void MovementComponent::ApplyAcceleration(glm::vec3 accel, float deltaTime) {
 	accel.x *= m_MaxStrafeAccel;
 	accel.y *= m_MaxVerticalAccel;

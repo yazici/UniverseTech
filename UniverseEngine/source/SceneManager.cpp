@@ -1,25 +1,27 @@
-#include "UniSceneManager.h"
-#include "UniSceneRenderer.h"
+#include "SceneManager.h"
+#include "SceneRenderer.h"
 #include "UniEngine.h"
 #include "systems/Systems.h"
 
+using namespace uni::scene;
+
 std::vector<std::string> scenelist = {"testlevel2", "testlevel"};
 
-void UniSceneManager::Initialise() {
+void SceneManager::Initialise() {
   std::cout << "Initialising new scene." << std::endl; 
 }
 
-void UniSceneManager::LoadScene(std::string sceneName) {
+void SceneManager::LoadScene(std::string sceneName) {
   std::cout << "Loading assets for scene: " << sceneName << std::endl;
 
   if (m_renderers.find(sceneName) == m_renderers.end()) {
     std::cout << "%%%% CREATING SCENERENDERER FOR " << sceneName << " %%%%" << std::endl;
-    auto renderer = std::make_shared<UniSceneRenderer>(sceneName);
+    auto renderer = std::make_shared<uni::render::SceneRenderer>(sceneName);
     m_renderers.insert({ sceneName, renderer });
   }
 
   {
-    auto scene = std::make_shared<UniScene>(sceneName);
+    auto scene = std::make_shared<Scene>(sceneName);
     scene->Initialize();
     m_scenes.insert({ sceneName, scene});
   }
@@ -33,14 +35,14 @@ void UniSceneManager::LoadScene(std::string sceneName) {
   
 }
 
-void UniSceneManager::ActivateScene(std::string sceneName) {
+void SceneManager::ActivateScene(std::string sceneName) {
   if (m_scenes.find(sceneName) == m_scenes.end()) {
     throw std::runtime_error("Cannot activate scene " + sceneName);
   }
   m_currentScene = sceneName;
 
   std::cout << "***** SCENERENDERER INIT " << sceneName << " *****" << std::endl;
-  SceneRenderer(sceneName)->Initialise();
+  GetSceneRenderer(sceneName)->Initialise();
 
   EmitEvent<LevelStartEvent>({ true });
 
@@ -49,7 +51,7 @@ void UniSceneManager::ActivateScene(std::string sceneName) {
 
 }
 
-void UniSceneManager::UnloadScene(std::string sceneName) {
+void SceneManager::UnloadScene(std::string sceneName) {
   std::cout << "Unloading scene " << sceneName << std::endl;
   m_scenes.at(sceneName)->Unload();
   m_scenes.erase(sceneName);
@@ -59,16 +61,16 @@ void UniSceneManager::UnloadScene(std::string sceneName) {
   m_renderers.erase(sceneName);
 }
 
-void UniSceneManager::LoadAssets(std::string sceneName) {
+void SceneManager::LoadAssets(std::string sceneName) {
   m_scenes.at(sceneName)->Load(UniEngine::GetInstance()->getAssetPath() + "levels/" + sceneName + ".json");
 }
 
-void UniSceneManager::RequestNewScene(std::string sceneName) {
+void SceneManager::RequestNewScene(std::string sceneName) {
   m_UpdateScene = true;
   m_NextScene = sceneName;
 }
 
-void UniSceneManager::CycleScenes() {
+void SceneManager::CycleScenes() {
   m_CurrentSceneIdx++;
   if (m_CurrentSceneIdx >= scenelist.size())
     m_CurrentSceneIdx = 0;
@@ -77,7 +79,7 @@ void UniSceneManager::CycleScenes() {
   m_UpdateScene = true;
 }
 
-void UniSceneManager::Shutdown() {
+void SceneManager::Shutdown() {
   std::vector<std::string> scenes = {};
   for (auto& [name, scene] : m_scenes) {
     scenes.push_back(name);
@@ -89,17 +91,17 @@ void UniSceneManager::Shutdown() {
   }
 }
 
-std::shared_ptr<UniScene> UniSceneManager::CurrentScene() {
+std::shared_ptr<Scene> SceneManager::CurrentScene() {
   return m_scenes.at(m_currentScene);
 }
 
-void UniSceneManager::Tick(float frameTimer) {
+void SceneManager::Tick(float frameTimer) {
   CurrentScene()->Tick(frameTimer);
-  SceneRenderer()->Tick(frameTimer);
+  GetSceneRenderer()->Tick(frameTimer);
 
 }
 
-bool UniSceneManager::CheckNewScene() {
+bool SceneManager::CheckNewScene() {
   if (m_UpdateScene && !m_NextScene.empty()) {
     auto lastScene = m_currentScene;
     LoadScene(m_NextScene);
@@ -111,12 +113,12 @@ bool UniSceneManager::CheckNewScene() {
   return false;
 }
 
-std::shared_ptr<UniSceneRenderer> UniSceneManager::SceneRenderer()
+std::shared_ptr<uni::render::SceneRenderer> SceneManager::GetSceneRenderer()
 {
-  return SceneRenderer(m_currentScene);
+  return GetSceneRenderer(m_currentScene);
 }
 
-std::shared_ptr<UniSceneRenderer> UniSceneManager::SceneRenderer(std::string sceneName)
+std::shared_ptr<uni::render::SceneRenderer> SceneManager::GetSceneRenderer(std::string sceneName)
 {
   return m_renderers.at(sceneName);
 }

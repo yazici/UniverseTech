@@ -1,9 +1,12 @@
 #include <algorithm>
 
 #include "UniEngine.h"
-#include "UniSceneManager.h"
-#include "UniSceneRenderer.h"
+#include "SceneManager.h"
+#include "SceneRenderer.h"
 #include "systems/events.h"
+
+using namespace uni::render;
+using namespace uni::scene;
 
 // Wrapper functions for aligned memory allocation
 // There is currently no standard for this in C++ that works across all
@@ -28,13 +31,13 @@ void alignedFree(void* data) {
 #endif
 }
 
-UniSceneRenderer::UniSceneRenderer(std::string name)
+SceneRenderer::SceneRenderer(std::string name)
 {
   m_name = name;
   std::cout << "******************** SCENERENDER!!! " << name << " ********************" << std::endl;
 }
 
-void UniSceneRenderer::Initialise() {
+void SceneRenderer::Initialise() {
   std::cout << "Prepare vertex descriptions..." << std::endl;
   SetupVertexDescriptions();
 
@@ -57,7 +60,7 @@ void UniSceneRenderer::Initialise() {
   BuildCommandBuffers();
 }
 
-void UniSceneRenderer::ShutDown() {
+void SceneRenderer::ShutDown() {
 
   auto engine = UniEngine::GetInstance();
   auto device = engine->GetDevice();
@@ -78,7 +81,7 @@ void UniSceneRenderer::ShutDown() {
 
 }
 
-void UniSceneRenderer::SetupVertexDescriptions() {
+void SceneRenderer::SetupVertexDescriptions() {
   // Binding description
   m_vertices.bindingDescriptions = {
       vks::initializers::vertexInputBindingDescription(
@@ -123,7 +126,7 @@ void UniSceneRenderer::SetupVertexDescriptions() {
 }
 
 // Prepare and initialize uniform buffer containing shader uniforms
-void UniSceneRenderer::PrepareUniformBuffers() {
+void SceneRenderer::PrepareUniformBuffers() {
   auto engine = UniEngine::GetInstance();
 
   // Fullscreen vertex shader
@@ -133,7 +136,7 @@ void UniSceneRenderer::PrepareUniformBuffers() {
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &m_uniformBuffers.vsForward, sizeof(m_uboForward)));
 
-  auto models = engine->SceneManager()->CurrentScene()->GetRenderedObjects();
+  auto models = engine->GetSceneManager()->CurrentScene()->GetRenderedObjects();
   auto dynamicAlignment = engine->getDynamicAlignment();
   size_t bufferSize =
       std::max(static_cast<int>(models.size()), 1) * dynamicAlignment;
@@ -164,7 +167,7 @@ void UniSceneRenderer::PrepareUniformBuffers() {
   UpdateDynamicUniformBuffers();
 }
 
-void UniSceneRenderer::SetupDescriptorSetLayout() {
+void SceneRenderer::SetupDescriptorSetLayout() {
   // Deferred shading layout
   m_setLayoutBindings = {
       // Binding 0 : uniform buffer
@@ -203,7 +206,7 @@ void UniSceneRenderer::SetupDescriptorSetLayout() {
                                          nullptr, &m_pipelineLayouts.forward));
 }
 
-void UniSceneRenderer::PreparePipelines() {
+void SceneRenderer::PreparePipelines() {
   auto engine = UniEngine::GetInstance();
 
   auto wfmode = VK_POLYGON_MODE_FILL;
@@ -287,7 +290,7 @@ void UniSceneRenderer::PreparePipelines() {
   }
 }
 
-void UniSceneRenderer::SetupDescriptorPool() {
+void SceneRenderer::SetupDescriptorPool() {
   auto engine = UniEngine::GetInstance();
   auto device = engine->GetDevice();
   auto& drawCmdBuffers = engine->GetCommandBuffers();
@@ -314,7 +317,7 @@ void UniSceneRenderer::SetupDescriptorPool() {
                                          &m_descriptorPool));
 }
 
-void UniSceneRenderer::SetupDescriptorSets() {
+void SceneRenderer::SetupDescriptorSets() {
   auto device = UniEngine::GetInstance()->GetDevice();
 
   VkDescriptorSetAllocateInfo allocInfo =
@@ -346,7 +349,7 @@ void UniSceneRenderer::SetupDescriptorSets() {
                          m_writeDescriptorSets.data(), 0, nullptr);
 }
 
-void UniSceneRenderer::BuildCommandBuffers() {
+void SceneRenderer::BuildCommandBuffers() {
   auto engine = UniEngine::GetInstance();
 
   VkCommandBufferBeginInfo cmdBufInfo =
@@ -430,20 +433,20 @@ void UniSceneRenderer::BuildCommandBuffers() {
   }
 }
 
-void UniSceneRenderer::Render() {
+void SceneRenderer::Render() {
   UpdateUniformBufferDeferredLights();
   UpdateDynamicUniformBuffers();
 }
 
-void UniSceneRenderer::Tick(uint32_t millis) {
+void SceneRenderer::Tick(uint32_t millis) {
   AddTimeDelta(millis);
 }
 
-void UniSceneRenderer::ViewChanged() {
+void SceneRenderer::ViewChanged() {
   updateUniformBuffersScreen();
 }
 
-void UniSceneRenderer::updateUniformBuffersScreen() {
+void SceneRenderer::updateUniformBuffersScreen() {
   m_uboForward.projection =
       SceneManager()->CurrentScene()->GetCameraComponent()->matrices.projection;
   m_uboForward.view =
@@ -453,7 +456,7 @@ void UniSceneRenderer::updateUniformBuffersScreen() {
 }
 
 // Update light position uniform block
-void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
+void SceneRenderer::UpdateUniformBufferDeferredLights() {
   // each scene light into uboFragmentLights.lights
   uint32_t lightCount = 0;
   SceneManager()
@@ -491,13 +494,13 @@ void UniSceneRenderer::UpdateUniformBufferDeferredLights() {
   memcpy(m_uniformBuffers.fsLights.mapped, &uboLights, sizeof(uboLights));
 }
 
-void UniSceneRenderer::UpdateDynamicUniformBuffers() {
+void SceneRenderer::UpdateDynamicUniformBuffers() {
   auto engine = UniEngine::GetInstance();
   uint32_t index = 0;
   auto dynamicAlignment = engine->getDynamicAlignment();
   auto models = SceneManager()->CurrentScene()->GetRenderedObjects();
   for_each(models.begin(), models.end(),
-           [this, &index, dynamicAlignment](std::shared_ptr<UniSceneObject> model) {
+           [this, &index, dynamicAlignment](std::shared_ptr<SceneObject> model) {
              glm::mat4* modelMat =
                  (glm::mat4*)(((uint64_t)m_uboModelMatDynamic.model +
                                (index * dynamicAlignment)));
@@ -517,31 +520,31 @@ void UniSceneRenderer::UpdateDynamicUniformBuffers() {
   vkFlushMappedMemoryRanges(engine->GetDevice(), 1, &memoryRange);
 }
 
-void UniSceneRenderer::UpdateCamera(float width, float height) {
+void SceneRenderer::UpdateCamera(float width, float height) {
   SceneManager()->CurrentScene()->GetCameraComponent()->aspect = width / height;
   SceneManager()->CurrentScene()->GetCameraComponent()->CalculateProjection();
 }
 
-void UniSceneRenderer::RegisterMaterial(std::string materialID, std::shared_ptr<UniMaterial> mat) {
+void SceneRenderer::RegisterMaterial(std::string materialID, std::shared_ptr<Material> mat) {
   m_materialInstances.insert({ materialID, mat });
 }
 
-void UniSceneRenderer::UnRegisterMaterial(std::string materialID) {
+void SceneRenderer::UnRegisterMaterial(std::string materialID) {
   m_materialInstances.erase(m_materialInstances.find(materialID));
 }
 
-void UniSceneRenderer::UnRegisterMaterials()
+void SceneRenderer::UnRegisterMaterials()
 {
   m_materialInstances = {};
 }
 
-std::string UniSceneRenderer::GetShader(std::string shader) {
+std::string SceneRenderer::GetShader(std::string shader) {
   auto engine = UniEngine::GetInstance();
   auto aPath = engine->getAssetPath();
 
   return aPath + "shaders/" + shader + ".spv";
 }
 
-std::shared_ptr<UniSceneManager> UniSceneRenderer::SceneManager() {
-  return UniEngine::GetInstance()->SceneManager();
+std::shared_ptr<SceneManager> SceneRenderer::SceneManager() {
+  return UniEngine::GetInstance()->GetSceneManager();
 }

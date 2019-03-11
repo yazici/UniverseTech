@@ -21,13 +21,27 @@
 // todo: check if hardware supports sample number (or select max. supported)
 #define SAMPLE_COUNT VK_SAMPLE_COUNT_8_BIT
 
-
+namespace uni {
+  namespace assets {
+    class AssetManager;
+  }
+  namespace scene {
+    class SceneManager;
+  }
+  namespace render {
+    class SceneRenderer;
+  }
+  namespace audio {
+    class AudioEngine;
+  }
+  namespace input {
+    class Input;
+  }
+}
 // forward declarations
-class UniSceneManager;
-class UniSceneRenderer;
-class UniInput;
-class UniAudioEngine;
-class UniAssetManager;
+
+
+
 
 class UniEngine final : public VulkanExampleBase {
  private:
@@ -62,22 +76,22 @@ class UniEngine final : public VulkanExampleBase {
 
 
  private:
-  std::shared_ptr<UniSceneManager> m_SceneManager;
-  std::shared_ptr<UniInput> m_InputManager;
-  std::shared_ptr<UniAudioEngine> m_AudioManager;
-  std::shared_ptr<UniAssetManager> m_AssetManager;
+  std::shared_ptr<uni::scene::SceneManager> m_SceneManager;
+  std::shared_ptr<uni::input::Input> m_InputManager;
+  std::shared_ptr<uni::audio::AudioEngine> m_AudioManager;
+  std::shared_ptr<uni::assets::AssetManager> m_AssetManager;
 
   bool m_CamPaused = false;
   float m_PlanetZOffset = 0;
 
 
  public:
-  std::shared_ptr<UniSceneManager> SceneManager(){ return m_SceneManager; }
-  std::shared_ptr<UniSceneRenderer> SceneRenderer();
+  std::shared_ptr<uni::scene::SceneManager> GetSceneManager(){ return m_SceneManager; }
+  std::shared_ptr<uni::render::SceneRenderer> GetSceneRenderer();
   void windowResized() override;
-  std::shared_ptr<UniInput> InputManager() { return m_InputManager; }
-  std::shared_ptr<UniAudioEngine> AudioManager() { return m_AudioManager; }
-  std::shared_ptr<UniAssetManager> AssetManager() { return m_AssetManager; }
+  std::shared_ptr<uni::input::Input> GetInputManager() { return m_InputManager; }
+  std::shared_ptr<uni::audio::AudioEngine> GetAudioManager() { return m_AudioManager; }
+  std::shared_ptr<uni::assets::AssetManager> GetAssetManager() { return m_AssetManager; }
   void SetupInput();
 
   void handleWMMessages(MSG& msg) override;

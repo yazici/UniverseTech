@@ -1,5 +1,5 @@
-#include "UniAssetManager.h"
-#include "UniAsset.h"
+#include "AssetManager.h"
+#include "Asset.h"
 #include "UniEngine.h"
 #include <filesystem>
 #include <iosfwd>
@@ -8,9 +8,9 @@
 #include <ppl.h>
 
 using json = nlohmann::json;
+using namespace uni::assets;
 
-
-UniAssetManager::UniAssetManager(std::string basePath, std::string registryFile)
+AssetManager::AssetManager(std::string basePath, std::string registryFile)
 {
   m_basePath = basePath;
   if (CheckPath(m_basePath) != PATH_EXISTS) {
@@ -25,7 +25,7 @@ UniAssetManager::UniAssetManager(std::string basePath, std::string registryFile)
 
 }
 
-UniAssetManager::ReturnType UniAssetManager::CheckPath(std::string path)
+AssetManager::ReturnType AssetManager::CheckPath(std::string path)
 {
   if (std::filesystem::exists(path)) {
     return PATH_EXISTS;
@@ -33,14 +33,14 @@ UniAssetManager::ReturnType UniAssetManager::CheckPath(std::string path)
   return FILE_NOT_FOUND;
 }
 
-void UniAssetManager::Shutdown()
+void AssetManager::Shutdown()
 {
   for (auto& kv : m_assets) {
     kv.second->Destroy();
   }
 }
 
-UniAssetManager::ReturnType UniAssetManager::LoadRegistry()
+AssetManager::ReturnType AssetManager::LoadRegistry()
 {
   std::ifstream t(m_basePath + m_registryFile);
   std::stringstream buffer;
@@ -61,7 +61,7 @@ UniAssetManager::ReturnType UniAssetManager::LoadRegistry()
 }
 
 // Registers an asset with a path name.
-UniAssetManager::ReturnType UniAssetManager::RegisterAsset(std::string path, std::shared_ptr<UniAsset> asset, bool replace)
+AssetManager::ReturnType AssetManager::RegisterAsset(std::string path, std::shared_ptr<Asset> asset, bool replace)
 {
   if (m_assets.find(path) != m_assets.end() && !replace) {
     return ALREADY_CREATED;
@@ -71,14 +71,14 @@ UniAssetManager::ReturnType UniAssetManager::RegisterAsset(std::string path, std
   return CREATED_OK;
 }
 
-void UniAssetManager::CheckImported(std::vector<std::string> assets)
+void AssetManager::CheckImported(std::vector<std::string> assets)
 {
   for (const auto& assetPath : assets) {
     auto _ = Import(assetPath);
   }
 }
 
-bool UniAssetManager::ImportAll()
+bool AssetManager::ImportAll()
 {
   concurrency::parallel_for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
   //for_each(m_assets.begin(), m_assets.end(), [&](auto & kv) {
@@ -89,13 +89,13 @@ bool UniAssetManager::ImportAll()
   return true;
 }
 
-UniAssetManager::ReturnType UniAssetManager::DeleteAsset(std::string path)
+AssetManager::ReturnType AssetManager::DeleteAsset(std::string path)
 {
   m_assets.erase(path);
   return DELETED_OK;
 }
 
-std::shared_ptr<UniAsset> UniAssetManager::GetAsset(std::string path)
+std::shared_ptr<Asset> AssetManager::GetAsset(std::string path)
 {
   if (m_assets.find(path) == m_assets.end()) {
     return nullptr;

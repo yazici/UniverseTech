@@ -2,7 +2,7 @@
 
 #include <array>
 #include "../UniEngine.h"
-#include "../UniSceneRenderer.h"
+#include "../SceneRenderer.h"
 
 
 PlanetMaterial::PlanetMaterial(std::string name, bool hasOcean) {

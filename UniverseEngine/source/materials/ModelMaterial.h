@@ -1,16 +1,26 @@
 #pragma once
 
-#include "../UniMaterial.h"
+#include "../Material.h"
 
-class ModelComponent;
 
-class ModelMaterial : public UniMaterial {
-private:
-  std::vector<std::shared_ptr<ModelComponent>> m_models;
+namespace uni {
+  namespace components {
+    class ModelComponent;
+  }
+  namespace materials {
+    class ModelMaterial : public Material {
+    private:
+      std::vector<std::shared_ptr<uni::components::ModelComponent>> m_models;
 
-public:
-  std::vector<std::shared_ptr<ModelComponent>> GetModels() { return m_models; }
+    public:
+      std::vector<std::shared_ptr<uni::components::ModelComponent>> GetModels() { return m_models; }
 
-  ModelMaterial() = default;
-  ModelMaterial(std::string name);
-};
+      ModelMaterial() = default;
+      ModelMaterial(std::string name);
+    };
+
+  }
+}
+
+
+

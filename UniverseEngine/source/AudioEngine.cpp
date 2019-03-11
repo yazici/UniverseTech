@@ -1,19 +1,21 @@
-#include "UniAudioEngine.h"
+#include "AudioEngine.h"
+
+using namespace uni::audio;
 
 Implementation::Implementation() {
   mnNextChannelId = 0;
   mpStudioSystem = nullptr;
-  UniAudioEngine::ErrorCheck(FMOD::Studio::System::create(&mpStudioSystem));
-  UniAudioEngine::ErrorCheck(mpStudioSystem->initialize(
+  AudioEngine::ErrorCheck(FMOD::Studio::System::create(&mpStudioSystem));
+  AudioEngine::ErrorCheck(mpStudioSystem->initialize(
     32, FMOD_STUDIO_INIT_LIVEUPDATE, FMOD_INIT_PROFILE_ENABLE, nullptr));
 
   mpSystem = nullptr;
-  UniAudioEngine::ErrorCheck(mpStudioSystem->getLowLevelSystem(&mpSystem));
+  AudioEngine::ErrorCheck(mpStudioSystem->getLowLevelSystem(&mpSystem));
 }
 
 Implementation::~Implementation() {
-  UniAudioEngine::ErrorCheck(mpStudioSystem->unloadAll());
-  UniAudioEngine::ErrorCheck(mpStudioSystem->release());
+  AudioEngine::ErrorCheck(mpStudioSystem->unloadAll());
+  AudioEngine::ErrorCheck(mpStudioSystem->release());
 }
 
 
@@ -30,24 +32,24 @@ void Implementation::Update() {
   for (auto& it : pStoppedChannels) {
     mChannels.erase(it);
   }
-  UniAudioEngine::ErrorCheck(mpStudioSystem->update());
+  AudioEngine::ErrorCheck(mpStudioSystem->update());
 }
 
 
-shared_ptr<Implementation> UniAudioEngine::GetImplementation() {
+shared_ptr<Implementation> AudioEngine::GetImplementation() {
   static std::shared_ptr<Implementation> instance(new Implementation);
   return instance;
 }
 
-void UniAudioEngine::Init() {
+void AudioEngine::Init() {
 
 }
 
-void UniAudioEngine::Update() {
+void AudioEngine::Update() {
   GetImplementation()->Update();
 }
 
-void UniAudioEngine::LoadSound(const std::string& strSoundName,
+void AudioEngine::LoadSound(const std::string& strSoundName,
   bool b3d,
   bool bLooping,
   bool bStream) {
@@ -61,33 +63,33 @@ void UniAudioEngine::LoadSound(const std::string& strSoundName,
   eMode |= bStream ? FMOD_CREATESTREAM : FMOD_CREATECOMPRESSEDSAMPLE;
 
   FMOD::Sound * pSound = nullptr;
-  UniAudioEngine::ErrorCheck(GetImplementation()->mpSystem->createSound(
+  AudioEngine::ErrorCheck(GetImplementation()->mpSystem->createSound(
     strSoundName.c_str(), eMode, nullptr, &pSound));
   if (pSound) {
     GetImplementation()->mSounds[strSoundName] = pSound;
   }
 }
 
-void UniAudioEngine::UnLoadSound(const std::string& strSoundName) {
+void AudioEngine::UnLoadSound(const std::string& strSoundName) {
   auto tFoundIt = GetImplementation()->mSounds.find(strSoundName);
   if (tFoundIt == GetImplementation()->mSounds.end())
     return;
   std::cout << "Unloading sound " << strSoundName << std::endl;
-  UniAudioEngine::ErrorCheck(tFoundIt->second->release());
+  AudioEngine::ErrorCheck(tFoundIt->second->release());
   GetImplementation()->mSounds.erase(tFoundIt);
 }
 
-void UniAudioEngine::Set3dListenerAndOrientation(const glm::vec3 & vPos, const glm::vec3 & vUp, const glm::vec3 & vForward, const glm::vec3& vVelocity)
+void AudioEngine::Set3dListenerAndOrientation(const glm::vec3 & vPos, const glm::vec3 & vUp, const glm::vec3 & vForward, const glm::vec3& vVelocity)
 {
   FMOD_VECTOR position = VectorToFmod(vPos);
   FMOD_VECTOR up = VectorToFmod(vUp);
   FMOD_VECTOR forward = VectorToFmod(vForward);
   FMOD_VECTOR velocity = VectorToFmod(vVelocity);
-  UniAudioEngine::ErrorCheck(GetImplementation()->mpSystem->set3DListenerAttributes(0, &position, &velocity, &forward, &up));
+  AudioEngine::ErrorCheck(GetImplementation()->mpSystem->set3DListenerAttributes(0, &position, &velocity, &forward, &up));
 }
 
 
-int UniAudioEngine::PlaySoundFile(const string & strSoundName,
+int AudioEngine::PlaySoundFile(const string & strSoundName,
   const glm::vec3 & vPosition,
   float fVolumePercent) {
   int nChannelId = GetImplementation()->mnNextChannelId++;
@@ -100,41 +102,41 @@ int UniAudioEngine::PlaySoundFile(const string & strSoundName,
     }
   }
   FMOD::Channel* pChannel = nullptr;
-  UniAudioEngine::ErrorCheck(GetImplementation()->mpSystem->playSound(
+  AudioEngine::ErrorCheck(GetImplementation()->mpSystem->playSound(
     tFoundIt->second, nullptr, true, &pChannel));
   if (pChannel) {
     FMOD_MODE currMode;
     tFoundIt->second->getMode(&currMode);
     if (currMode & FMOD_3D) {
       FMOD_VECTOR position = VectorToFmod(vPosition);
-      UniAudioEngine::ErrorCheck(pChannel->set3DAttributes(&position, nullptr));
+      AudioEngine::ErrorCheck(pChannel->set3DAttributes(&position, nullptr));
     }
-    UniAudioEngine::ErrorCheck(pChannel->setVolume(fVolumePercent));
-    UniAudioEngine::ErrorCheck(pChannel->setPaused(false));
+    AudioEngine::ErrorCheck(pChannel->setVolume(fVolumePercent));
+    AudioEngine::ErrorCheck(pChannel->setPaused(false));
     GetImplementation()->mChannels[nChannelId] = pChannel;
   }
   return nChannelId;
 }
 
-void UniAudioEngine::SetChannel3dPosition(int nChannelId,
+void AudioEngine::SetChannel3dPosition(int nChannelId,
   const glm::vec3 & vPosition) {
   auto tFoundIt = GetImplementation()->mChannels.find(nChannelId);
   if (tFoundIt == GetImplementation()->mChannels.end())
     return;
 
   FMOD_VECTOR position = VectorToFmod(vPosition);
-  UniAudioEngine::ErrorCheck(tFoundIt->second->set3DAttributes(&position, nullptr));
+  AudioEngine::ErrorCheck(tFoundIt->second->set3DAttributes(&position, nullptr));
 }
 
-void UniAudioEngine::SetChannelVolume(int nChannelId, float fVolumedB) {
+void AudioEngine::SetChannelVolume(int nChannelId, float fVolumedB) {
   auto tFoundIt = GetImplementation()->mChannels.find(nChannelId);
   if (tFoundIt == GetImplementation()->mChannels.end())
     return;
 
-  UniAudioEngine::ErrorCheck(tFoundIt->second->setVolume(dbToVolume(fVolumedB)));
+  AudioEngine::ErrorCheck(tFoundIt->second->setVolume(dbToVolume(fVolumedB)));
 }
 
-bool UniAudioEngine::IsPlaying(int nChannelId) const
+bool AudioEngine::IsPlaying(int nChannelId) const
 {
   auto tFoundIt = GetImplementation()->mChannels.find(nChannelId);
   if (tFoundIt == GetImplementation()->mChannels.end())
@@ -142,35 +144,35 @@ bool UniAudioEngine::IsPlaying(int nChannelId) const
 
   bool bIsPlaying = false;
   //std::cout << "Checking if channel " << nChannelId << " is playing" << std::endl;
-  UniAudioEngine::ErrorCheck(GetImplementation()->mChannels[nChannelId]->isPlaying(&bIsPlaying));
+  AudioEngine::ErrorCheck(GetImplementation()->mChannels[nChannelId]->isPlaying(&bIsPlaying));
 
   return bIsPlaying;
 
 }
 
-void UniAudioEngine::LoadBank(const std::string & strBankName,
+void AudioEngine::LoadBank(const std::string & strBankName,
   FMOD_STUDIO_LOAD_BANK_FLAGS flags) {
   auto tFoundIt = GetImplementation()->mBanks.find(strBankName);
   if (tFoundIt != GetImplementation()->mBanks.end())
     return;
   FMOD::Studio::Bank * pBank;
-  UniAudioEngine::ErrorCheck(GetImplementation()->mpStudioSystem->loadBankFile(
+  AudioEngine::ErrorCheck(GetImplementation()->mpStudioSystem->loadBankFile(
     strBankName.c_str(), flags, &pBank));
   if (pBank) {
     GetImplementation()->mBanks[strBankName] = pBank;
   }
 }
 
-void UniAudioEngine::LoadEvent(const std::string & strEventName) {
+void AudioEngine::LoadEvent(const std::string & strEventName) {
   auto tFoundit = GetImplementation()->mEvents.find(strEventName);
   if (tFoundit != GetImplementation()->mEvents.end())
     return;
   FMOD::Studio::EventDescription * pEventDescription = nullptr;
-  UniAudioEngine::ErrorCheck(GetImplementation()->mpStudioSystem->getEvent(
+  AudioEngine::ErrorCheck(GetImplementation()->mpStudioSystem->getEvent(
     strEventName.c_str(), &pEventDescription));
   if (pEventDescription) {
     FMOD::Studio::EventInstance* pEventInstance = nullptr;
-    UniAudioEngine::ErrorCheck(
+    AudioEngine::ErrorCheck(
       pEventDescription->createInstance(&pEventInstance));
     if (pEventInstance) {
       GetImplementation()->mEvents[strEventName] = pEventInstance;
@@ -178,7 +180,7 @@ void UniAudioEngine::LoadEvent(const std::string & strEventName) {
   }
 }
 
-void UniAudioEngine::PlayEvent(const string & strEventName) {
+void AudioEngine::PlayEvent(const string & strEventName) {
   auto tFoundit = GetImplementation()->mEvents.find(strEventName);
   if (tFoundit == GetImplementation()->mEvents.end()) {
     LoadEvent(strEventName);
@@ -189,20 +191,20 @@ void UniAudioEngine::PlayEvent(const string & strEventName) {
   tFoundit->second->start();
 }
 
-void UniAudioEngine::StopChannel(int nChannelId)
+void AudioEngine::StopChannel(int nChannelId)
 {
   auto tFoundIt = GetImplementation()->mChannels.find(nChannelId);
   if (tFoundIt == GetImplementation()->mChannels.end())
     return;
 
   if(IsPlaying(nChannelId)){
-    UniAudioEngine::ErrorCheck(GetImplementation()->mChannels[nChannelId]->stop());
+    AudioEngine::ErrorCheck(GetImplementation()->mChannels[nChannelId]->stop());
     Update();
   }
 
 }
 
-void UniAudioEngine::StopEvent(const string & strEventName, bool bImmediate) {
+void AudioEngine::StopEvent(const string & strEventName, bool bImmediate) {
   auto tFoundIt = GetImplementation()->mEvents.find(strEventName);
   if (tFoundIt == GetImplementation()->mEvents.end())
     return;
@@ -210,10 +212,10 @@ void UniAudioEngine::StopEvent(const string & strEventName, bool bImmediate) {
   FMOD_STUDIO_STOP_MODE eMode;
   eMode =
     bImmediate ? FMOD_STUDIO_STOP_IMMEDIATE : FMOD_STUDIO_STOP_ALLOWFADEOUT;
-  UniAudioEngine::ErrorCheck(tFoundIt->second->stop(eMode));
+  AudioEngine::ErrorCheck(tFoundIt->second->stop(eMode));
 }
 
-bool UniAudioEngine::IsEventPlaying(const string & strEventName) const {
+bool AudioEngine::IsEventPlaying(const string & strEventName) const {
   auto tFoundIt = GetImplementation()->mEvents.find(strEventName);
   if (tFoundIt == GetImplementation()->mEvents.end())
     return false;
@@ -226,7 +228,7 @@ bool UniAudioEngine::IsEventPlaying(const string & strEventName) const {
   return false;
 }
 
-void UniAudioEngine::GetEventParameter(const string & strEventName,
+void AudioEngine::GetEventParameter(const string & strEventName,
   const string & strParameterName,
   float* parameter) {
   auto tFoundIt = GetImplementation()->mEvents.find(strEventName);
@@ -234,12 +236,12 @@ void UniAudioEngine::GetEventParameter(const string & strEventName,
     return;
 
   FMOD::Studio::ParameterInstance * pParameter = nullptr;
-  UniAudioEngine::ErrorCheck(
+  AudioEngine::ErrorCheck(
     tFoundIt->second->getParameter(strParameterName.c_str(), &pParameter));
-  UniAudioEngine::ErrorCheck(pParameter->getValue(parameter));
+  AudioEngine::ErrorCheck(pParameter->getValue(parameter));
 }
 
-void UniAudioEngine::SetEventParameter(const string & strEventName,
+void AudioEngine::SetEventParameter(const string & strEventName,
   const string & strParameterName,
   float fValue) {
   auto tFoundIt = GetImplementation()->mEvents.find(strEventName);
@@ -247,13 +249,13 @@ void UniAudioEngine::SetEventParameter(const string & strEventName,
     return;
 
   FMOD::Studio::ParameterInstance * pParameter = nullptr;
-  UniAudioEngine::ErrorCheck(
+  AudioEngine::ErrorCheck(
     tFoundIt->second->getParameter(strParameterName.c_str(), &pParameter));
-  UniAudioEngine::ErrorCheck(pParameter->setValue(fValue));
+  AudioEngine::ErrorCheck(pParameter->setValue(fValue));
 }
 
 
-void UniAudioEngine::StopAllChannels()
+void AudioEngine::StopAllChannels()
 {
   Update();
 
@@ -262,7 +264,7 @@ void UniAudioEngine::StopAllChannels()
   }
 }
 
-FMOD_VECTOR UniAudioEngine::VectorToFmod(const glm::vec3 & vPosition) {
+FMOD_VECTOR AudioEngine::VectorToFmod(const glm::vec3 & vPosition) {
   FMOD_VECTOR fVec;
   fVec.x = vPosition.x;
   fVec.y = vPosition.y;
@@ -270,15 +272,15 @@ FMOD_VECTOR UniAudioEngine::VectorToFmod(const glm::vec3 & vPosition) {
   return fVec;
 }
 
-float UniAudioEngine::dbToVolume(float dB) {
+float AudioEngine::dbToVolume(float dB) {
   return powf(10.0f, 0.05f * dB);
 }
 
-float UniAudioEngine::VolumeTodB(float volume) {
+float AudioEngine::VolumeTodB(float volume) {
   return 20.0f* log10f(volume);
 }
 
-int UniAudioEngine::ErrorCheck(FMOD_RESULT result) {
+int AudioEngine::ErrorCheck(FMOD_RESULT result) {
   if (result != FMOD_OK) {
     cout << "FMOD ERROR " << result << endl;
     return 1;
@@ -287,6 +289,6 @@ int UniAudioEngine::ErrorCheck(FMOD_RESULT result) {
   return 0;
 }
 
-void UniAudioEngine::Shutdown() {
+void AudioEngine::Shutdown() {
   StopAllChannels();
 }
